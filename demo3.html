@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多页面跳转示例</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+        }
+        .site-section {
+            margin-bottom: 20px;
+        }
+        .site-section img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        .site-section p {
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>洪特的简单网页</h1>
+
+        <div class="site-section">
+            <img src="subwebsite\images\image-demostration1\pink.png" alt="网站1图片">
+            <p>网站1简介：这是一个提供学习资源和教程的优秀平台。</p>
+            <button onclick="window.location.href='https://www.example1.com'">访问网站1</button>
+        </div>
+
+        <div class="site-section">
+            <img src="https://via.placeholder.com/100" alt="网站2图片">
+            <p>网站2简介：这个网站专注于技术博客和最新科技资讯。</p>
+            <button onclick="window.location.href='https://www.example2.com'">访问网站2</button>
+        </div>
+
+        <div class="site-section">
+            <img src="https://via.placeholder.com/100" alt="网站3图片">
+            <p>网站3简介：一个提供高清壁纸和设计资源的地方。</p>
+            <button onclick="window.location.href='https://www.example3.com'">访问网站3</button>
+        </div>
+    </div>
+
+    <script>
+        // 这里可以添加更多 JavaScript 代码
+    </script>
+</body>
+</html>
