@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高考倒计时</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: '黑体', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    .page {
+      display: none;
+      text-align: center;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    h1, h2 {
+      font-weight: bold;
+    }
+
+    .subject-btn, #end-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .flip-clock {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .flip {
+      font-size: 80px;
+      font-weight: bold;
+      margin: 0 10px;
+      width: 120px;
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #333;
+      color: white;
+      border-radius: 10px;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    .flip::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      height: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .result {
+      font-size: 80px;
+      font-weight: bold;
+    }
+
+    #time-used.green {
+      color: green;
+    }
+
+    #time-used.red {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page 1: Subject Selection -->
+  <div id="page1" class="page active">
+    <h1>您今天想考什么？</h1>
+    <button class="subject-btn" onclick="startExam('语文', 150)">语文 (2小时30分钟)</button>
+    <button class="subject-btn" onclick="startExam('数学/英语', 120)">数学/英语 (2小时)</button>
+    <button class="subject-btn" onclick="startExam('其他科目', 75)">其他科目 (75分钟)</button>
+    <box>wht</box>
+  </div>
+
+  <!-- Page 2: Countdown Timer -->
+  <div id="page2" class="page">
+    <h2>距离考试结束还有</h2>
+    <div class="flip-clock">
+      <div id="minutes" class="flip">00</div>
+      <div id="seconds" class="flip">00</div>
+    </div>
+    <button id="end-btn" onclick="endExam()">结束</button>
+  </div>
+
+  <!-- Page 3: Exam Results -->
+  <div id="page3" class="page">
+    <h2>您本次考试用时如下</h2>
+    <div class="result">
+      <span id="time-used"></span>
+    </div>
+    <button onclick="continueExam()">继续本次考试</button>
+    <button onclick="resetExam()">开始下一场考试</button>
+  </div>
+
+  <script>
+    let countdownInterval;
+    let examDuration;
+    let timeLeft;
+    let timeout = false;
+    let endTime = 0;
+
+    // Page Transitions
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    function startExam(subject, minutes) {
+      examDuration = minutes * 60;
+      timeLeft = examDuration;
+      updateTime();
+      showPage('page2');
+      startCountdown();
+    }
+
+    function startCountdown() {
+      countdownInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+        } else {
+          timeLeft--;
+          if (!timeout) {
+            document.getElementById('minutes').style.color = 'red';
+            document.getElementById('seconds').style.color = 'red';
+            timeout = true;
+          }
+        }
+        updateTime();
+      }, 1000);
+    }
+
+    function updateTime() {
+      const minutes = Math.floor(Math.abs(timeLeft) / 60);
+      const seconds = Math.abs(timeLeft) % 60;
+      
+      document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
+      document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
+    }
+
+    function endExam() {
+      clearInterval(countdownInterval);
+      showPage('page3');
+      const timeUsed = examDuration - timeLeft;
+      const minutesUsed = Math.floor(timeUsed / 60);
+      const secondsUsed = timeUsed % 60;
+      
+      const timeUsedElement = document.getElementById('time-used');
+      if (timeLeft >= 0) {
+        timeUsedElement.textContent = `${minutesUsed} 分钟 ${secondsUsed} 秒`;
+        timeUsedElement.className = 'green';
+      } else {
+        timeUsedElement.textContent = `${Math.abs(minutesUsed)} 分钟 ${Math.abs(secondsUsed)} 秒 (超时)`;
+        timeUsedElement.className = 'red';
+      }
+    }
+
+    function continueExam() {
+      showPage('page2');
+      startCountdown();
+    }
+
+    function resetExam() {
+      timeout = false;
+      document.getElementById('minutes').style.color = 'white';
+      document.getElementById('seconds').style.color = 'white';
+      showPage('page1');
+    }
+  </script>
+</body>
+</html>
