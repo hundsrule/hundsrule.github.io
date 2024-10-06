@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高考倒计时</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: '黑体', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    .page {
+      display: none;
+      text-align: center;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    h1, h2 {
+      font-weight: bold;
+    }
+
+    .subject-btn, #end-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .flip-clock {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .flip {
+      font-size: 80px;
+      font-weight: bold;
+      margin: 0 10px;
+      width: 120px;
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #333;
+      color: white;
+      border-radius: 10px;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    .flip::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      height: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .result {
+      font-size: 80px;
+      font-weight: bold;
+    }
+
+    #time-used.green {
+      color: green;
+    }
+
+    #time-used.red {
+      color: red;
+    }
+
+    .exam-info {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page 1: Subject Selection -->
+  <div id="page1" class="page active">
+    <h1>您今天想考什么？</h1>
+    <input type="text" id="exam-name" placeholder="考试名称">
+    <input type="number" id="exam-duration" placeholder="时长（分钟）">
+    <button class="subject-btn" onclick="startExam('', )">自定义考试</button>
+    <button class="subject-btn" onclick="startExam('语文', 150)">语文 (2小时30分钟)</button>
+    <button class="subject-btn" onclick="startExam('语文 无作文', 90)">语文（无作文） (1小时30分钟)</button>
+    <button class="subject-btn" onclick="startExam('数学/英语', 120)">数学/英语 (2小时)</button>
+    <button class="subject-btn" onclick="startExam('英语', 80)">英语 (无作文)（80分钟）</button>
+    <button class="subject-btn" onclick="startExam('其他科目', 75)">其他科目 (75分钟)</button>
+    <p6>Made With Love To USSR</p6>
+  </div>
+
+  <!-- Page 2: Countdown Timer -->
+  <div id="page2" class="page">
+    <h2>距离考试结束还有</h2>
+    <div class="flip-clock">
+      <div id="minutes" class="flip">00</div>
+      <div id="seconds" class="flip">00</div>
+    </div>
+    <button id="end-btn" onclick="endExam()">结束</button>
+  </div>
+
+  <!-- Page 3: Exam Results -->
+  <div id="page3" class="page">
+    <h2>您本次考试用时如下</h2>
+    <div class="exam-info">
+      <h3 id="final-exam-name"></h3>
+      <div class="result">
+        <span id="time-used"></span>
+      </div>
+      <div id="encouragement"></div>
+    </div>
+    <button onclick="continueExam()">继续本次考试</button>
+    <button onclick="resetExam()">开始下一场考试</button>
+  </div>
+
+  <script>
+    let countdownInterval;
+    let examDuration;
+    let timeLeft;
+    let timeout = false;
+    let endTime = 0;
+    const encouragementMessages = [
+      "坚持就是胜利！",
+      "相信自己，你能做到！",
+      "努力过后，一定会有回报！",
+      "你已经尽力了，加油！"，
+      "向着共产主义前进！",
+      "为了社会主义而奋斗！",
+      "劳动创造一切！",
+      "团结就是力量！",
+      "向科学和技术进军！",
+      "无产阶级团结起来！",
+      "胜利属于劳动者！",
+      "为伟大的事业而奋斗！",
+      "共产主义的未来是光明的！",
+      "我们将保卫列宁的城市！",
+      "欧洲将获得自由",
+      "不是列宁格勒惧怕死亡，而是死亡惧怕列宁格勒！",
+      "钢铁般的意志，铸就了苏维埃的辉煌，人民的力量，汇聚成红色的海洋。",
+      "红色经典是历史的见证，记录着苏联人民的英勇与智慧。",
+      "只要我们不停止前进，我们就一定能够取得胜利！",
+      "“我们要让历史的车轮前行，奋发向前！” —— 赫鲁晓夫 ",
+      "“无产者们，联合起来！” —— 利巴赫诺夫 ",
+      "在那烽火连天的岁月里，红色经典是我们精神的食粮，激励我们前行。",
+      "武装保卫苏维埃，赤旗飘扬映山红！以铁血担当，守护红色政权，不负人民重托！",
+      "苏维埃的荣光，由我们武装来捍卫！手握钢枪，心向光明，誓将革命进行到底！",
+      "社会主义的花朵，在风雨中绽放，散发出迷人的芬芳。",
+      "保卫苏维埃，是我们坚定不移的信念！以武装之躯，筑起红色堡垒，捍卫革命成果！",
+      "下定决心，不怕牺牲，排除万难，去争取胜利。",
+      "前途是光明的，道路是曲折的。",
+      "青年最要紧的精神，是要与命运奋斗，要在任何环境中间都能够解决自己乃至中国的问题。",
+      "做人最大的事情是什么呢？就是要知道怎样爱国。",
+      "在苏联军队中，撤退比进攻更需要勇气。"
+    ];
+
+    // Page Transitions
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    function startExam(subject, minutes) {
+      const examName = document.getElementById('exam-name').value || subject;
+      examDuration = document.getElementById('exam-duration').value * 60 || minutes * 60;
+      timeLeft = examDuration;
+      document.getElementById('final-exam-name').textContent = 考试名称：${examName};
+      updateTime();
+      showPage('page2');
+      startCountdown();
+    }
+
+    function startCountdown() {
+      countdownInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+        } else {
+          timeLeft--;
+          if (!timeout) {
+            document.getElementById('minutes').style.color = 'red';
+            document.getElementById('seconds').style.color = 'red';
+            timeout = true;
+          }
+        }
+        updateTime();
+      }, 1000);
+    }
+
+    function updateTime() {
+      const minutes = Math.floor(Math.abs(timeLeft) / 60);
+      const seconds = Math.abs(timeLeft) % 60;
+      
+      document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
+      document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
+    }
+
+    function endExam() {
+      clearInterval(countdownInterval);
+      showPage('page3');
+      const timeUsed = examDuration - timeLeft;
+      const minutesUsed = Math.floor(timeUsed / 60);
+      const secondsUsed = timeUsed % 60;
+      
+      const timeUsedElement = document.getElementById('time-used');
+      if (timeLeft >= 0) {
+        timeUsedElement.textContent = ${minutesUsed} 分钟 ${secondsUsed} 秒;
+        timeUsedElement.className = 'green';
+      } else {
+        timeUsedElement.textContent = ${Math.abs(minutesUsed)} 分钟 ${Math.abs(secondsUsed)} 秒 (超时);
+        timeUsedElement.className = 'red';
+      }
+
+      // Show random encouragement message
+      const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+      document.getElementById('encouragement').textContent = randomMessage;
+    }
+
+    function continueExam() {
+      showPage('page2');
+      startCountdown();
+    }
+
+    function resetExam() {
+      timeout = false;
+      document.getElementById('minutes').style.color = 'white';
+      document.getElementById('seconds').style.color = 'white';
+      showPage('page1');
+    }
+  </script>
+</body>
+</html>
