@@ -98,7 +98,7 @@
 
   <!-- Page 1: Subject Selection -->
   <div id="page1" class="page active">
-    <h1>您今天想考什么？</h1>
+    <h1>牢房里的艺术家，今天想考什么？</h1>
     <input type="text" id="exam-name" placeholder="考试名称">
     <input type="number" id="exam-duration" placeholder="时长（分钟）">
     <button class="subject-btn" onclick="startExam('', )">自定义考试</button>
@@ -181,7 +181,7 @@
       const examName = document.getElementById('exam-name').value || subject;
       examDuration = document.getElementById('exam-duration').value * 60 || minutes * 60;
       timeLeft = examDuration;
-      document.getElementById('final-exam-name').textContent = `考试名称：${examName}`;
+      document.getElementById('final-exam-name').textContent = `测试名称：${examName}`;
       updateTime();
       showPage('page2');
       startCountdown();
