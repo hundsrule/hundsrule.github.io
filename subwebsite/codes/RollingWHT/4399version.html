@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | RollingWHT_枣园巷大冒险</title>
+    <style>
+        body {
+            text-align: center;
+            padding: 0;
+            margin: 0;
+            background: url('subwebsite\codes\RollingWHT\BG.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            color: #FFFFFF;
+            overflow: hidden;
+        }
+
+      h1 {
+        font-size: 24px;
+        color: yellow;
+        background-color: rgba(255, 0, 0, 0.7);
+        padding: 10px;
+        margin: 20px auto;
+        width: 50%;
+        border: 5px solid #ffcc00;
+        box-shadow: 0px 0px 10px #000;
+      }
+
+      #unity-canvas {
+        width: 960px;
+        height: 600px;
+        background: #231F20;
+        border: 10px solid #ff0000;
+        box-shadow: 0px 0px 20px #00ff00, inset 0px 0px 10px #00ff00;
+        margin: 20px auto;
+      }
+
+        .advert {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 600px;
+            background: url('subwebsite/codes/RollingWHT/ad.jpg') no-repeat center center;
+            background-size:contain ;
+            border: 5px solid #00ffcc;
+            color: #000;
+            font-size: 18px;
+            line-height: 1.5;
+            padding: 10px;
+            box-shadow: 0px 0px 10px #000;
+        }
+
+        .advert2 {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 600px;
+            background: url('subwebsite/codes/RollingWHT/ad.jpg') no-repeat center center;
+            background-size: contain;
+            border: 5px solid #cc00ff;
+            color: #000;
+            font-size: 18px;
+            line-height: 1.5;
+            padding: 10px;
+            box-shadow: 0px 0px 10px #000;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="advert">广告区1<br>杂乱元素</div>
+    <div class="advert2">广告区2<br>乱七八糟的广告</div>
+    <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+    <h1>操作提示：移动：WASD或箭号 开始：K</h1>
+    <h1>游戏简介：《RollingWHT：枣园巷大冒险》是一款充满奇幻色彩的网页小游戏，玩家将跟随主角WHT在神秘的枣园巷展开一场刺激的冒险。在这个五光十色的世界里，WHT需要穿越各种障碍，收集宝藏，解锁隐藏关卡，与形形色色的角色互动。通过挑战不同的任务和谜题，WHT逐渐成长，最终努力实现成为世界大明星的梦想。快来加入这场冒险，体验无尽的乐趣和挑战吧！</h1>
+        <script src="Build/WHT.loader.js"></script>
+        <script>
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                // Mobile device style: fill the whole browser client area with the game canvas:
+                var meta = document.createElement('meta');
+                meta.name = 'viewport';
+                meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+                document.getElementsByTagName('head')[0].appendChild(meta);
+
+                var canvas = document.querySelector("#unity-canvas");
+                canvas.style.width = "100%";
+                canvas.style.height = "100%";
+                canvas.style.position = "fixed";
+
+                document.body.style.textAlign = "left";
+            }
+
+            createUnityInstance(document.querySelector("#unity-canvas"), {
+                dataUrl: "Build/WHT.data",
+                frameworkUrl: "Build/WHT.framework.js",
+                codeUrl: "Build/WHT.wasm",
+                streamingAssetsUrl: "StreamingAssets",
+                companyName: "DefaultCompany",
+                productName: "RollingWHT_枣园巷大冒险",
+                productVersion: "0.1",
+            });
+        </script>
+</body>
+</html>
