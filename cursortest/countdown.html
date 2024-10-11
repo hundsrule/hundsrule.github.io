@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考试计时器</title>
+    <style>
+        body {
+            font-family: "黑体", sans-serif;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            max-width: 95%;
+            width: 600px;
+        }
+        .screen {
+            display: none;
+        }
+        .active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .timer {
+            font-size: 6rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .flip {
+            perspective: 300px;
+            display: inline-block;
+            margin: 0 30px;
+        }
+        .flip-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .flip-inner.flipped {
+            transform: rotateX(180deg);
+        }
+        .flip-front, .flip-back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .flip-back {
+            transform: rotateX(180deg);
+        }
+        button {
+            margin: 1rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 100%;
+            max-width: 400px;
+        }
+        input, select {
+            margin: 0.8rem 0;
+            padding: 0.8rem;
+            font-size: 1.2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+            .timer {
+                font-size: 4rem;
+            }
+            .flip {
+                margin: 0 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .timer {
+                font-size: 3rem;
+            }
+            .flip {
+                margin: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="screen1" class="screen active">
+            <h1>选择考试科目</h1>
+            <button onclick="startExam('语文', 150)">语文 (2小时30分钟)</button>
+            <button onclick="startExam('语文（无作文）', 90)">语文（无作文） (1小时30分钟)</button>
+            <button onclick="startExam('数学', 120)">数学 (2小时)</button>
+            <button onclick="startExam('英语', 120)">英语 (2小时)</button>
+            <button onclick="startExam('英语（无作文）', 80)">英语（无作文） (80分钟)</button>
+            <button onclick="startExam('其他科目', 75)">其他科目 (75分钟)</button>
+            <h2>自定义考试</h2>
+            <input type="text" id="customSubject" placeholder="自定义科目名称">
+            <input type="number" id="duration" placeholder="考试时长（分钟）" min="1">
+            <button onclick="startCustomExam()">开始自定义考试</button>
+        </div>
+        
+        <div id="screen2" class="screen">
+            <h2 id="examSubject"></h2>
+            <div class="timer">
+                <div class="flip">
+                    <div class="flip-inner">
+                        <div class="flip-front" id="minutesFront">00</div>
+                        <div class="flip-back" id="minutesBack">00</div>
+                    </div>
+                </div>
+                <span>:</span>
+                <div class="flip">
+                    <div class="flip-inner">
+                        <div class="flip-front" id="secondsFront">00</div>
+                        <div class="flip-back" id="secondsBack">00</div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="endExam()">结束</button>
+        </div>
+        
+        <div id="screen3" class="screen">
+            <h2>考试结束</h2>
+            <p id="examResult"></p>
+            <p id="examMessage"></p>
+            <button onclick="continueExam()">继续本次考试</button>
+            <button onclick="newExam()">开始下一场考试</button>
+        </div>
+    </div>
+
+    <script>
+        let timer;
+        let startTime;
+        let duration;
+        let subject;
+        let isOvertime = false;
+
+        function startExam(examSubject, examDuration) {
+            subject = examSubject;
+            duration = examDuration * 60;
+            startTimer();
+        }
+
+        function startCustomExam() {
+            subject = document.getElementById('customSubject').value;
+            duration = parseInt(document.getElementById('duration').value) * 60;
+            if (!subject || isNaN(duration) || duration <= 0) {
+                alert('请输入有效的科目名称和考试时长');
+                return;
+            }
+            startTimer();
+        }
+
+        function startTimer() {
+            document.getElementById('examSubject').textContent = subject + '考试';
+            startTime = new Date().getTime();
+            updateTimer();
+            timer = setInterval(updateTimer, 1000);
+            switchScreen('screen2');
+        }
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const diff = now - startTime;
+            let remainingTime = duration * 1000 - diff;
+
+            if (remainingTime <= 0 && !isOvertime) {
+                isOvertime = true;
+                document.querySelector('.timer').style.color = 'red';
+            }
+
+            if (isOvertime) remainingTime = Math.abs(remainingTime);
+
+            const minutes = Math.floor(remainingTime / 60000);
+            const seconds = Math.floor((remainingTime % 60000) / 1000);
+
+            flipNumber('minutes', minutes);
+            flipNumber('seconds', seconds);
+        }
+
+        function flipNumber(unit, number) {
+            const frontEl = document.getElementById(unit + 'Front');
+            const backEl = document.getElementById(unit + 'Back');
+            const flipInner = frontEl.parentElement;
+
+            if (frontEl.textContent !== padNumber(number)) {
+                backEl.textContent = padNumber(number);
+                flipInner.classList.add('flipped');
+
+                setTimeout(() => {
+                    frontEl.textContent = padNumber(number);
+                    flipInner.classList.remove('flipped');
+                }, 300);
+            }
+        }
+
+        function padNumber(number) {
+            return number.toString().padStart(2, '0');
+        }
+
+        function endExam() {
+            clearInterval(timer);
+            const endTime = new Date().getTime();
+            const totalTime = Math.floor((endTime - startTime) / 1000);
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+
+            const resultEl = document.getElementById('examResult');
+            const messageEl = document.getElementById('examMessage');
+
+            resultEl.textContent = `考试用时：${minutes}分${seconds}秒`;
+            
+            if (totalTime <= duration) {
+                resultEl.style.color = 'green';
+                messageEl.textContent = `恭喜您按时完成${subject}考试！`;
+            } else {
+                resultEl.style.color = 'red';
+                messageEl.textContent = `您并未按时完成${subject}考试，希望您下次成功。`;
+            }
+
+            switchScreen('screen3');
+        }
+
+        function continueExam() {
+            switchScreen('screen2');
+            if (!timer) {
+                timer = setInterval(updateTimer, 1000);
+            }
+        }
+
+        function newExam() {
+            clearInterval(timer);
+            isOvertime = false;
+            document.querySelector('.timer').style.color = 'black';
+            switchScreen('screen1');
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh" data-theme="dark">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>高考倒计时</title>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -14,40 +12,25 @@
     }
 
     body {
-      font-family: 'Roboto', sans-serif;
+      font-family: '黑体', sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .container {
-      background-color: var(--container-color);
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      max-width: 600px;
-      transition: background-color 0.3s ease;
+      background-color: #f4f4f4;
     }
 
     .page {
       display: none;
-      opacity: 0;
-      transition: opacity 0.5s ease;
+      text-align: center;
     }
 
     .page.active {
       display: block;
-      opacity: 1;
     }
 
     h1, h2 {
       font-weight: bold;
-      margin-bottom: 20px;
     }
 
     .subject-btn, #end-btn {
@@ -55,25 +38,17 @@
       margin: 20px auto;
       padding: 10px 20px;
       font-size: 18px;
-      background-color: var(--button-color);
+      background-color: #333;
       color: white;
       border: none;
-      border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-
-    .subject-btn:hover, #end-btn:hover {
-      background-color: var(--button-hover-color);
-      transform: scale(1.05);
     }
 
     .flip-clock {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 20px;
     }
 
     .flip {
@@ -85,7 +60,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: var(--flip-background-color);
+      background-color: #333;
       color: white;
       border-radius: 10px;
       position: relative;
@@ -117,88 +92,45 @@
     .exam-info {
       margin: 20px 0;
     }
-
-    .dark-mode-toggle {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background-color: var(--button-color);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .dark-mode-toggle:hover {
-      background-color: var(--button-hover-color);
-    }
-
-    :root {
-      --background-color: #f0f0f0;
-      --container-color: #ffffff;
-      --button-color: #6200ee;
-      --button-hover-color: #3700b3;
-      --flip-background-color: #333;
-      --text-color: #000000;
-    }
-
-    [data-theme="dark"] {
-      --background-color: #121212;
-      --container-color: #1e1e1e;
-      --button-color: #bb86fc;
-      --button-hover-color: #3700b3;
-      --flip-background-color: #444;
-      --text-color: #ffffff;
-    }
   </style>
 </head>
 <body>
-  <button class="dark-mode-toggle" onclick="toggleDarkMode()">
-    <span class="material-icons">brightness_4</span>
-  </button>
-  <div class="container">
-    <!-- Page 1: Subject Selection -->
-    <div id="page1" class="page active">
-      <h1>牢房里的艺术家，今天想考什么？</h1>
-      <input type="text" id="exam-name" placeholder="考试名称">
-      <input type="number" id="exam-duration" placeholder="时长（分钟）">
-      <button class="subject-btn" onclick="startExam('', )">自定义考试</button>
-      <button class="subject-btn" onclick="startExam('语文', 150)">语文 (2小时30分钟)</button>
-      <button class="subject-btn" onclick="startExam('语文 无作文', 90)">语文（无作文） (1小时30分钟)</button>
-      <button class="subject-btn" onclick="startExam('数学/英语', 120)">数学/英语 (2小时)</button>
-      <button class="subject-btn" onclick="startExam('英语', 80)">英语 (无作文)（80分钟）</button>
-      <button class="subject-btn" onclick="startExam('其他科目', 75)">其他科目 (75分钟)</button>
-      <p6>Made With Love To USSR</p6>
-    </div>
 
-    <!-- Page 2: Countdown Timer -->
-    <div id="page2" class="page">
-      <h2>距离考试结束还有</h2>
-      <div class="flip-clock">
-        <div id="minutes" class="flip">00</div>
-        <div id="seconds" class="flip">00</div>
-      </div>
-      <button id="end-btn" onclick="endExam()">结束</button>
-    </div>
+  <!-- Page 1: Subject Selection -->
+  <div id="page1" class="page active">
+    <h1>牢房里的艺术家，今天想考什么？</h1>
+    <input type="text" id="exam-name" placeholder="考试名称">
+    <input type="number" id="exam-duration" placeholder="时长（分钟）">
+    <button class="subject-btn" onclick="startExam('', )">自定义考试</button>
+    <button class="subject-btn" onclick="startExam('语文', 150)">语文 (2小时30分钟)</button>
+    <button class="subject-btn" onclick="startExam('语文 无作文', 90)">语文（无作文） (1小时30分钟)</button>
+    <button class="subject-btn" onclick="startExam('数学/英语', 120)">数学/英语 (2小时)</button>
+    <button class="subject-btn" onclick="startExam('英语', 80)">英语 (无作文)（80分钟）</button>
+    <button class="subject-btn" onclick="startExam('其他科目', 75)">其他科目 (75分钟)</button>
+    <p6>Made With Love To USSR</p6>
+  </div>
 
-    <!-- Page 3: Exam Results -->
-    <div id="page3" class="page">
-      <div class="exam-info">
-        <h3 id="final-exam-name"></h3>
-        <div class="result">
-          <span id="time-used"></span>
-        </div>
-        <div id="encouragement"></div>
-      </div>
-      <button class="subject-btn" onclick="continueExam()">继续本次测试</button>
-      <button class="subject-btn" onclick="resetExam()">开始下一场测试</button>
+  <!-- Page 2: Countdown Timer -->
+  <div id="page2" class="page">
+    <h2>距离考试结束还有</h2>
+    <div class="flip-clock">
+      <div id="minutes" class="flip">00</div>
+      <div id="seconds" class="flip">00</div>
     </div>
+    <button id="end-btn" onclick="endExam()">结束</button>
+  </div>
+
+  <!-- Page 3: Exam Results -->
+  <div id="page3" class="page">
+    <div class="exam-info">
+      <h3 id="final-exam-name"></h3>
+      <div class="result">
+        <span id="time-used"></span>
+      </div>
+      <div id="encouragement"></div>
+    </div>
+    <button onclick="continueExam()">继续本次测试</button>
+    <button onclick="resetExam()">开始下一场测试</button>
   </div>
 
   <script>
@@ -310,12 +242,6 @@
       document.getElementById('minutes').style.color = 'white';
       document.getElementById('seconds').style.color = 'white';
       showPage('page1');
-    }
-
-    function toggleDarkMode() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', newTheme);
     }
   </script>
 </body>
