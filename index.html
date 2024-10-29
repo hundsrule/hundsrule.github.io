@@ -128,6 +128,11 @@
         <h4>天鹅绒房间背景音乐</h4>
         <audio src="subwebsite/BGM.mp3" autoplay controls></audio>
         <div class="site-section">
+            <img src="subwebsite/images/FlyingWHT.png" alt="博客">
+            <p>洪特的个人博客</p>
+            <button onclick="smoothRedirect('http://blog.wht.icu')">欢迎参观</button>
+        </div>
+        <div class="site-section">
             <img src="subwebsite/images/image-demostration1/pink.jpg" alt="高考倒计时">
             <p>功能如其名的一个倒计时工具</p>
             <button onclick="smoothRedirect('subwebsite/codes/%E9%AB%98%E8%80%83%E5%80%92%E8%AE%A1%E6%97%B6/index.html')">开始考试</button>
@@ -174,14 +179,7 @@
             <p>一张福瑞图片</p>
             <button onclick="smoothRedirect('subwebsite/images/Furry1 (3).jpg')">开始福瑞之旅</button>
         </div>
-
-        <div class="site-section">
-            <img src="subwebsite/images/FS2.png" alt="网站6图片">
-            <p>一张清晰度测试图片</p>
-            <button onclick="smoothRedirect('subwebsite/images/testHDimage.jpg')">开始看图之旅</button>
-        </div>
-    </div>
-    <script>
+        <script>
         function toggleDarkMode() {
             const body = document.body;
             const currentTheme = body.getAttribute('data-theme');
@@ -199,6 +197,6 @@
             document.body.style.transition = 'opacity 0.3s ease';
             document.body.style.opacity = 1;
         });
-    </script>
+        </script>
 </body>
 </html>
