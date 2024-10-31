@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Word of the Day</title>
+  <!-- 更新字体链接，添加 900 字重 -->
+  <link href="https://fonts.alicdn.com/css?family=Source+Han+Serif+SC:400,900&display=swap" rel="stylesheet">
+
   <style>
     /* 设置页面背景、字体和布局 */
     body, html {
@@ -22,14 +25,15 @@
     /* 设置单词的样式 */
     .word-container {
       text-align: center;
-      background: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+      background: rgba(0, 0, 0, 0.3); /* 降低不透明度 */
       padding: 20px;
-      border-radius: 10px;
     }
 
     /* 大字体样式 */
     .word {
-      font-size: 72px; /* 增加字体大小 */
+      font-size: 88px; /* 增加字体大小 */
+      font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", "宋体", serif; /* 添加宋体 */
+      font-weight: 900; /* 修改为 Heavy 字重 */
     }
 
     /* 单词定义的样式 */
@@ -37,6 +41,8 @@
       font-size: 24px; /* 增加定义字体大小 */
       color: #dddddd;
       margin-top: 10px;
+      font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", "宋体", serif; /* 添加宋体 */
+      font-weight: 400; /* 定义部分保持常规字重 */
     }
   </style>
 </head>
@@ -48,17 +54,17 @@
   </div>
 
   <script>
-    // 从本地 dictionary.txt 文件中获取随机 K 开头单词
-    function getRandomKWord() {
+    // 从本地 dictionary.txt 文件中获取随机单词
+    function getRandomWord() {
       const xhr = new XMLHttpRequest();
       xhr.open("GET", "dictionary.txt", true);
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
           const entries = xhr.responseText.split('* * *\n');
-          const kEntries = entries.filter(entry => entry.trim() && entry.trim()[0].toLowerCase() === 'k');
+          const validEntries = entries.filter(entry => entry.trim());
 
-          if (kEntries.length > 0) {
-            const randomEntry = kEntries[Math.floor(Math.random() * kEntries.length)].trim();
+          if (validEntries.length > 0) {
+            const randomEntry = validEntries[Math.floor(Math.random() * validEntries.length)].trim();
             const lines = randomEntry.split('\n');
             const word = lines[0].trim();
             const definition = lines.slice(1).join(' ').trim();
@@ -85,7 +91,7 @@
       });
 
     // 加载随机单词
-    getRandomKWord();
+    getRandomWord();
   </script>
 </body>
 </html>
