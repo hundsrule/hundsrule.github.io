@@ -71,15 +71,17 @@
       xhr.send();
     }
 
-    // 必应每日一图的API背景
-    fetch("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1")
+    // 修改必应背景图片加载部分
+    fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1"))
       .then(response => response.json())
       .then(data => {
         const imageUrl = "https://www.bing.com" + data.images[0].url;
         document.body.style.backgroundImage = `url('${imageUrl}')`;
       })
       .catch(error => {
-        console.error("无法加载每日一图背景:", error);
+        console.error("无法加载背景图片:", error);
+        // 设置默认背景色或图片
+        document.body.style.backgroundColor = "#2c3e50";
       });
 
     // 加载随机单词
