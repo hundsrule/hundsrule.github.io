@@ -49,26 +49,44 @@
 
   <script>
     // 从本地 dictionary.txt 文件中获取随机 K 开头单词
-    function getRandomKWord() {
-      const xhr = new XMLHttpRequest();
-      xhr.open("GET", "dictionary.txt", true);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          const entries = xhr.responseText.split('* * *\n');
-          const kEntries = entries.filter(entry => entry.trim() && entry.trim()[0].toLowerCase() === 'k');
-
-          if (kEntries.length > 0) {
-            const randomEntry = kEntries[Math.floor(Math.random() * kEntries.length)].trim();
-            const lines = randomEntry.split('\n');
-            const word = lines[0].trim();
-            const definition = lines.slice(1).join(' ').trim();
-
-            document.getElementById("word").textContent = word;
-            document.getElementById("definition").textContent = definition;
-          }
+    async function getRandomKWord() {
+      try {
+        const response = await fetch('dictionary.txt');
+        console.log('词典加载状态:', response.status); // 添加调试信息
+        
+        if (!response.ok) {
+          throw new Error(`HTTP错误! 状态码: ${response.status}`);
         }
-      };
-      xhr.send();
+        
+        const text = await response.text();
+        console.log('词典内容长度:', text.length); // 添加调试信息
+        
+        // 找到词典实际开始的位置
+        const startIndex = text.indexOf(startMarker);
+        console.log('词典起始位置:', startIndex); // 添加调试信息
+        
+        if (startIndex === -1) {
+          throw new Error('找不到词典内容起始位置，请确保文件包含 "* * *" 分隔符');
+        }
+        
+        // 只保留词典部分的内容
+        dictionaryContent = text.slice(startIndex);
+        
+        // 启用刷新按钮
+        document.getElementById('refreshBtn').disabled = false;
+        
+        // 加载第一个单词
+        getRandomWord();
+      } catch (error) {
+        console.error('加载词典详细错误:', error); // 更详细的错误信息
+        document.getElementById("word").textContent = '加载失败';
+        document.getElementById("definition").textContent = 
+          `无法加载词典，请检查以下问题：\n` +
+          `1. dictionary.txt 文件是否存在\n` +
+          `2. 文件是否在正确的目录\n` +
+          `3. 文件格式是否正确（需要包含 "* * *" 分隔符）\n` +
+          `具体错误: ${error.message}`;
+      }
     }
 
     // 必应每日一图的API背景
