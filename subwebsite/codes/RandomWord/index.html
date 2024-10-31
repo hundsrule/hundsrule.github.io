@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word of the Day</title>
+  <style>
+    /* 设置页面背景、字体和布局 */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      color: white;
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* 设置单词的样式 */
+    .word-container {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    /* 大字体样式 */
+    .word {
+      font-size: 72px; /* 增加字体大小 */
+    }
+
+    /* 单词定义的样式 */
+    .definition {
+      font-size: 24px; /* 增加定义字体大小 */
+      color: #dddddd;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="word-container">
+    <div class="word" id="word">Kibble</div>
+    <div class="definition" id="definition">Definition will appear here.</div>
+  </div>
+
+  <script>
+    // 从本地 dictionary.txt 文件中获取随机 K 开头单词
+    function getRandomKWord() {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "dictionary.txt", true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          const entries = xhr.responseText.split('* * *\n');
+          const kEntries = entries.filter(entry => entry.trim() && entry.trim()[0].toLowerCase() === 'k');
+
+          if (kEntries.length > 0) {
+            const randomEntry = kEntries[Math.floor(Math.random() * kEntries.length)].trim();
+            const lines = randomEntry.split('\n');
+            const word = lines[0].trim();
+            const definition = lines.slice(1).join(' ').trim();
+
+            document.getElementById("word").textContent = word;
+            document.getElementById("definition").textContent = definition;
+          }
+        }
+      };
+      xhr.send();
+    }
+
+    // 必应每日一图的API背景
+    fetch("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1")
+      .then(response => response.json())
+      .then(data => {
+        const imageUrl = "https://www.bing.com" + data.images[0].url;
+        document.body.style.backgroundImage = `url('${imageUrl}')`;
+      })
+      .catch(error => {
+        console.error("无法加载每日一图背景:", error);
+      });
+
+    // 加载随机单词
+    getRandomKWord();
+  </script>
+</body>
+</html>
