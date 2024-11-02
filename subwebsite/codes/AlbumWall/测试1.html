@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态封面墙</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            min-height: 100vh;
+        }
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .container {
+            display: grid;
+            gap: 10px;
+            width: 100%;
+            height: 100vh;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .cover-wrapper {
+            perspective: 1000px;
+            width: 100%;
+            height: 100%;
+        }
+        .cover-cube {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+            animation: autoRotate 10s infinite linear;
+        }
+        .album-cover {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            backface-visibility: hidden;
+        }
+        .face-front { transform: translateZ(50%) rotateY(0deg); }
+        .face-back { transform: translateZ(-50%) rotateY(180deg); }
+        .face-right { transform: translateX(50%) rotateY(90deg); }
+        .face-left { transform: translateX(-50%) rotateY(-90deg); }
+
+        @keyframes autoRotate {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+        
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            margin: 5px;
+        }
+        button {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h2>动态封面墙设置</h2>
+        <div>
+            <label>行数：<input type="number" id="rows" value="3" min="1" max="10"></label>
+            <label>列数：<input type="number" id="cols" value="4" min="1" max="10"></label>
+            <button onclick="updateGrid()">更新布局</button>
+        </div>
+        <input type="file" id="fileInput" multiple accept="image/*" style="margin-top: 10px;">
+    </div>
+    <div class="container" id="coverContainer"></div>
+
+    <script>
+        let imageFiles = [];
+        
+        function updateGrid() {
+            const rows = document.getElementById('rows').value;
+            const cols = document.getElementById('cols').value;
+            const container = document.getElementById('coverContainer');
+            
+            container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            container.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            
+            container.innerHTML = '';
+            
+            const totalCells = rows * cols;
+            for(let i = 0; i < totalCells; i++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'cover-wrapper';
+                
+                const cube = document.createElement('div');
+                cube.className = 'cover-cube';
+                
+                // 创建四个面
+                ['front', 'back', 'right', 'left'].forEach((face, index) => {
+                    const img = document.createElement('img');
+                    img.className = `album-cover face-${face}`;
+                    if(imageFiles.length > 0) {
+                        const fileIndex = i % imageFiles.length;
+                        img.src = URL.createObjectURL(imageFiles[fileIndex]);
+                    } else {
+                        img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23ddd"/></svg>';
+                    }
+                    cube.appendChild(img);
+                });
+                
+                wrapper.appendChild(cube);
+                container.appendChild(wrapper);
+            }
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            imageFiles = Array.from(event.target.files).filter(file => file.type.startsWith('image/'));
+            updateGrid();
+        });
+
+        // 初始化网格
+        updateGrid();
+    </script>
+</body>
+</html>
