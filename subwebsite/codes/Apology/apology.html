@@ -6,13 +6,15 @@
     <style>
         body {
             font-family: '微软雅黑', sans-serif;
-            background: linear-gradient(45deg, #f6d365, #fda085);
+            background: linear-gradient(45deg, #f6d365, #fda085, #fd85a0, #85fda7);
+            background-size: 400% 400%;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 0;
-            animation: gradientBG 15s ease infinite;
+            animation: gradientBG 10s ease infinite;
+            perspective: 1000px;
         }
 
         @keyframes gradientBG {
@@ -22,58 +24,96 @@
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem;
+            border-radius: 30px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            max-width: 800px;
             text-align: center;
-            animation: fadeIn 2s ease;
+            transform-style: preserve-3d;
+            position: relative;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .char {
+            display: inline-block;
+            animation: randomWobble 0.3s ease-in-out infinite;
+        }
+
+        @keyframes randomWobble {
+            0%, 100% { 
+                transform: translate(0, 0); 
+            }
+            25% { 
+                transform: translate(
+                    calc(var(--x-offset) * 2px),
+                    calc(var(--y-offset) * 2px)
+                ); 
+            }
+            75% { 
+                transform: translate(
+                    calc(var(--x-offset) * -2px),
+                    calc(var(--y-offset) * -2px)
+                ); 
+            }
         }
 
         h1 {
             color: #e74c3c;
-            animation: heartbeat 1.5s ease-in-out infinite;
-        }
-
-        @keyframes heartbeat {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         p {
-            line-height: 1.8;
-            margin: 20px 0;
-            animation: slideIn 1s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-50px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            font-size: 1.4em;
+            line-height: 2;
+            margin: 25px 0;
         }
 
         .emoji {
-            font-size: 2em;
-            margin: 10px;
+            font-size: 3em;
+            margin: 15px;
             display: inline-block;
-            animation: bounce 2s infinite;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.3));
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        .promise-list {
+            font-size: 1.3em;
+            background: linear-gradient(45deg, #ffefba, #ffffff);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .star {
+            display: inline-block;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            border-radius: 32px;
+            z-index: -1;
+            animation: glowing 20s linear infinite;
+            background-size: 400%;
+            filter: blur(10px);
+            opacity: 0.5;
+        }
+
+        @keyframes glowing {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>诚挚的道歉 🙏</h1>
+        <h1 id="title">诚挚的道歉 🙏</h1>
         
         <div class="emoji">😔</div>
         <div class="emoji">💔</div>
@@ -88,12 +128,14 @@
         <p>您的每一堂课都倾注了大量心血，而我却没有好好珍惜。这让我感到非常愧疚。 💭</p>
         
         <p>我承诺从现在开始：</p>
-        <p>
-            ⭐ 认真听讲每一堂课<br>
-            ⭐ 将手机放在书包里<br>
-            ⭐ 专注于课堂学习<br>
-            ⭐ 做一个优秀的学生
-        </p>
+        <div class="promise-list">
+            <p>
+                <span class="star">⭐</span> 认真听讲每一堂课<br>
+                <span class="star">⭐</span> 将手机放在书包里<br>
+                <span class="star">⭐</span> 专注于课堂学习<br>
+                <span class="star">⭐</span> 做一个优秀的学生
+            </p>
+        </div>
         
         <p>希望您能原谅我的过失，给我一个改正的机会。 🌈</p>
         
@@ -103,5 +145,28 @@
         <div class="emoji">🌟</div>
         <div class="emoji">💪</div>
     </div>
+
+    <script>
+        function wrapChars() {
+            const elements = document.querySelectorAll('p, h1');
+            elements.forEach(element => {
+                const text = element.textContent;
+                element.textContent = '';
+                [...text].forEach(char => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.className = 'char';
+                    // 为每个字符设置随机的抖动偏移量
+                    span.style.setProperty('--x-offset', (Math.random() - 0.5).toFixed(2));
+                    span.style.setProperty('--y-offset', (Math.random() - 0.5).toFixed(2));
+                    // 设置随机的动画延迟，使抖动不同步
+                    span.style.animationDelay = `${Math.random() * 0.2}s`;
+                    element.appendChild(span);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', wrapChars);
+    </script>
 </body>
 </html>
