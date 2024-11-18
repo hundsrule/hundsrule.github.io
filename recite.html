@@ -8,7 +8,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-image: url(https://ENKOSHI.github.io/Background.jpg);
+            background-image: url(https://wht.icu/Background.jpg);
             background-size: cover;
             background-attachment: fixed;
         }
@@ -21,6 +21,7 @@
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
+            transition: all 0.1s ease;
         }
 
         h1 {
@@ -28,6 +29,7 @@
             text-align: center;
             color: indianred;
             font-weight: 900;
+            transition: all 0.1s ease;
         }
 
         .box {
@@ -40,6 +42,7 @@
             opacity: 0.95;
             border-radius: 10px;
             padding: 20px;
+            transition: all 0.1s ease;
         }
 
         p {
@@ -57,6 +60,18 @@
             font-weight: 800;
         }
 
+        #question {
+            transition: opacity 0.1s ease;
+        }
+
+        .fade-out {
+            opacity: 0;
+        }
+
+        .fade-in {
+            opacity: 1;
+        }
+
         input[type="text"] {
             opacity: 0.60;
             width: 100%;
@@ -68,6 +83,13 @@
             box-sizing: border-box;
             font-weight: 600;
             color: indianred;
+            transition: all 0.1s ease;
+        }
+
+        input[type="text"]:focus {
+            opacity: 0.8;
+            transform: scale(1.01);
+            box-shadow: 0 0 10px rgba(205, 92, 92, 0.2);
         }
 
         button {
@@ -80,31 +102,162 @@
             cursor: pointer;
             font-size: 16px;
             margin-right: 10px;
+            transition: all 0.1s ease;
         }
 
-            button:hover {
-                background-color: indianred;
-                opacity: 0.80;
+        button:hover {
+            background-color: indianred;
+            opacity: 0.80;
+            transform: scale(1.05);
+        }
+
+        @keyframes confetti {
+            0% {
+                transform: translateY(-10px) rotate(0deg);
+                opacity: 1;
             }
+            100% {
+                transform: translateY(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .celebrate::before,
+        .celebrate::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 16px;
+            opacity: 0;
+            z-index: 1000;
+        }
+
+        .celebrate::before {
+            left: 30%;
+            top: 30%;
+        }
+
+        .celebrate::after {
+            left: 70%;
+            top: 30%;
+        }
+
+        .celebrate::before:nth-child(2),
+        .celebrate::after:nth-child(2) {
+            left: 50%;
+            top: 50%;
+        }
+
+        .celebrate::before:nth-child(3),
+        .celebrate::after:nth-child(3) {
+            left: 30%;
+            top: 70%;
+        }
+
+        .celebrate::before:nth-child(4),
+        .celebrate::after:nth-child(4) {
+            left: 70%;
+            top: 70%;
+        }
+
+        .celebrate::before {
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00);
+            animation: 
+                confetti-left-1 1s ease-out forwards,
+                confetti-left-2 1s ease-out forwards 0.2s,
+                confetti-left-3 1s ease-out forwards 0.4s,
+                confetti-left-4 1s ease-out forwards 0.6s;
+        }
+
+        .celebrate::after {
+            background: linear-gradient(45deg, #00ff00, #0000ff, #8b00ff);
+            animation: 
+                confetti-right-1 1s ease-out forwards 0.1s,
+                confetti-right-2 1s ease-out forwards 0.3s,
+                confetti-right-3 1s ease-out forwards 0.5s,
+                confetti-right-4 1s ease-out forwards 0.7s;
+        }
+
+        @keyframes confetti-left-1 {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(-150px, -100px) rotate(180deg); opacity: 1; }
+            100% { transform: translate(-300px, 100px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes confetti-left-2 {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(-100px, -150px) rotate(180deg); opacity: 1; }
+            100% { transform: translate(-200px, 50px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes confetti-left-3 {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(-200px, -120px) rotate(180deg); opacity: 1; }
+            100% { transform: translate(-400px, 80px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes confetti-left-4 {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(-120px, -180px) rotate(180deg); opacity: 1; }
+            100% { transform: translate(-250px, 70px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes confetti-right-1 {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(150px, -100px) rotate(-180deg); opacity: 1; }
+            100% { transform: translate(300px, 100px) rotate(-360deg); opacity: 0; }
+        }
+
+        @keyframes confetti-right-2 {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(100px, -150px) rotate(-180deg); opacity: 1; }
+            100% { transform: translate(200px, 50px) rotate(-360deg); opacity: 0; }
+        }
+
+        @keyframes confetti-right-3 {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(200px, -120px) rotate(-180deg); opacity: 1; }
+            100% { transform: translate(400px, 80px) rotate(-360deg); opacity: 0; }
+        }
+
+        @keyframes confetti-right-4 {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(120px, -180px) rotate(-180deg); opacity: 1; }
+            100% { transform: translate(250px, 70px) rotate(-360deg); opacity: 0; }
+        }
+
+        .celebrate::before {
+            left: calc(50% - 20px);
+            top: 50%;
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00);
+            transform-origin: center;
+        }
+
+        .celebrate::after {
+            left: calc(50% + 20px);
+            top: 50%;
+            background: linear-gradient(45deg, #00ff00, #0000ff, #8b00ff);
+            transform-origin: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1> 背默检测</h1>
-        <div class=" box">
-            <tag><div id="question"> 点击“刷新”以获取题目</div></tag>
+        <div class="box">
+            <tag><div id="question"></div></tag>
             <input type="text" id="answerInput" placeholder="请输入答案">
         </div>
-        <div class=" box">
-            <button onclick="checkAnswer()"> 提交答案</button>
-            <button onclick="startGame()">刷新</button>
-            <div class=" box">
+        <div class="box">
+            <button onclick="checkAnswer()">提交答案</button>
+            <button onclick="startGame()">换一题</button>
+            <div class="box">
                 <a href="https://github.com/ENKOSHI/ENKOSHI.github.io">Click to view origin</a>
             </div>
         </div>
         <script>
             const questions = [
-                { question: '在《＜论语＞十二章》中，孔子用"文"和"质"对"君子"下了定义的句子是：', answer: '文质彬彬，然后君子' },
+             { question: '在《＜论语＞十二章》中，孔子用"文"和"质"对"君子"下了定义的句子是：', answer: '文质彬彬，然后君子' },
                 { question: '荀子的《劝学》中，以雕刻为喻，正面强调学习必须持之以恒的句子是：', answer: '锲而不舍，金石可镂' },
                 { question: '李煜的《虞美人》中，“________”两句通过写故国建筑和当年宫女，传达出物是人非之感。', answer: '雕栏玉砌应犹在，只是朱颜改' },
                 { question: '苏轼的《念奴娇·赤壁怀古》中，以“________”写周瑜的儒将装扮；用“________”表现出曹军惨败的情景。', answer: '羽扇纶巾，樯橹灰飞烟灭' },
@@ -605,39 +758,78 @@
                 { question: '《朝天子·咏喇叭》写出喇叭“吹”之恶果的句子是:______________，______________。', answer: '军听了军愁，民听了民怕' },
                 { question: '《朝天子·咏喇叭》形象地写出宦官欺压百姓，把百姓搜刮得倾家荡产的句子是:______________，______________!', answer: '眼见的吹翻了这家，吹伤了那家，只吹的水尽鹅飞罢' },
 
+                // ... 原有的questions数组内容保持不变 ...
             ];
 
-            let currentQuestion = {
-            }
+            let currentQuestion = {};
+            let attempts = 0;
 
-                ;
+            function normalizeAnswer(answer) {
+                return answer.replace(/[.,，。、！？""《》\s]/g, '').toLowerCase();
+            }
 
             function getRandomQuestion() {
                 const randomIndex = Math.floor(Math.random() * questions.length);
                 return questions[randomIndex];
             }
 
+            function fadeTransition(callback) {
+                const questionElement = document.getElementById('question');
+                questionElement.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    callback();
+                    questionElement.classList.remove('fade-out');
+                    questionElement.classList.add('fade-in');
+                    
+                    setTimeout(() => {
+                        questionElement.classList.remove('fade-in');
+                    }, 500);
+                }, 500);
+            }
+
             function startGame() {
-                currentQuestion = getRandomQuestion();
-                document.getElementById('question').textContent = currentQuestion.question;
-                document.getElementById('answerInput').value = '';
+                fadeTransition(() => {
+                    currentQuestion = getRandomQuestion();
+                    document.getElementById('question').textContent = currentQuestion.question;
+                    document.getElementById('answerInput').value = '';
+                    attempts = 0;
+                });
+            }
+
+            function celebrate() {
+                const container = document.querySelector('.container');
+                container.classList.add('celebrate');
+                setTimeout(() => {
+                    container.classList.remove('celebrate');
+                }, 800);
             }
 
             function checkAnswer() {
                 const userAnswer = document.getElementById('answerInput').value;
-                if (userAnswer === currentQuestion.answer) {
-                    alert('回答正确!');
-                    startGame();
-                }
+                const normalizedUserAnswer = normalizeAnswer(userAnswer);
+                const normalizedCorrectAnswer = normalizeAnswer(currentQuestion.answer);
 
-                else {
-                    alert(`回答错误！正确答案是 ${currentQuestion.answer}`);
+                if (normalizedUserAnswer === normalizedCorrectAnswer) {
+                    celebrate();
+                    setTimeout(() => {
+                        alert('太棒了！你真是个天才！这么难的题目都被你答对了，继续加油，你一定能成为最厉害的！');
+                        startGame();
+                    }, 300);
+                } else {
+                    attempts++;
+                    if (attempts === 1) {
+                        alert('回答错误，让我们再试一次吧！');
+                    } else {
+                        alert(`别灰心！正确答案是 ${currentQuestion.answer}。记住这个答案，下次一定能答对！`);
+                        startGame();
+                    }
                 }
-
             }
+
+            // 页面加载时自动开始
+            window.onload = startGame;
         </script>
-    </div>
-    </div>
     </div>
 </body>
 </html>
