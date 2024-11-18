@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>致歉信 - 给叶利钦老师 🙏</title>
+    <style>
+        body {
+            font-family: '微软雅黑', sans-serif;
+            background: linear-gradient(45deg, #f6d365, #fda085, #fd85a0, #85fda7);
+            background-size: 400% 400%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            animation: gradientBG 10s ease infinite;
+            perspective: 1000px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem;
+            border-radius: 30px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            max-width: 90%;
+            text-align: center;
+            transform-style: preserve-3d;
+            position: relative;
+            margin: 20px;
+        }
+
+        .char {
+            display: inline-block;
+            animation: randomWobble 0.3s ease-in-out infinite;
+        }
+
+        @keyframes randomWobble {
+            0%, 100% { 
+                transform: translate(0, 0); 
+            }
+            25% { 
+                transform: translate(
+                    calc(var(--x-offset) * 2px),
+                    calc(var(--y-offset) * 2px)
+                ); 
+            }
+            75% { 
+                transform: translate(
+                    calc(var(--x-offset) * -2px),
+                    calc(var(--y-offset) * -2px)
+                ); 
+            }
+        }
+
+        h1 {
+            color: #e74c3c;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 1.5em;
+        }
+
+        p {
+            font-size: 1.8em;
+            line-height: 1.8;
+            margin: 30px 0;
+            color: #2c3e50;
+        }
+
+        .emoji {
+            font-size: 4em;
+            margin: 20px;
+            display: inline-block;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.3));
+        }
+
+        .promise-list {
+            font-size: 1.6em;
+            background: linear-gradient(45deg, #ffefba, #ffffff);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            margin: 40px 0;
+        }
+
+        .star {
+            display: inline-block;
+            color: #f1c40f;
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            border-radius: 32px;
+            z-index: -1;
+            animation: glowing 20s linear infinite;
+            background-size: 400%;
+            filter: blur(10px);
+            opacity: 0.5;
+        }
+
+        @keyframes glowing {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        @media (max-width: 768px) {
+            p { font-size: 1.6em; }
+            .promise-list { font-size: 1.4em; }
+            .emoji { font-size: 3.5em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">深切的忏悔与道歉 🙏</h1>
+        
+        <div class="emoji">😔</div>
+        <div class="emoji">💔</div>
+        <div class="emoji">🥺</div>
+        
+        <p>尊敬的叶利钦老师：</p>
+        
+        <p>我怀着无比愧疚和自责的心情，为自己在课堂上背不出过秦论的不当行为向您诚恳道歉。 💝</p>
+        
+        <p>这种行为不仅严重影响了自己的学习进度，也打扰了其他同学的注意力，更是对您孜孜不倦教导的极大不敬。我深感羞愧。 📚✨</p>
+        
+        <p>每当想起您为备课熬夜到深夜，为我们讲解知识点时声音嘶哑，而我却沉迷于逃避背过秦论，内心就充满了懊悔与自责。 💭</p>
+        
+        <p>在此，我郑重承诺：</p>
+        <div class="promise-list">
+            <p>
+                <span class="star">⭐</span> 彻底改掉不背书的坏习惯<br>
+                <span class="star">⭐</span> 上课前主动向老师背古诗<br>
+                <span class="star">⭐</span> 全神贯注听讲每一堂课<br>
+                <span class="star">⭐</span> 认真完成每一项作业<br>
+                <span class="star">⭐</span> 以实际行动证明我的改变
+            </p>
+        </div>
+        
+        <p>恳请您给我一次改过自新的机会，我一定会用优异的成绩和良好的表现来回报您的信任。 🌈</p>
+        
+        <p>您诚挚的学生<br>王洪特<br>敬上 ❤️</p>
+        
+        <div class="emoji">🙇‍♂️</div>
+        <div class="emoji">🌟</div>
+        <div class="emoji">💪</div>
+    </div>
+
+    <script>
+        function wrapChars() {
+            const elements = document.querySelectorAll('p, h1');
+            elements.forEach(element => {
+                const text = element.textContent;
+                element.textContent = '';
+                [...text].forEach(char => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.className = 'char';
+                    span.style.setProperty('--x-offset', (Math.random() - 0.5).toFixed(2));
+                    span.style.setProperty('--y-offset', (Math.random() - 0.5).toFixed(2));
+                    span.style.animationDelay = `${Math.random() * 0.2}s`;
+                    element.appendChild(span);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', wrapChars);
+    </script>
+</body>
+</html>
