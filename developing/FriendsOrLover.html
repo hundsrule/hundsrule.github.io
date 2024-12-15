@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>朋友 vs 恋人 - 村上春树的奇幻之旅 ✨</title>
+    <style>
+        body {
+            background: linear-gradient(45deg, #ff69b4, #4169e1, #ff1493, #00bfff, #9400d3, #ff8c00);
+            background-size: 600% 600%;
+            animation: gradient 15s ease infinite;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 150%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 
+                0 0 30px rgba(255,105,180,0.6),
+                0 0 60px rgba(65,105,225,0.4),
+                0 0 90px rgba(255,20,147,0.3);
+            text-align: center;
+            position: relative;
+            max-width: 900px;
+            transform-style: preserve-3d;
+            animation: float 8s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg) translateZ(0); }
+            25% { transform: translateY(-20px) rotate(2deg) translateZ(50px); }
+            75% { transform: translateY(20px) rotate(-2deg) translateZ(-50px); }
+            100% { transform: translateY(0px) rotate(0deg) translateZ(0); }
+        }
+
+        .floating-emoji {
+            position: absolute;
+            pointer-events: none;
+            animation: floatEmoji 6s linear infinite;
+            font-size: 24px;
+            opacity: 0.8;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        @keyframes floatEmoji {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+            50% { transform: translate(100px, -100px) rotate(180deg); opacity: 0.4; }
+            100% { transform: translate(200px, -200px) rotate(360deg); opacity: 0; }
+        }
+
+        .button {
+            background: linear-gradient(45deg, #ff69b4, #4169e1, #ff1493);
+            background-size: 200% 200%;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            margin: 15px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            animation: buttonGlow 3s infinite;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes buttonGlow {
+            0% { box-shadow: 0 0 20px rgba(255,105,180,0.6); background-position: 0% 50%; }
+            50% { box-shadow: 0 0 40px rgba(65,105,225,0.8); background-position: 100% 50%; }
+            100% { box-shadow: 0 0 20px rgba(255,105,180,0.6); background-position: 0% 50%; }
+        }
+
+        .button:hover {
+            transform: scale(1.1) rotate(3deg);
+            box-shadow: 0 0 30px rgba(255,105,180,0.8);
+        }
+
+        .button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .hidden {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .visible {
+            display: block;
+            opacity: 1;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ff1493;
+            text-shadow: 
+                2px 2px 4px rgba(0,0,0,0.3),
+                0 0 20px rgba(255,105,180,0.5);
+            animation: titleGlow 5s linear infinite;
+        }
+
+        @keyframes titleGlow {
+            0% { color: #ff1493; text-shadow: 0 0 20px rgba(255,105,180,0.5); }
+            25% { color: #4169e1; text-shadow: 0 0 30px rgba(65,105,225,0.6); }
+            50% { color: #9400d3; text-shadow: 0 0 40px rgba(148,0,211,0.7); }
+            75% { color: #ff8c00; text-shadow: 0 0 30px rgba(255,140,0,0.6); }
+            100% { color: #ff1493; text-shadow: 0 0 20px rgba(255,105,180,0.5); }
+        }
+
+        .story-text {
+            font-size: 19px;
+            line-height: 1.8;
+            margin: 25px 0;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            position: relative;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            animation: sparkle 1.5s linear infinite;
+            font-size: 12px;
+        }
+
+        @keyframes sparkle {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        .rain {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .rain-drop {
+            position: absolute;
+            pointer-events: none;
+            animation: rain linear infinite;
+        }
+
+        @keyframes rain {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <div class="rain" id="rain"></div>
+    <div class="container" id="mainContainer">
+        <h1>🌟 迷失东京：一场关于爱与友情的奇幻旅程 🌟</h1>
+        
+        <!-- 故事内容和按钮部分与之前类似，但增加更多emoji装饰 -->
+        <!-- 在每个div中添加更多的装饰性元素 -->
+
+        <script>
+            // 创建装饰性元素
+            function createDecorations() {
+                const emojis = ['✨', '💫', '🌟', '⭐', '🌙', '💝', '💖', '💕', '💗', '💓'];
+                const colors = ['#ff69b4', '#4169e1', '#ff1493', '#00bfff', '#9400d3', '#ff8c00'];
+                
+                setInterval(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'floating-emoji';
+                    emoji.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.left = Math.random() * window.innerWidth + 'px';
+                    emoji.style.top = Math.random() * window.innerHeight + 'px';
+                    emoji.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    document.body.appendChild(emoji);
+
+                    setTimeout(() => emoji.remove(), 6000);
+                }, 300);
+            }
+
+            // 创建闪烁效果
+            function createSparkles() {
+                setInterval(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    sparkle.innerHTML = '✦';
+                    sparkle.style.left = Math.random() * window.innerWidth + 'px';
+                    sparkle.style.top = Math.random() * window.innerHeight + 'px';
+                    document.body.appendChild(sparkle);
+
+                    setTimeout(() => sparkle.remove(), 1500);
+                }, 200);
+            }
+
+            // 创建雨滴效果
+            function createRain() {
+                const rain = document.getElementById('rain');
+                setInterval(() => {
+                    const drop = document.createElement('div');
+                    drop.className = 'rain-drop';
+                    drop.innerHTML = ['💕', '💗', '💓', '💝'][Math.floor(Math.random() * 4)];
+                    drop.style.left = Math.random() * window.innerWidth + 'px';
+                    drop.style.animationDuration = Math.random() * 2 + 1 + 's';
+                    rain.appendChild(drop);
+
+                    setTimeout(() => drop.remove(), 3000);
+                }, 100);
+            }
+
+            // 初始化所有效果
+            createDecorations();
+            createSparkles();
+            createRain();
+
+            // 优化的section切换逻辑
+            let currentSection = 'question1';
+            let isTransitioning = false;
+
+            function showSection(sectionId) {
+                if(isTransitioning || currentSection === sectionId) return;
+                
+                isTransitioning = true;
+                currentSection = sectionId;
+
+                const allSections = document.querySelectorAll('div[id]');
+                allSections.forEach(div => {
+                    if(div.classList.contains('visible')) {
+                        div.classList.remove('visible');
+                        div.classList.add('hidden');
+                    }
+                });
+
+                setTimeout(() => {
+                    const newSection = document.getElementById(sectionId);
+                    if(newSection) {
+                        newSection.classList.remove('hidden');
+                        newSection.classList.add('visible');
+                    }
+                    isTransitioning = false;
+                }, 300);
+
+                const container = document.getElementById('mainContainer');
+                container.style.animation = 'none';
+                container.offsetHeight;
+                container.style.animation = 'float 8s ease-in-out infinite';
+            }
+
+            function showConclusion(conclusionId) {
+                showSection(conclusionId);
+                document.body.style.animation = 'gradient 5s ease infinite';
+            }
+
+            function restart() {
+                currentSection = 'question1';
+                showSection('question1');
+                document.body.style.animation = 'gradient 15s ease infinite';
+            }
+        </script>
+    </div>
+</body>
+</html>

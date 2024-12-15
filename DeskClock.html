@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桌面时钟</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            overflow: hidden;
+            font-weight: bold;
+            padding-top: 40px;
+        }
+
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .date {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .clock {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .flip {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 150px;
+            width: 250px;
+        }
+
+        .seconds {
+            font-size: 50px;
+            position: absolute;
+            right: -60px;
+            bottom: 45px;
+        }
+
+        .countdown {
+            font-size: 18px;
+            margin: 20px 0;
+            background: rgba(26, 26, 26, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .weather {
+            font-size: 16px;
+            margin: 20px 0;
+            background: rgba(26, 26, 26, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .current-weather {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .forecast {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .forecast-item {
+            background: rgba(26, 26, 26, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            flex: 1;
+        }
+
+        .quote {
+            font-size: 20px;
+            margin: 20px 0;
+            max-width: 90%;
+            text-align: center;
+            background: rgba(26, 26, 26, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+
+        @media screen and (max-width: 414px) {
+            .flip {
+                font-size: 100px;
+                width: 180px;
+            }
+            .seconds {
+                font-size: 40px;
+                right: -45px;
+                bottom: 30px;
+            }
+            .date {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="date" id="currentDate">2023年12月1日 星期五</div>
+        <div class="clock">
+            <span class="flip hours">00</span>
+            <span class="flip minutes">00</span>
+            <span class="seconds">00</span>
+        </div>
+        <div class="countdown">距离高考还有：<span id="examCountdown">loading...</span></div>
+        <div class="weather">
+            <div class="current-weather">
+                <div id="currentWeather">加载中...</div>
+                <div id="todayWeather"></div>
+            </div>
+            <div class="forecast" id="forecast"></div>
+        </div>
+        <div class="quote" id="dailyQuote">今日寄语加载中...</div>
+    </div>
+
+    <script>
+        // 自动全屏
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+        });
+
+        // 更新日期
+        function updateDate() {
+            const now = new Date();
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${weekdays[now.getDay()]}`;
+            document.getElementById('currentDate').textContent = dateStr;
+        }
+
+        // 时钟更新
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            document.querySelector('.hours').textContent = hours;
+            document.querySelector('.minutes').textContent = minutes;
+            document.querySelector('.seconds').textContent = seconds;
+        }
+
+        // 高考倒计时
+        function updateCountdown() {
+            const examDate = new Date('2025-06-07T00:00:00');
+            const now = new Date();
+            const diff = Math.abs(examDate - now);
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('examCountdown').textContent = 
+                `${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
+        }
+
+        // 天气API（使用和风天气，需要替换YOUR_API_KEY）
+        async function getWeather() {
+            const API_KEY = '9a815c87b12146fd8dd7df4ccb6a4f31';
+            const city = '101010100'; // 北京的城市代码，需要根据实际位置修改
+
+            try {
+                const currentResponse = await fetch(`https://devapi.qweather.com/v7/weather/now?location=${city}&key=${API_KEY}`);
+                const currentData = await currentResponse.json();
+                
+                const forecastResponse = await fetch(`https://devapi.qweather.com/v7/weather/3d?location=${city}&key=${API_KEY}`);
+                const forecastData = await forecastResponse.json();
+
+                // 获取天气对应的emoji
+                function getWeatherEmoji(text) {
+                    const emojiMap = {
+                        '晴': '☀️',
+                        '多云': '⛅',
+                        '阴': '☁️',
+                        '雨': '🌧️',
+                        '雪': '❄️',
+                        '雷': '⚡'
+                    };
+                    for (let key in emojiMap) {
+                        if (text.includes(key)) return emojiMap[key];
+                    }
+                    return '☁️';
+                }
+
+                // 更新当前天气
+                document.getElementById('currentWeather').innerHTML = 
+                    `当前温度: ${currentData.now.temp}°C ${getWeatherEmoji(currentData.now.text)} ${currentData.now.text}`;
+
+                // 更新今日天气
+                const todayForecast = forecastData.daily[0];
+                document.getElementById('todayWeather').innerHTML = 
+                    `今日天气: ${getWeatherEmoji(todayForecast.textDay)} ${todayForecast.textDay}`;
+
+                // 更新三日天气预报
+                const dayNames = ['今天', '明天', '后天'];
+                const forecastHtml = forecastData.daily.map((day, index) => `
+                    <div class="forecast-item">
+                        ${dayNames[index]}: 
+                        ${getWeatherEmoji(day.textDay)} ${day.textDay}
+                        ${day.tempMax}°C/${day.tempMin}°C
+                    </div>
+                `).join('');
+                
+                document.getElementById('forecast').innerHTML = forecastHtml;
+            } catch (error) {
+                console.error('获取天气信息失败:', error);
+            }
+        }
+
+        // 每日一句
+        const quotes = [
+            "相信自己，你比想象中更强大。",
+            "今天的汗水是明天的光芒。",
+            "没有人能够阻挡一个意志坚定的人。",
+            "成功不是终点，失败也不是终结。",
+            "每一个现在，都是通向未来的桥梁。",
+            "高考只是人生的一个站点，但绝不是终点。",
+            "坚持的路上，你永远不是一个人在战斗。",
+            "熬过无数个日夜，只为绽放最美的光芒。",
+            "不要让任何事物动摇你的决心。",
+            "现在的付出，都是为了将来的回报。",
+            "别人的成功无法复制，你要走出属于自己的路。",
+            "高考是一场马拉松，要懂得调整节奏。",
+            "你的潜力远超过你的想象。",
+            "不要被一时的困难打倒，坚持就是胜利。",
+            "考场如战场，淡定从容就是制胜法宝。",
+            "既然选择了远方，便只顾风雨兼程。",
+            "梦想的道路上没有捷径，只有脚踏实地。",
+            "高考不是终点，而是新的起点。",
+            "你比自己想象的要坚强得多。",
+            "每一分付出都不会白费，未来都会有回报。"
+        ];
+
+        function updateQuote() {
+            const today = new Date();
+            const index = today.getDate() % quotes.length;
+            document.getElementById('dailyQuote').textContent = quotes[index];
+        }
+
+        // 初始化和定时更新
+        updateDate();
+        setInterval(updateClock, 1000);
+        setInterval(updateCountdown, 1000);
+        setInterval(updateDate, 1000);
+        updateQuote();
+        getWeather();
+        setInterval(getWeather, 900000); // 每15分钟更新一次天气
+
+        // 数字翻转动画
+        document.querySelectorAll('.flip').forEach(elem => {
+            elem.addEventListener('DOMSubtreeModified', function() {
+                this.style.transform = 'rotateX(360deg)';
+                this.style.transition = 'transform 0.5s';
+                setTimeout(() => {
+                    this.style.transform = 'rotateX(0deg)';
+                    this.style.transition = 'none';
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>
