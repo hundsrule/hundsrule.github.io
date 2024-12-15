@@ -18,7 +18,7 @@
             min-height: 100vh;
             overflow: hidden;
             font-weight: bold;
-            padding-top: 20px;
+            padding-top: 10px;
         }
 
         .container {
@@ -44,21 +44,21 @@
 
         .flip {
             background: #1a1a1a;
-            border-radius: 3px;
-            padding: 3px;
-            font-size: 220px;
+            border-radius: 0px;
+            padding: 0px;
+            font-size: 210px;
             width: 350px;
         }
 
         .seconds {
-            font-size: 40px;
+            font-size: 35px;
             position: absolute;
-            right: 230px;
-            bottom: 60px;
+            right: 60px;
+            bottom: 40px;
         }
 
         .countdown {
-            font-size: 14px;
+            font-size: 18px;
             margin: 10px 0;
             background: rgba(26, 26, 26, 0.7);
             padding: 10px;
@@ -66,7 +66,7 @@
         }
 
         .weather {
-            font-size: 14px;
+            font-size: 16px;
             margin: 10px 0;
             background: rgba(26, 26, 26, 0.7);
             padding: 10px;
@@ -95,12 +95,12 @@
 
         .quote {
             font-size: 16px;
-            margin: 10px 0;
+            margin: 5px 0;
             max-width: 90%;
             text-align: center;
             background: rgba(26, 26, 26, 0.7);
             padding: 10px;
-            border-radius: 10px;
+            border-radius: 5px;
             line-height: 1.4;
         }
 
@@ -114,7 +114,7 @@
             <span class="flip minutes">00</span>
             <span class="seconds">00</span>
         </div>
-        <div class="countdown">距离高考还有：<span id="examCountdown">loading...</span></div>
+        <div class="countdown">高考还有<span id="examCountdown">loading...</span></div>
         <div class="weather">
             <div class="current-weather">
                 <div id="currentWeather">加载中...</div>
@@ -258,7 +258,7 @@
         setInterval(updateDate, 1000);
         updateQuote();
         getWeather();
-        setInterval(getWeather, 900000); // 每15分钟更新一次天气
+        setInterval(getWeather, 1800000); // 每30分钟更新一次天气
     </script>
 </body>
 </html>
