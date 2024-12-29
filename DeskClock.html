@@ -155,7 +155,7 @@
 
         // 高考倒计时
         function updateCountdown() {
-            const examDate = new Date('2025-06-07T00:00:00');
+            const examDate = new Date('2025-06-07T09:00:00');
             const now = new Date();
             const diff = Math.abs(examDate - now);
 
@@ -171,7 +171,7 @@
         // 天气API（使用和风天气，需要替换YOUR_API_KEY）
         async function getWeather() {
             const API_KEY = '9a815c87b12146fd8dd7df4ccb6a4f31';
-            const city = '101230908'; // 北京的城市代码，需要根据实际位置修改
+            const city = '101230908'; // 松溪的城市代码，需要根据实际位置修改
 
             try {
                 const currentResponse = await fetch(`https://devapi.qweather.com/v7/weather/now?location=${city}&key=${API_KEY}`);

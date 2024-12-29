@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色彩流动</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96e6a1);
+            background-size: 200% 200%;
+            animation: gradientBG 30s ease infinite;
+            transition: background 1s ease;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .content {
+            text-align: center;
+            color: white;
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .interactive-area {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="interactive-area"></div>
+    <div class="content">
+        <h1>色彩流动</h1>
+        <p>移动鼠标体验更多效果</p>
+    </div>
+
+    <script>
+        const interactiveArea = document.querySelector('.interactive-area');
+        let isMouseMoving = false;
+        let lastMouseMoveTime = 0;
+        let currentColors = {
+            angle: 45,
+            hues: [0, 90, 180, 270]
+        };
+        let targetColors = {
+            angle: 45,
+            hues: [0, 90, 180, 270]
+        };
+        
+        // 生成随机HSL颜色
+        function getRandomHue() {
+            return Math.floor(Math.random() * 360);
+        }
+
+        // 计算两个角度之间的最短距离
+        function getAngleDifference(angle1, angle2) {
+            const diff = (angle2 - angle1 + 360) % 360;
+            return diff > 180 ? diff - 360 : diff;
+        }
+
+        // 在两个值之间进行平滑插值
+        function lerp(start, end, t) {
+            // 如果是角度，使用特殊的插值方法
+            if (Math.abs(end - start) > 180) {
+                if (end > start) {
+                    start += 360;
+                } else {
+                    end += 360;
+                }
+            }
+            const result = start + (end - start) * t;
+            return result % 360;
+        }
+
+        // 更新背景渐变
+        function updateBackground(angle, hues) {
+            // 增加颜色停止点，使过渡更平滑
+            document.body.style.background = `linear-gradient(
+                ${angle}deg,
+                hsl(${hues[0]}, 60%, 60%) 0%,
+                hsl(${(hues[0] + hues[1]) / 2}, 60%, 60%) 20%,
+                hsl(${hues[1]}, 60%, 60%) 40%,
+                hsl(${(hues[1] + hues[2]) / 2}, 60%, 60%) 60%,
+                hsl(${hues[2]}, 60%, 60%) 80%,
+                hsl(${(hues[2] + hues[3]) / 2}, 60%, 60%) 90%,
+                hsl(${hues[3]}, 60%, 60%) 100%
+            )`;
+            document.body.style.backgroundSize = '200% 200%';
+        }
+
+        // 生成新的目标颜色
+        function generateNewTargetColors() {
+            targetColors.angle = Math.random() * 360;
+            const baseHue = getRandomHue();
+            targetColors.hues = [
+                baseHue,
+                (baseHue + 90) % 360,
+                (baseHue + 180) % 360,
+                (baseHue + 270) % 360
+            ];
+        }
+
+        // 平滑过渡到目标颜色
+        function smoothTransition() {
+            if (!isMouseMoving && Date.now() - lastMouseMoveTime > 1000) {
+                const t = 0.005; // 保持较慢的过渡速度
+                
+                currentColors.angle = lerp(currentColors.angle, targetColors.angle, t);
+                
+                for (let i = 0; i < 4; i++) {
+                    currentColors.hues[i] = lerp(currentColors.hues[i], targetColors.hues[i], t);
+                }
+                
+                updateBackground(currentColors.angle, currentColors.hues);
+                
+                // 如果所有颜色都接近目标值，生成新的目标颜色
+                if (Math.abs(getAngleDifference(currentColors.angle, targetColors.angle)) < 0.1 &&
+                    currentColors.hues.every((hue, i) => 
+                        Math.abs(getAngleDifference(hue, targetColors.hues[i])) < 0.1)) {
+                    generateNewTargetColors();
+                }
+            }
+        }
+
+        // 每帧更新颜色过渡
+        function animate() {
+            smoothTransition();
+            requestAnimationFrame(animate);
+        }
+        
+        // 启动动画
+        animate();
+        
+        interactiveArea.addEventListener('mousemove', (e) => {
+            isMouseMoving = true;
+            lastMouseMoveTime = Date.now();
+            const x = e.clientX / window.innerWidth;
+            
+            currentColors.angle = x * 360;
+            currentColors.hues = [
+                x * 360,
+                (x * 360 + 90) % 360,
+                (x * 360 + 180) % 360,
+                (x * 360 + 270) % 360
+            ];
+            
+            updateBackground(currentColors.angle, currentColors.hues);
+
+            // 停止移动2秒后重新启用自动变化
+            setTimeout(() => {
+                isMouseMoving = false;
+                generateNewTargetColors();
+            }, 2000);
+        });
+
+        // 添加触摸支持
+        interactiveArea.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            isMouseMoving = true;
+            lastMouseMoveTime = Date.now();
+            const touch = e.touches[0];
+            const x = touch.clientX / window.innerWidth;
+            
+            currentColors.angle = x * 360;
+            currentColors.hues = [
+                x * 360,
+                (x * 360 + 90) % 360,
+                (x * 360 + 180) % 360,
+                (x * 360 + 270) % 360
+            ];
+            
+            updateBackground(currentColors.angle, currentColors.hues);
+
+            // 停止触摸2秒后重新启用自动变化
+            setTimeout(() => {
+                isMouseMoving = false;
+                generateNewTargetColors();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

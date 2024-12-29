@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电子烟花</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks"></canvas>
+    <script>
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+
+        // 设置画布尺寸
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 烟花粒子类
+        class Particle {
+            constructor(x, y, targetY, color, isRocket = false) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.isRocket = isRocket;
+                if (isRocket) {
+                    // 计算到目标高度的速度
+                    const distance = y - targetY;
+                    const time = 30; // 大约30帧到达
+                    this.velocity = {
+                        x: (Math.random() - 0.5) * 2,
+                        y: -distance / time
+                    };
+                    this.gravity = distance / (time * time * 0.5); // 使用简单的物理公式计算重力
+                    this.size = 2;
+                } else {
+                    this.velocity = {
+                        x: (Math.random() - 0.5) * (Math.random() * 12 + 4),
+                        y: (Math.random() - 0.5) * (Math.random() * 12 + 4)
+                    };
+                    this.size = Math.random() * 3 + 1;
+                }
+                this.alpha = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+                this.flicker = Math.random() > 0.5;
+                this.flickerRate = Math.random() * 0.2;
+                this.targetY = targetY;
+            }
+
+            draw() {
+                ctx.beginPath();
+                const flickerAlpha = this.flicker ? 
+                    this.alpha * (1 - Math.random() * this.flickerRate) : 
+                    this.alpha;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.color}, ${flickerAlpha})`;
+                ctx.fill();
+            }
+
+            update() {
+                if (this.isRocket) {
+                    this.velocity.y += this.gravity;
+                    if (this.y <= this.targetY) {
+                        return false; // 火箭达到目标高度
+                    }
+                } else {
+                    this.velocity.y += 0.08 + Math.random() * 0.04;
+                    this.velocity.x += (Math.random() - 0.5) * 0.1;
+                    this.alpha -= this.decay;
+                }
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                return true;
+            }
+        }
+
+        // 创建烟花
+        function createFirework(x, y, targetY = null, isRocket = false) {
+            const particles = [];
+            const colors = [
+                '255, 0, 0',
+                '0, 255, 0',
+                '0, 0, 255',
+                '255, 255, 0',
+                '255, 0, 255',
+                '0, 255, 255',
+                '255, 165, 0',
+                '255, 192, 203',
+                '128, 0, 128'
+            ];
+            
+            if (isRocket) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(x, y, targetY, color, true));
+            } else {
+                const selectedColors = [];
+                const colorCount = Math.floor(Math.random() * 3) + 1;
+                for(let i = 0; i < colorCount; i++) {
+                    selectedColors.push(colors[Math.floor(Math.random() * colors.length)]);
+                }
+                
+                const particleCount = Math.floor(Math.random() * 100) + 50;
+                for (let i = 0; i < particleCount; i++) {
+                    const color = selectedColors[Math.floor(Math.random() * selectedColors.length)];
+                    particles.push(new Particle(x, y, null, color, false));
+                }
+            }
+            return particles;
+        }
+
+        let fireworks = [];
+        let rockets = [];
+
+        // 动画循环
+        function animate() {
+            ctx.fillStyle = `rgba(0, 0, 0, ${Math.random() * 0.1 + 0.05})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 更新火箭
+            rockets = rockets.filter(particles => {
+                particles = particles.filter(rocket => {
+                    const alive = rocket.update();
+                    if (alive) {
+                        rocket.draw();
+                    } else {
+                        // 火箭达到目标高度时爆炸
+                        fireworks.push(createFirework(rocket.x, rocket.y));
+                    }
+                    return alive;
+                });
+                return particles.length > 0;
+            });
+
+            // 更新爆炸效果
+            fireworks = fireworks.filter(particles => {
+                particles = particles.filter(particle => particle.alpha > 0);
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+                return particles.length > 0;
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // 点击或触摸时创建烟花
+        function handleInteraction(e) {
+            const x = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const y = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            // 直接在点击位置创建爆炸效果
+            fireworks.push(createFirework(x, y));
+        }
+
+        canvas.addEventListener('click', handleInteraction);
+        canvas.addEventListener('touchstart', handleInteraction);
+
+        // 随机生成烟花
+        setInterval(() => {
+            const x = Math.random() * canvas.width;
+            const targetY = Math.random() * (canvas.height * 0.6) + canvas.height * 0.2; // 在20%-80%的高度范围内爆炸
+            if(Math.random() > 0.3) { // 70%的概率生成烟花
+                rockets.push(createFirework(x, canvas.height, targetY, true));
+            }
+        }, Math.random() * 500 + 500); // 0.5-1秒间隔
+
+        animate();
+    </script>
+</body>
+</html>
