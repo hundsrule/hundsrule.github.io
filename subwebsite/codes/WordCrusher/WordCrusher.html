@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>单词打击者</title>
+    <style>
+        /* 基础样式设置 */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            background-image: url('assets/images/background.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        #gameArea {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        /* 敌人样式 - 红色半透明背景 */
+        .enemy {
+            position: absolute;
+            padding: 10px;
+            background: rgba(255,0,0,0.5);
+            border-radius: 5px;
+            transition: top 2s linear;
+            font-size: 24px; /* 增大文字大小 */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            min-width: 100px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 2px 2px 2px #000;  /* 为文字添加阴影，使其在任何背景上都清晰可见 */
+        }
+        /* 敌人暂停样式 */
+        .enemy.paused {
+            transition: none;
+        }
+        /* 敌人输入反馈样式 */
+        .enemy.matching {
+            background: rgba(255,255,0,0.5);
+            border: 2px solid #ff0;
+        }
+        /* 玩家样式 - 绿色方块 */
+        #player {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background-image: url('assets/images/player.png');
+            background-size: cover;
+        }
+        /* 血量条样式 */
+        #health {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            width: 200px;
+            height: 20px;
+            background: #333;
+            border: 2px solid #fff;
+        }
+        #healthBar {
+            width: 100%;
+            height: 100%;
+            background: #f00;
+            transition: width 0.3s;
+        }
+        /* 输入框样式 */
+        #inputArea {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            text-align: center;
+            font-size: 24px; /* 增大输入框文字 */
+            padding: 8px;
+            border: 2px solid #fff;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+        }
+        /* UI元素样式 */
+        #score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+        }
+        #combo {
+            position: fixed;
+            top: 50px;
+            right: 20px;
+            color: #ff0;
+            font-size: 24px;
+        }
+        #level {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+        }
+        /* 输入反馈样式 */
+        .correct {
+            background: rgba(0,255,0,0.2) !important;
+            border-color: #0f0 !important;
+        }
+        .wrong {
+            background: rgba(255,0,0,0.2) !important;
+            border-color: #f00 !important;
+        }
+        /* 击中效果 */
+        .hit {
+            animation: hitEffect 0.3s;
+        }
+        @keyframes hitEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(0); }
+        }
+        /* 暂停提示样式 */
+        #pauseOverlay {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 32px;
+            z-index: 1000;
+        }
+        #gameStats {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 800px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameStats">
+        <div>按ESC暂停/继续 | Ctrl+R重开 | 输入单词消灭敌人 | 连击可获得额外奖励</div>
+        <div>计分方式：基础分数 × (1 + 连击数 × 0.25) | 每5连击回复5点血量</div>
+        <div class="stats-grid">
+            <div>游玩时间：<span id="playTime">00:00</span></div>
+            <div>历史最高分：<span id="highScore">0</span></div>
+            <div>游玩次数：<span id="playCount">0</span></div>
+            <div>本次得分：<span id="currentScore">0</span></div>
+        </div>
+    </div>
+    <div id="gameArea">
+        <div id="player"></div>
+        <div id="score">分数: 0</div>
+        <div id="combo">连击: 0</div>
+        <div id="level">关卡: 1</div>
+        <div id="health">
+            <div id="healthBar"></div>
+        </div>
+        <div id="pauseOverlay">游戏暂停中...</div>
+        <input type="text" id="inputArea" autocomplete="off" placeholder="在此输入单词...">
+    </div>
+
+    <script>
+        // 音效文件占位符
+        const AUDIO = {
+            bgm: new Audio('assets/bgm.mp3'),
+            hit: new Audio('assets/hit.mp3'),
+            levelUp: new Audio('assets/level-up.wav'),
+            gameOver: new Audio('assets/game-over.mp3'),
+            wrong: new Audio('assets/wrong.wav')
+        };
+
+        // 基础词库 - 可以根据需要扩充
+        const words = ['you', 'i', 'the', 'to', 'a', 's', 'it', 'and', 'that', 't', 'of', 'is', 'in', 'what', 'we', 'me', 'this', 'he', 'for', 'my', 'on', 'have', 'your', 'do', 'was', 'm', 'no', 'not', 'be', 'are', 'don', 're', 'know', 'can', 'with', 'but', 'all', 'so', 'just', 'there', 'here', 'they', 'like', 'll', 'get', 'she', 'go', 'if', 'right', 'out', 'about', 'up', 'at', 'him', 'now', 'oh', 'one', 'come', 'well', 'her', 'how', 'yeah', 've', 'will', 'got', 'want', 'think', 'as', 'see', 'did', 'good', 'who', 'why', 'from', 'let', 'his', 'yes', 'when', 'going', 'time', 'an', 'okay', 'back', 'look', 'us', 'would', 'them', 'where', 'were', 'take', 'then', 'had', 'or', 'been', 'our', 'gonna', 'tell', 'really', 'man', 'some', 'say', 'hey', 'could', 'd', 'didn', 'by', 'need', 'something', 'has', 'too', 'more', 'way', 'down', 'make', 'very', 'never', 'only', 'people', 'over', 'because', 'little', 'please', 'love', 'should', 'mean', 'said', 'sorry', 'give', 'off', 'am', 'thank', 'any', 'two', 'even', 'much', 'doing', 'sure', 'thing', 'these', 'help', 'first', 'into', 'anything', 'still', 'find', 'life', 'nothing', 'sir', 'day', 'god', 'work', 'their', 'uh', 'again', 'maybe', 'must', 'before', 'other', 'wait', 'stop', 'call', 'after', 'won', 'talk', 'away', 'than', 'thought', 'home', 'night', 'put', 'great', 'those', 'last', 'better', 'everything', 'told', 'mr.', 'new', 'things', 'always', 'keep', 'long', 'years', 'leave', 'does', 'money', 'around', 'doesn', 'name', 'place', 'ever', 'feel', 'guys', 'father', 'guy', 'made', 'old', 'isn', 'which', 'big', 'lot', 'done', 'hello', 'nice', 'believe', 'girl', 'someone', 'fine', 'thanks', 'wanted', 'kind', 'coming', 'house', 'every', 'ok', 'through', 'being', 'course', 'stay', 'left', 'dad', 'enough', 'happened', 'came', 'may', 'mother', 'wrong', 'world', 'bad', 'might', 'three', 'today', 'listen', 'another', 'understand', 'hear', 'remember', 'ask', 'own', 'same', 'show', 'else', 'kill', 'talking', 'found', 'next', 'getting', 'care', 'car', 'looking', 'son', 'try', 'woman', 'went', 'hi', 'dead', 'many', 'mind', 'wasn', 'friend', 'best', 'mom', 'hell', 'morning', 'trying', 'boy', 'together', 'yourself', 'job', 'saw', 'family', 'real', 'without', 'baby', 'room', 'wouldn', 'already', 'move', 'most', 'seen', 'live', 'miss', 'actually', 'huh', 'shit', 'both', 'heard', 'once', 'ready', 'head', 'called', 'used', 'idea', 'knew', 'hold', 'happy', 'door', 'such', 'fuck', 'brother', 'also', 'pretty', 'bit', 'took', 'haven', 'yet', 'men', 'whole', 'start', 'use', 'while', 'since', 'wife', 'days', 'guess', 'tomorrow', 'matter', 'meet', 'bring', 'tonight', 'everyone', 'run', 'wanna', 'hard', 'ah', 'alone', 'myself', 'school', 'gone', 'um', 'end', 'saying', 'phone', 'play', 'looks', 'couldn', 'fucking', 'problem', 'few', 'friends', 'gotta', 'ago', 'open', 'anyone', 'killed', 'hope', 'face', 'until', 'lost', 'police', 'excuse', 'turn', 'business', 'case', 'wants', 'says', 'true', 'die', 'heart', 'soon', 'each', 'worry', 'later', 'year', 'watch', 'music', 'hand', 'having', 'probably', 'beautiful', 'doctor', 'sit', 'eat', 'thinking', 'young', 'second', 'working', 'water', 'person', 'part', 'kids', 'late', 'stuff', 'exactly', 'under', 'death', 'minute', 'pay', 'crazy', 'forget', 'everybody', 'kid', 'change', 'gave', 'happen', 'damn', 'five', 'drink', 'far', 'knows', 'its', 'whatever', 'eyes', 'shut', 'aren', 'hit', 'taking', 'easy', 'times', 'check', 'hands', 'minutes', 'deal', 'different', 'means', 'point', 'inside', 'makes', 'asked', 'somebody', 'mine', 'making', 'body', 'afraid', 'sleep', 'chance', 'dear', 'quite', 'four', 'anyway', 'close', 'ain', 'party', 'fun', 'against', 'word', 'comes', 'important', 'set', 'shall', 'story', 'number', 'daughter', 'least', 'waiting', 'hurt', 'wish', 'moment', 'fight', 'week', 'husband', 'girls', 'rest', 'married', 'fire', 'game', 'nobody', 'mr', 'children', 'side', 'stand', 'read', 'though', 'cut', 'started', 'sister', 'supposed', 'between', 'child', 'goes', 'hours', 'speak', 'women', 'behind', 'almost', 'truth', 'blood', 'able', 'lady', 'anymore', 'playing', 'gets', 'shot', 'reason', 'trouble', 'break', 'war', 'city', 'walk', 'town', 'trust', 'dr.', 'met', 'office', 'question', 'brought', 'yours', 'welcome', 'high', 'wow', 'couple', 'half', 'died', 'cool', 'free', 'either', 'seems', 'power', 'whoa', 'bye', 'buy', 'telling', 'honey', 'tried', 'front', 'team', 'answer', 'gun', 'boys', 'line', 'send', 'news', 'stupid', 'bed', 'hurry', 'full', 'months', 'save', 'sometimes', 'become', 'along', 'hate', 'food', 'outside', 'light', 'l', 'needs', 'dog', 'country', 'clear', 'order', 'em', 'fact', 'lord', 'captain', 'six', 'hot', 'funny', 'black', 'mrs.', 'alive', 'pick', 'feeling', 'living', 'cause', 'ahead', 'lose', 'king', 'plan', 'dinner', 'sighs', 'sort', 'leaving', 'shouldn', 'running', 'boss', 'alright', 'promise', 'taken', 'safe', 'ma', 'book', 'sent', 'white', 'hour', 'anybody', 'small', 'perfect', 'cause', 'lives', 'special', 'parents', 's', 'john', 'himself', 'perhaps', 'sounds', 'serious', 'sick', 'company', 'ha', 'scared', 'uncle', 'poor', 'red', 'past', 'earth', 'possible', 'shoot', 'touch', 'sound', 'top', 'ass', 'laughs', 'cannot', 'asking', 'win', 'glad', 'control', 'hmm', 'human', 'drive', 'hair', 'jack', 'bitch', 'luck', 'murder', 'happens', 'air', 'ten', 'daddy', 'finally', 'chuckles', 'fast', 'cold', 'seem', 'laughing', 'words', 'hospital', 'street', 'hang', 'dance', 'meeting', 'till', 'others', 'catch', 'follow', 'sense', 'sex', 'lie', 'evening', 'master', 'known', 'dream', 'write', 'million', 'voice', 'sweet', 'rather', 'felt', 'sign', 'lucky', 'somewhere', 'bet', 'o', 'jesus', 'longer', 'calling', 'worked', 'quiet', 'looked', 'less', 'pull', 'beat', 'careful', 'coffee', 'return', 'secret', 'weeks', 'weren', 'date', 'seeing', 'fall', 'given', 'ooh', 'fault', 'straight', 'takes', 'song', 'future', 'gentlemen', 'loved', 'changed', 'road', 'calm', 'wonderful', 'mad', 'turned', 'drop', 'ladies', 'learn', 'step', 'absolutely', 'early', 'explain', 'clean', 'piece', 'yesterday', 'throw', 'picture', 'land', 'feet', 'wonder', 'questions', 'speaking', 'worth', 'darling', 'dude', 'giving', 'president', 'eye', 'quick', 'moving', 'figure', 'state', 'strong', 'sam', 'none', 'amazing', 'ones', 'works', 'act', 'needed', 'weird', 'law', 'worried', 'report', 'goodbye', 'missing', 'choice', 'happening', 'chief', 'wedding', 'strange', 'general', 'pain', 'am', 'kidding', 'decided', 'ya', 'pass', 'tired', 'class', 'officer', 'kept', 'wake', 'worse', 'busy', 'eh', 'mistake', 'kiss', 'court', 'building', 'finish', 'during', 'age', 'ship', 'caught', 'marry', 'meant', 'sell', 'dark', 'watching', 'system', 'suppose', 'evidence', 'movie', 'ride', 't', 'completely', 'mouth', 'totally', 'birthday', 'tv', 'forgive', 'born', 'imagine', 'information', 'instead', 'definitely', 'security', 'certainly', 'film', 'month', 'lying', 'unless', 'train', 'seven', 'wear', 'clothes', 'michael', 'hotel', 'christmas', 'attack', 'hasn', 'round', 'expect', 'sing', 'terrible', 'george', 'bag', 'history', 'blue', 'near', 'broke', 'station', 'seriously', 'forever', 'david', 'frank', 'except', 'thinks', 'message', 'entire', 'joe', 'table', 'talked', 'across', 'rock', 'lovely', 'handle', 'middle', 'buddy', 'paid', 'protect', 'using', 'floor', 'ran', 'swear', 'spend', 'situation', 'ring', 'anywhere', 'dangerous', 'bill', 'york', 'army', 'lead', 'bought', 'finished', 'fair', 'sun', 'letter', 'fool', 'attention', 'club', 'simple', 'interesting', 'space', 'test', 'box', 'group', 'single', 'sitting', 'marriage', 'join', 'fear', 'd', 'peace', 'forgot', 'force', 'short', 'normal', 'charlie', 'present', 'enjoy', 'mike', 'crime', 'horse', 'ground', 'american', 'count', 'area', 'charge', 'honor', 'lunch', 'miles', 'radio', 'idiot', 'ball', 'surprise', 'paper', 'key', 'boat', 'quickly', 'gold', 'bar', 'fish', 'mark', 'tom', 'wearing', 'crying', 'accident', 'government', 'eight', 'fell', 'cover', 'certain', 'interested', 'deep', 'star', 'sea', 'agree', 'problems', 'detective', 'prison', 'major', 'stick', 'offer', 'difficult', 'smart', 'personal', 'record', 'stopped', 'hide', 'whether', 'bank', 'trip', 'relax', 'america', 'public', 'list', 'afternoon', 'brain', 'fix', 'bastard', 'proud', 'tea', 'service', 'screaming', 'forward', 'angry', 'park', 'soul', 'fighting', 'peter', 'rich', 'agent', 'blow', 'paul', 'dress', 'mary', 'missed', 'scene', 'killing', 'standing', 'saved', 'mm', 'respect', 'killer', 'ice', 'mess', 'tough', 'feels', 'church', 'sad', 'cell', 'drunk', 'share', 'camera', 'mm-hmm', 'within', 'card', 'fly', 'ben', 'girlfriend', 'laugh', 'smell', 'broken', 'mum', 'honest', 'often', 'starting', 'calls', 'y', 'spent', 'third', 'english', 'visit', 'mama', 'judge', 'window', 'hungry', 'dare', 'relationship', 'moved', 'prove', 'private', 'wall', 'seat', 'i-i', 'position', 'lieutenant', 'realize', 'lt', 'especially', 'machine', 'walking', 'art', 'pleasure', 'bloody', 'college', 'french', 'involved', 'cry', 'became', 'lived', 'impossible', 'obviously', 'neither', 'accept', 'boyfriend', 'besides', 'queen', 'teacher', 'cops', 'sake', 'loves', 'carry', 'teach', 'apartment', 'upset', 'green', 'la', 'liked', 'cute', 'evil', 'professor', 'contact', 'joke', 'cop', 'huge', 'holy', 'store', 'jail', 'likes', 'lawyer', 'doubt', 'continue', 'appreciate', 'cat', 'shop', 'driving', 'congratulations', 'wrote', 'village', 'quit', 'field', 'james', 'wine', 'decision', 'south', 'sleeping', 'slow', 'laughter', 'island', 'glass', 'beginning', 'cash', 'dying', 'hundred', 'whose', 'difference', 'plane', 'push', 'continues', 'mmm', 'singing', 'eating', 'north', 'mrs', 'tree', 'madam', 'gift', 'truck', 'putting', 'bear', 'board', 'grab', 'beer', 'stuck', 'magic', 'support', 'rules', 'grunts', 'partner', 'reach', 'wind', 'colonel', 'max', 'immediately', 'seconds', 'thousand', 'gives', 'experience', 'cheers', 'victim', 'upon', 'computer', 'christ', 'planet', 'promised', 'bus', 'henry', 'dirty', 'search', 'staying', 'dreams', 'arrest', 'holding', 'suddenly', 'usually', 'lots', 'shoes', 'er', 'jump', 'rid', 'yo', 'knock', 'owe', 'harry', 'grow', 'worst', 'river', 'aunt', 'patient', 'kitchen', 'aah', 'fat', 'passed', 'm', 'final', 'summer', 'bob', 'listening', 'escape', 'everywhere', 'moon', 'arms', 'turns', 'address', 'ow', 'match', 'gasps', 'grand', 'yep', 'shh', 'nervous', 'de', 'choose', 'themselves', 'decide', 'mate', 'drinking', 'press', 'bother', 'foot', 'hadn', 'blame', 'crap', 'drugs', 'type', 'rings', 'mission', 'named', 'heaven', 'ii', 'picked', 'paris', 'race', 'risk', 'books', 'further', 'danny', 'action', 'allowed', 'orders', 'learned', 'price', 'arrived', 'nick', 'otherwise', 'pictures', 'fit', 'smoke', 'favor', 'played', 'notice', 'awesome', 'smile', 'director', 'guard', 'begin', 'spot', 'surprised', 'innocent', 'narrator', 'herself', 'london', 'feelings', 'enemy', 'battle', 'ourselves', 'alex', 'dollars', 'allow', 'nine', 'gay', 'department', 'guilty', 'apart', 'earlier', 'duty', 'jim', 'suit', 'bell', 'west', 'legs', 'hero', 'destroy', 'stage', 'bunch', 'according', 'chicken', 'bigger', 'grunting', 'low', 'helping', 'admit', 'closed', 'names', 'witness', 'upstairs', 'arm', 'steal', 'jimmy', 'kick', 'twice', 'cross', 'ways', 'sergeant', 'indeed', 'gas', 'keeping', 'energy', 'pregnant', 'waste', 'helped', 'fired', 'favorite', 'tony', 'taste', 'locked', 'places', 'writing', 'adam', 'brothers', 'starts', 'prince', 'form', 'sold', 'silly', 'mention', 'build', 'throat', 'hole', 'figured', 'track', 'ringing', 'lock', 'leg', 'above', 'hiding', 'steve', 'seemed', 'breakfast', 'engine', 'written', 'complete', 'video', 'applause', 'however', 'pressure', 'fresh', 'weapon', 'sky', 'ms.', 'stole', 'study', 'burn', 'reading', 'crowd', 'treat', 'roll', 'double', 'spirit', 'danger', 'cost', 'empty', 'level', 'memory', 'itself', 'acting', 'interest', 'nose', 'plans', 'following', 'bathroom', 'built', 'closer', 'ray', 'sarah', 'band', 'groans', 'apparently', 'excited', 'richard', 'losing', 'animals', 'flight', 'nature', 'raise', 'pop', 'client', 'bomb', 'neck', 'suspect', 'warm', 'extra', 'bottle', 'van', 'heavy', 'mommy', 'dogs', 'wild', 'ridiculous', 'simply', 'lee', 'animal', 'showed', 'billy', 'shooting', 'keeps', 'camp', 'guns', 'medical', 'shame', 'hoping', 'whom', 'bird', 'majesty', 'flowers', 'famous', 'asleep', 'beauty', 'driver', 'keys', 'rain', 'awful', 'large', 'local', 'deserve', 'goddamn', 'stone', 'jane', 'grace', 'consider', 'weekend', 'wondering', 'lay', 'plenty', 'willing', 'pants', 'sweetheart', 'skin', 'excellent', 'asshole', 'beach', 'c', 'faith', 'beg', 'fuckin', 'responsible', 'military', 'cheering', 'opportunity', 'common', 'bottom', 'german', 'whoever', 'cook', 'walked', 'papers', 'justice', 'hall', 'commander', 'drug', 'main', 'knife', 'devil', 'necessary', 'although', 'princess', 'lights', 'flying', 'dick', 'rose', 'knowing', 'clearly', 'hat', 'agreed', 'johnny', 'corner', 'code', 'note', 'tommy', 'due', 'correct', 'apologize', 'language', 'stars', 'faster', 'cars', 'folks', 'bullshit', 'i.', 'fellow', 'several', 'grandma', 'shows', 'leader', 'leaves', 'restaurant', 'east', 'shouting', 'blind', 'ghost', 'cup', 'gotten', 'tight', 'conversation', 'tells', 'lies', 'nor', 'pulled', 'hanging', 'speed', 'stories', 'health', 'advice', 'held', 'uh-huh', 'murdered', 'beyond', 'rule', 'hardly', 'possibly', 'inspector', 'cousin', 'trial', 'emergency', 'ought', 'eddie', 'somehow', 'hearing', 'states', 'account', 'spoke', 'file', 'understood', 'angel', 'tape', 'milk', 'powerful', 'weapons', 'practice', 'manager', 'pardon', 'vote', 'jake', 'national', 'career', 'minister', 'super', 'taught', 'robert', 'biggest', 'plays', 'natural', 'dancing', 'copy', 'plus', 'martin', 'cake', 'freedom', 'among', 'breath', 'operation', 'chris', 'crew'];
+        // 游戏状态变量
+        let score = 0;
+        let combo = 0;
+        let level = 1;
+        let enemies = [];
+        let gameSpeed = 2000;    // 初始敌人生成间隔(ms)
+        let enemyCount = 2;      // 初始同屏敌人数量
+        let health = 100;        
+        let isPaused = false;    
+        let wordsNeeded = 5;     // 每关需要消灭的单词数量
+        let wordsDestroyed = 0;  // 当前关卡已消灭的单词数量
+        let speedIncrease = 400; // 每关加速幅度(ms)
+        let currentTransitionDuration = 4; // 当前敌人下落动画时长(秒)
+        let bgmStarted = false;  // 添加标志位
+
+        // 添加词库管理相关变量
+        let availableWords = [...words]; // 可用词库的副本
+        let usedWords = new Set(); // 使用Set来存储当前正在使用的单词
+
+        // 添加图片资源
+        const IMAGES = {
+            player: './assets/images/player.jpg',  // 使用相对路径
+            background: './assets/images/background.jpeg',
+            enemies: [
+                './assets/images/enemy1.jpg',
+                './assets/images/enemy2.png',
+                './assets/images/enemy3.png',
+                './assets/images/enemy4.png'
+            ]
+        };
+
+        // 添加图片预加载函数
+        function preloadImages() {
+            // 创建一个临时div来测试图片是否存在
+            const testDiv = document.createElement('div');
+            testDiv.style.opacity = '0';
+            testDiv.style.position = 'absolute';
+            document.body.appendChild(testDiv);
+
+            // 测试背景图片
+            testDiv.style.backgroundImage = `url('${IMAGES.background}')`;
+            if (getComputedStyle(testDiv).backgroundImage === 'none') {
+                console.warn('背景图片加载失败，使用默认背景色');
+                document.body.style.backgroundColor = '#000';
+            }
+
+            // 测试主角图片
+            testDiv.style.backgroundImage = `url('${IMAGES.player}')`;
+            if (getComputedStyle(testDiv).backgroundImage === 'none') {
+                console.warn('主角图片加载失败，使用默认样式');
+                document.getElementById('player').style.backgroundColor = '#00ff00';  // 使用绿色方块代替
+            }
+
+            // 清理测试div
+            document.body.removeChild(testDiv);
+        }
+
+        // 修改样式
+        const style = document.createElement('style');
+        style.textContent = `
+            body {
+                margin: 0;
+                overflow: hidden;
+                background: #000;
+                color: #fff;
+                font-family: Arial, sans-serif;
+                background-image: url('${IMAGES.background}');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+            
+            #player {
+                position: absolute;
+                bottom: 50px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100px;
+                height: 100px;
+                background-image: url('${IMAGES.player}');
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                z-index: 100;
+            }
+            
+            .enemy {
+                position: absolute;
+                padding: 10px;
+                background: rgba(255,0,0,0.5);  /* 添加默认背景色 */
+                border-radius: 5px;
+                transition: top 2s linear;
+                font-size: 24px;
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                min-width: 100px;
+                min-height: 100px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-shadow: 2px 2px 2px #000;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 优化的获取随机单词函数
+        function getRandomWord() {
+            // 如果可用词库为空，则重新填充（排除当前正在使用的单词）
+            if (availableWords.length === 0) {
+                availableWords = words.filter(word => !usedWords.has(word));
+                // 如果所有词都在使用中，则重新使用完整词库
+                if (availableWords.length === 0) {
+                    availableWords = [...words];
+                }
+            }
+            
+            // 从可用词库中随机选择一个单词
+            const randomIndex = Math.floor(Math.random() * availableWords.length);
+            const word = availableWords[randomIndex];
+            
+            // 从可用词库中移除这个单词
+            availableWords.splice(randomIndex, 1);
+            usedWords.add(word);
+            
+            return word;
+        }
+
+        // 暂停游戏
+        function pauseGame(duration = null, message = '游戏暂停中...') {
+            isPaused = true;
+            const overlay = document.getElementById('pauseOverlay');
+            overlay.textContent = message;
+            overlay.style.display = 'block';
+            
+            // 暂停所有敌人的动画
+            enemies.forEach(enemy => {
+                const currentTop = window.getComputedStyle(enemy).top;
+                enemy.classList.add('paused');
+                enemy.style.top = currentTop;
+            });
+            
+            // 暂停时取消输入框焦点
+            document.getElementById('inputArea').blur();
+            
+            if (duration) {
+                setTimeout(() => {
+                    resumeGame();
+                }, duration);
+            }
+        }
+
+        // 恢复游戏
+        function resumeGame() {
+            isPaused = false;
+            document.getElementById('pauseOverlay').style.display = 'none';
+            
+            // 恢复所有敌人的动画
+            enemies.forEach(enemy => {
+                enemy.classList.remove('paused');
+                const currentTop = parseFloat(enemy.style.top);
+                if (currentTop < window.innerHeight) {
+                    enemy.style.top = window.innerHeight + 'px';
+                }
+            });
+            
+            // 恢复时重新聚焦到输入框
+            document.getElementById('inputArea').focus();
+            
+            spawnEnemies();
+        }
+
+        // 更新血量显示
+        function updateHealth(damage) {
+            health = Math.max(0, health - damage);
+            document.getElementById('healthBar').style.width = health + '%';
+            if (health <= 0) {
+                AUDIO.gameOver.play();
+                gameOver();
+            }
+        }
+
+        // 创建新的敌人
+        function createEnemy() {
+            if (isPaused) return;
+            
+            const enemy = document.createElement('div');
+            enemy.className = 'enemy';
+            
+            // 随机选择敌人贴图并添加错误处理
+            const randomEnemyImage = IMAGES.enemies[Math.floor(Math.random() * IMAGES.enemies.length)];
+            const testImage = new Image();
+            testImage.onload = () => {
+                enemy.style.backgroundImage = `url('${randomEnemyImage}')`;
+            };
+            testImage.onerror = () => {
+                console.warn('敌人图片加载失败，使用默认样式');
+                enemy.style.backgroundColor = 'rgba(255,0,0,0.5)';
+            };
+            testImage.src = randomEnemyImage;
+            
+            const word = getRandomWord();
+            enemy.textContent = word;
+            enemy.dataset.word = word;
+            
+            enemy.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+            enemy.style.top = '0px';
+            enemy.style.transition = `top ${currentTransitionDuration}s linear`;
+            document.getElementById('gameArea').appendChild(enemy);
+            enemies.push(enemy);
+
+            setTimeout(() => {
+                if (!isPaused) {
+                    enemy.style.top = window.innerHeight + 'px';
+                }
+            }, 100);
+
+            // 当敌人被消灭或到达底部时，释放单词
+            const releaseWord = () => {
+                usedWords.delete(enemy.dataset.word);
+            };
+
+            enemy.addEventListener('transitionend', () => {
+                if (enemy.style.top === window.innerHeight + 'px') {
+                    releaseWord();
+                    enemy.remove();
+                    enemies = enemies.filter(e => e !== enemy);
+                    resetCombo();
+                    AUDIO.wrong.play();
+                    updateHealth(20);
+                    if (enemies.length === 0 && health > 0) {
+                        nextLevel();
+                    }
+                }
+            });
+        }
+
+        // 游戏结束处理
+        function gameOver() {
+            alert(`游戏结束！\n最终分数: ${score}\n最高分: ${highScore}\n最高连击: ${combo}`);
+            location.reload();
+        }
+
+        // 更新分数
+        function updateScore(basePoints) {
+            const comboBonus = 1 + Math.floor(combo / 5) * 0.25;
+            const finalPoints = Math.floor(basePoints * comboBonus);
+            score += finalPoints;
+            
+            document.getElementById('currentScore').textContent = score;
+            
+            // 更新最高分
+            if (score > highScore) {
+                highScore = score;
+                setCookie('highScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+            }
+        }
+
+        // 更新连击数
+        function updateCombo() {
+            combo++;
+            document.getElementById('combo').textContent = `连击: ${combo}`;
+            
+            // 每5连击回复血量（增加回复量）
+            if (combo % 5 === 0) {
+                health = Math.min(100, health + 5);  // 每5连击回复5点血量
+                document.getElementById('healthBar').style.width = health + '%';
+            }
+        }
+
+        // 重置连击数
+        function resetCombo() {
+            combo = 0;
+            document.getElementById('combo').textContent = `连击: ${combo}`;
+        }
+
+        // 进入下一关
+        function nextLevel() {
+            level++;
+            AUDIO.levelUp.play();
+            document.getElementById('level').textContent = `关卡: ${level}`;
+            
+            // 调整敌人生成间隔（更平缓的加速）
+            gameSpeed = Math.max(1000, 2000 - (level - 1) * 100);  // 每关只减少100ms，最快1000ms
+            
+            // 调整敌人下落速度（更平缓的加速）
+            currentTransitionDuration = Math.max(2, 4 - (level - 1) * 0.1);  // 每关只减少0.1秒，最快2秒
+            
+            // 调整其他难度参数
+            enemyCount = Math.min(8, 2 + Math.floor((level - 1) / 2));  // 每2关增加1个敌人，最多8个
+            wordsNeeded = 5 + (level - 1) * 3;  // 每关只增加3个过关所需单词
+            wordsDestroyed = 0;  // 重置已消灭单词计数
+            
+            // 每关回复血量（增加回复量）
+            health = Math.min(100, health + 20);  // 每关回复20点血量
+            document.getElementById('healthBar').style.width = health + '%';
+            
+            // 暂停并显示提示
+            pauseGame(1000, `第 ${level} 关即将开始！\n目标：消灭 ${wordsNeeded} 个单词`);
+        }
+
+        // 清除所有敌人的匹配状态
+        function clearEnemyMatching() {
+            enemies.forEach(e => e.classList.remove('matching'));
+        }
+
+        // 输入处理
+        const input = document.getElementById('inputArea');
+        input.addEventListener('input', (e) => {
+            if (isPaused) return;
+            
+            const word = e.target.value.toLowerCase();
+            clearEnemyMatching();
+            const enemy = enemies.find(e => e.dataset.word.startsWith(word));
+            
+            if (enemy) {
+                input.className = 'correct';
+                enemy.classList.add('matching');
+                if (enemy.dataset.word === word) {
+                    // 匹配成功后立即清空输入框和样式
+                    e.target.value = '';
+                    input.className = '';
+                    
+                    AUDIO.hit.play();
+                    enemy.classList.add('hit');
+                    setTimeout(() => {
+                        usedWords.delete(enemy.dataset.word);
+                        enemy.remove();
+                        enemies = enemies.filter(e => e !== enemy);
+                        updateScore(10 * (combo + 1));
+                        updateCombo();
+                        
+                        wordsDestroyed++;
+                        if (wordsDestroyed >= wordsNeeded) {
+                            nextLevel();
+                        }
+                    }, 300);
+                }
+            } else {
+                input.className = word ? 'wrong' : '';
+            }
+        });
+
+        // 定期生成敌人
+        function spawnEnemies() {
+            if (isPaused) return;
+            
+            if (enemies.length < enemyCount) {
+                createEnemy();
+            }
+            setTimeout(spawnEnemies, gameSpeed);
+        }
+
+        // 添加暂停快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (isPaused) {
+                    resumeGame();
+                } else {
+                    pauseGame();
+                }
+            }
+        });
+
+        // 键盘事件监听
+        document.addEventListener('keydown', function(e) {
+            if (!bgmStarted) {
+                AUDIO.bgm.loop = true;
+                AUDIO.bgm.play().catch(err => console.warn('音频播放失败:', err));
+                bgmStarted = true;
+            }
+        }, { once: true });  // 只监听一次键盘事件
+
+        // 添加游戏统计相关变量和函数
+        let gameStartTime = Date.now();
+        let playCount = parseInt(getCookie('playCount') || '0');
+        let highScore = parseInt(getCookie('highScore') || '0');
+
+        // Cookie操作函数
+        function setCookie(name, value, days = 365) {
+            const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+            document.cookie = `${name}=${value};expires=${expires};path=/`;
+        }
+
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.split('=').map(c => c.trim());
+                if (cookieName === name) return cookieValue;
+            }
+            return null;
+        }
+
+        // 更新游玩时间
+        function updatePlayTime() {
+            if (!isPaused) {
+                const seconds = Math.floor((Date.now() - gameStartTime) / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                document.getElementById('playTime').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+            requestAnimationFrame(updatePlayTime);
+        }
+
+        // 修改游戏开始逻辑
+        function startGame() {
+            gameStartTime = Date.now();
+            playCount++;
+            setCookie('playCount', playCount);
+            document.getElementById('playCount').textContent = playCount;
+            updatePlayTime();
+            spawnEnemies();  // 确保游戏开始时就生成敌人
+            
+            // 自动聚焦到输入框
+            document.getElementById('inputArea').focus();
+        }
+
+        // 修改更新分数的函数
+        function updateScore(basePoints) {
+            const comboBonus = 1 + Math.floor(combo / 5) * 0.25;
+            const finalPoints = Math.floor(basePoints * comboBonus);
+            score += finalPoints;
+            
+            document.getElementById('currentScore').textContent = score;
+            
+            // 更新最高分
+            if (score > highScore) {
+                highScore = score;
+                setCookie('highScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+            }
+        }
+
+        // 修改游戏结束函数
+        function gameOver() {
+            alert(`游戏结束！\n最终分数: ${score}\n最高分: ${highScore}\n最高连击: ${combo}`);
+            location.reload();
+        }
+
+        // 初始化显示
+        document.getElementById('playCount').textContent = playCount;
+        document.getElementById('highScore').textContent = highScore;
+
+        // 开始游戏
+        startGame();
+
+        // 在页面加载完成后预加载图片
+        window.addEventListener('load', preloadImages);
+
+        // 创建必要的目录结构提示
+        console.log(`请确保以下目录结构存在：
+项目根目录/
+├── WordCrusher.html
+└── assets/
+    └── images/
+        ├── player.png
+        ├── background.jpg
+        ├── enemy1.png
+        ├── enemy2.png
+        ├── enemy3.png
+        └── enemy4.png
+        `);
+    </script>
+</body>
+</html>
