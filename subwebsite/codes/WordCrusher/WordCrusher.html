@@ -436,36 +436,18 @@
             });
         }
 
-        // 游戏结束处理
-        function gameOver() {
-            alert(`游戏结束！\n最终分数: ${score}\n最高分: ${highScore}\n最高连击: ${combo}`);
-            location.reload();
-        }
+        // 添加最高连击记录
+        let maxCombo = 0;  // 添加最高连击变量
 
-        // 更新分数
-        function updateScore(basePoints) {
-            const comboBonus = 1 + Math.floor(combo / 5) * 0.25;
-            const finalPoints = Math.floor(basePoints * comboBonus);
-            score += finalPoints;
-            
-            document.getElementById('currentScore').textContent = score;
-            
-            // 更新最高分
-            if (score > highScore) {
-                highScore = score;
-                setCookie('highScore', highScore);
-                document.getElementById('highScore').textContent = highScore;
-            }
-        }
-
-        // 更新连击数
+        // 修改更新连击的函数
         function updateCombo() {
             combo++;
+            maxCombo = Math.max(maxCombo, combo);  // 更新最高连击
             document.getElementById('combo').textContent = `连击: ${combo}`;
             
-            // 每5连击回复血量（增加回复量）
+            // 每5连击回复血量
             if (combo % 5 === 0) {
-                health = Math.min(100, health + 5);  // 每5连击回复5点血量
+                health = Math.min(100, health + 5);
                 document.getElementById('healthBar').style.width = health + '%';
             }
         }
@@ -482,19 +464,17 @@
             AUDIO.levelUp.play();
             document.getElementById('level').textContent = `关卡: ${level}`;
             
-            // 调整敌人生成间隔（更平缓的加速）
-            gameSpeed = Math.max(1000, 2000 - (level - 1) * 100);  // 每关只减少100ms，最快1000ms
+            // 调整敌人生成间隔
+            gameSpeed = Math.max(1000, gameSpeed - speedIncrease); // 每关加速，最快500ms
             
-            // 调整敌人下落速度（更平缓的加速）
-            currentTransitionDuration = Math.max(2, 4 - (level - 1) * 0.1);  // 每关只减少0.1秒，最快2秒
+            // 调整敌人下落速度
+            currentTransitionDuration = Math.max(1, currentTransitionDuration - 0.1); // 每关加速0.2秒，最快0.5秒
             
             // 调整其他难度参数
-            enemyCount = Math.min(8, 2 + Math.floor((level - 1) / 2));  // 每2关增加1个敌人，最多8个
-            wordsNeeded = 5 + (level - 1) * 3;  // 每关只增加3个过关所需单词
+            enemyCount = Math.min(10, enemyCount + 1);  // 每关增加1个敌人，最多10个
+            wordsNeeded = 10 + (level - 1) * 5;  // 每关增加5个过关所需单词
             wordsDestroyed = 0;  // 重置已消灭单词计数
-            
-            // 每关回复血量（增加回复量）
-            health = Math.min(100, health + 20);  // 每关回复20点血量
+            health = Math.min(100, health + 20);
             document.getElementById('healthBar').style.width = health + '%';
             
             // 暂停并显示提示
@@ -636,7 +616,7 @@
 
         // 修改游戏结束函数
         function gameOver() {
-            alert(`游戏结束！\n最终分数: ${score}\n最高分: ${highScore}\n最高连击: ${combo}`);
+            alert(`游戏结束！\n最终分数: ${score}\n最高分: ${highScore}\n最高连击: ${maxCombo}`);  // 使用maxCombo而不是combo
             location.reload();
         }
 
