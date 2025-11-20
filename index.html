@@ -1,89 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hongte's Velvet Room</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Black+Ops+One&family=Permanent+Marker&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'phantom-red': '#E60012',
-                        'phantom-black': '#101010',
-                        'phantom-gray': '#2A2A2A',
-                        'phantom-white': '#F2F2F2'
-                    },
-                    fontFamily: {
-                        'display': ['"Black Ops One"', 'sans-serif'],
-                        'marker': ['"Permanent Marker"', 'cursive'],
-                        'sans': ['"Anton"', '"Noto Sans SC"', 'sans-serif'],
-                    },
-                    animation: {
-                        'pulse-fast': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'glitch': 'glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite',
-                        'pop-in': 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-                    },
-                    keyframes: {
-                        glitch: {
-                            '0%': { transform: 'translate(0)' },
-                            '20%': { transform: 'translate(-2px, 2px)' },
-                            '40%': { transform: 'translate(-2px, -2px)' },
-                            '60%': { transform: 'translate(2px, 2px)' },
-                            '80%': { transform: 'translate(2px, -2px)' },
-                            '100%': { transform: 'translate(0)' }
-                        },
-                        popIn: {
-                            '0%': { opacity: '0', transform: 'scale(0.5) rotate(-10deg)' },
-                            '100%': { opacity: '1', transform: 'scale(1) rotate(0deg)' }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #101010;
-            color: #F2F2F2;
-            overflow-x: hidden;
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #101010;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #E60012;
-            transform: skewX(-10deg);
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ff1a1a;
-        }
-        
-        .clip-slant {
-            clip-path: polygon(10% 0, 100% 0, 100% 85%, 90% 100%, 0 100%, 0 15%);
-        }
-        .clip-shard {
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
-        }
-        .halftone {
-            background-image: radial-gradient(#2A2A2A 20%, transparent 20%), radial-gradient(#2A2A2A 20%, transparent 20%);
-            background-color: #101010;
-            background-position: 0 0, 5px 5px;
-            background-size: 10px 10px;
-        }
-        .text-shadow-pop {
-            text-shadow: 3px 3px 0px #000000;
-        }
-    </style>
-    <!-- Analytics from original file -->
+<head>
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BJBDJ1J052"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -100,20 +18,211 @@
           s.parentNode.insertBefore(hm, s);
         })();
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="hund.ico" type="image/x-icon">
+    <title>洪特的跳转页</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .container {
+            background-color: var(--container-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 90%;
+            transition: background-color 0.3s ease;
+        }
+        .site-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .site-section img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            margin-right: 10px;
+        }
+        .site-section img:hover {
+            transform: scale(1.1);
+        }
+        .site-section p {
+            font-size: 16px;
+            margin: 0;
+            flex: 1;
+            word-break: break-word;
+        }
+        button {
+            padding: 6px 12px;
+            margin-left: 10px;
+            border: none;
+            background-color: var(--button-color);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        button:hover {
+            background-color: var(--button-hover-color);
+            transform: scale(2.5);
+        }
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .dark-mode-toggle:hover {
+            background-color: var(--button-hover-color);
+        }
+        :root {
+            --background-color: #f0f0f0;
+            --container-color: #ffffff;
+            --button-color: #6200ee;
+            --button-hover-color: #3700b3;
+            --text-color: #000000;
+        }
+        [data-theme="dark"] {
+            --background-color: #121212;
+            --container-color: #1e1e1e;
+            --button-color: #bb86fc;
+            --button-hover-color: #3700b3;
+            --text-color: #ffffff;
+        }
+    </style>
 </head>
-  <body>
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+<body data-theme="dark">
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+        <span class="material-icons">brightness_4</span>
+    </button>
+    <div class="container">
+        <h2>欢迎来到洪特的天鹅绒房间。<br>今天想要干什么呢？</h2>
+        <h4>天鹅绒房间背景音乐</h4>
+        <audio src="subwebsite/BGM.mp3" autoplay controls></audio>
+        <h6>如果你是一个新用户，欢迎你！在界面底部找到更多信息。<br>这是一个由我（洪特）开发的个人小作品合集/工具箱。</h6>
+        <div class="site-section">
+            <img src="subwebsite/images/FlyingWHT.png" alt="博客">
+            <p>洪特的个人博客</p>
+            <button onclick="smoothRedirect('http://blog.wht.icu')">欢迎参观</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/image-demostration1/pink.jpg" alt="高考倒计时">
+            <p>功能如其名的一个倒计时工具</p>
+            <button onclick="smoothRedirect('subwebsite/codes/%E9%AB%98%E8%80%83%E5%80%92%E8%AE%A1%E6%97%B6/index.html')">开始考试</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/recite.jpeg" alt="recite">
+            <p>古诗背诵工具</p>
+            <button onclick="smoothRedirect('recite.html')">开始背书</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/WordCrusher.jpeg" alt="词汇破坏者">
+            <p>WHT征服英语</p>
+            <button onclick="smoothRedirect('subwebsite/codes/WordCrusher/WordCrusher.html')">开始背单词</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/FlyingWHT.png" alt="Apology">
+            <p>老师对不起</p>
+            <button onclick="smoothRedirect('subwebsite/codes/Apology/apology.html')">开始道歉</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/WHT.gif" alt="RollingwWHT">
+            <p>洪特的滚动模拟小游戏安卓版本</p>
+            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/RollingWHt.apk')">Android 版本下载</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/FlyingWHT.png" alt="飞行洪特">
+            <p>洪特的刷题模拟小游戏</p>
+            <button onclick="smoothRedirect('subwebsite/codes/FlyingWHT/index.html')">开始刷题之旅</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/k048.jpg" alt="K048">
+            <p>显示一个随机单词</p>
+            <button onclick="smoothRedirect('subwebsite/codes/RandomWord/index.html')">随机单词</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/k048.jpg" alt="K048">
+            <p>目标是合成出K的小游戏</p>
+            <button onclick="smoothRedirect('subwebsite/codes/K048/index.html')">开始合成K之旅</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/cover.jpg" alt="唱片墙">
+            <p>将所提供的图片转换为唱片墙</p>
+            <button onclick="smoothRedirect('subwebsite/codes/AlbumWall/index.html')">开始音乐之旅</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/imgae-demostration2/kcoffee.png" alt="网站2图片">
+            <p>将输入的任何文本的一部分随机替换为K</p>
+            <button onclick="smoothRedirect('subwebsite/codes/kkkgenerator/')">开始KK之旅</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/WHT.gif" alt="网站4图片">
+            <p>RollingWHT 滚动的洪特</p>
+            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/index.html')">开始翻滚之旅</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/WHTm.jpg" alt="wht图片">
+            <p>RollingWHT 滚动的洪特 风格化网页版</p>
+            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/4399version.html')">开始翻滚之旅</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/Fluttershy.jpg" alt="网站5图片">
+            <p>一张福瑞图片</p>
+            <button onclick="smoothRedirect('subwebsite/images/Furry1 (1).jpg')">开始福瑞之旅</button>
+        </div>
+        <div class="site-section">
+            <img src="subwebsite/images/Furry1 (2).jpg" alt="网站5图片">
+            <p>一张福瑞图片</p>
+            <button onclick="smoothRedirect('subwebsite/images/Furry1 (3).jpg')">开始福瑞之旅</button>
+        </div>
+        <p>你好，我是洪特，一个高三学生。<br>我在有限的空闲时间创建了这个网页。<br>大多数的编程都是AI完成的。<br>我本人的编程水平很有限。<br>如果有建议，欢迎发邮件（wanghongte@outlook.com）给我。<br>或者在下方找到我的其他社交媒体账号。<br><a href="https://github.com/hundsrule" style="color: blue;">Github</a><br><a href="https://space.bilibili.com/176868483" style="color: blue;">BiliBili</a>
+        <script>
+        function toggleDarkMode() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function smoothRedirect(url) {
+            document.body.style.opacity = 0;
+            setTimeout(() => {
+                window.location.href = url;
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.transition = 'opacity 0.3s ease';
+            document.body.style.opacity = 1;
+        });
+        </script>
 </body>
 </html>
