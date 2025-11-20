@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>预告信 - TAKE YOUR HEART</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone (for in-browser JSX compilation) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Framer Motion (UMD) -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              p5red: '#ff0000', /* Updated to brighter, vivid red */
+              p5black: '#000000',
+              p5gray: '#1a1a1a',
+              p5white: '#f5f5f5',
+            },
+            fontFamily: {
+              sans: ['"Noto Sans SC"', 'sans-serif'],
+              marker: ['"ZCOOL KuaiLe"', 'cursive'],
+              brush: ['"Ma Shan Zheng"', 'cursive'],
+              comic: ['"Bangers"', 'cursive'],
+            },
+            animation: {
+              'spin-slow': 'spin 12s linear infinite',
+              'pulse-fast': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+            },
+            keyframes: {
+              shake: {
+                '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        background-color: #1a1a1a;
+        overflow-x: hidden;
+        cursor: crosshair;
+        margin: 0;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #000; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #ff0000; 
+      }
+      
+      .halftone-pattern {
+        background-image: radial-gradient(#000 20%, transparent 20%), radial-gradient(#000 20%, transparent 20%);
+        background-color: #ff0000;
+        background-position: 0 0, 5px 5px;
+        background-size: 10px 10px;
+      }
+      
+      .perspective-1000 {
+        perspective: 1000px;
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion } = window.Motion;
+
+        // --- Components ---
+
+        // RansomText Component
+        const RansomText = ({ text, baseSize = 'text-2xl', className = '' }) => {
+          const FONTS = ['font-sans', 'font-marker', 'font-brush', 'font-comic'];
+          const COLORS = ['text-white', 'text-black', 'text-p5red', 'text-yellow-400'];
+          const BGS = ['bg-black', 'bg-white', 'bg-transparent', 'bg-p5red'];
+
+          const chars = text.split('');
+
+          return (
+            <div className={`flex flex-wrap justify-center items-center gap-1 ${className}`}>
+              {chars.map((char, i) => {
+                if (char === ' ') return <span key={i} className="w-4" />;
+                
+                const rot = (i * 33 % 20) - 10; 
+                const font = FONTS[i % FONTS.length];
+                const isInverted = i % 3 === 0;
+
+                return (
+                  <motion.span
+                    key={i}
+                    className={`
+                      inline-block px-1 py-0.5 rounded-sm shadow-sm
+                      ${baseSize} ${font}
+                      ${isInverted ? 'bg-black text-white' : 'bg-white text-black'}
+                      border-2 border-black
+                    `}
+                    initial={{ opacity: 0, y: 50, rotate: Math.random() * 360 }}
+                    animate={{ opacity: 1, y: 0, rotate: rot }}
+                    whileHover={{ scale: 1.5, rotate: 0, zIndex: 50 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15, delay: i * 0.03 }}
+                  >
+                    {char}
+                  </motion.span>
+                );
+              })}
+            </div>
+          );
+        };
+
+        // Background Component
+        const Background = ({ active }) => {
+          return (
+            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-p5gray">
+              {/* Base Red Layer */}
+              <div className="absolute inset-0 bg-p5red mix-blend-multiply" />
+              
+              {/* Halftone Overlay */}
+              <div className="absolute inset-0 opacity-20 halftone-pattern" />
+
+              {/* Rotating Starburst */}
+              <motion.div 
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250vw] h-[250vw] opacity-30"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+              >
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute top-0 left-1/2 h-full w-24 origin-bottom bg-black"
+                    style={{ transform: `rotate(${i * 22.5}deg) translateX(-50%)` }}
+                  />
+                ))}
+              </motion.div>
+
+              {/* Diagonal Stripes Animation */}
+              {active && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="absolute inset-0"
+                >
+                  <motion.div 
+                    className="absolute top-0 -left-1/4 w-[150%] h-40 bg-black -rotate-6 transform translate-y-20 mix-blend-overlay"
+                    animate={{ y: [20, 40, 20] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <motion.div 
+                    className="absolute bottom-0 -left-1/4 w-[150%] h-80 bg-black rotate-3 transform -translate-y-10 opacity-40"
+                    animate={{ rotate: [3, 1, 3] }}
+                    transition={{ duration: 0.2, repeat: Infinity }}
+                  />
+                  
+                  {/* Random Glitch Lines */}
+                  <motion.div 
+                    className="absolute top-1/4 left-0 w-full h-2 bg-white opacity-50"
+                    animate={{ x: [-1000, 1000], opacity: [0, 0.5, 0] }}
+                    transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                  />
+                </motion.div>
+              )}
+
+              {/* Floating Particles */}
+              {active && Array.from({ length: 25 }).map((_, i) => (
+                <motion.div
+                  key={`star-${i}`}
+                  className="absolute text-white/30 font-comic text-2xl"
+                  initial={{ 
+                    x: Math.random() * window.innerWidth, 
+                    y: Math.random() * window.innerHeight, 
+                    scale: 0 
+                  }}
+                  animate={{ 
+                    y: [null, Math.random() * -200],
+                    x: [null, (Math.random() - 0.5) * 50],
+                    opacity: [0, 1, 0],
+                    scale: [0, Math.random() * 2, 0],
+                    rotate: Math.random() * 720
+                  }}
+                  transition={{
+                    duration: 1 + Math.random() * 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 2,
+                    ease: "easeOut"
+                  }}
+                >
+                  {i % 2 === 0 ? '★' : '♦'}
+                </motion.div>
+              ))}
+            </div>
+          );
+        };
+
+        // IntroSequence Component
+        const IntroSequence = () => {
+          return (
+            <div className="flex flex-col items-center justify-center relative">
+              {/* Flash Effect */}
+              <motion.div 
+                className="fixed inset-0 bg-white z-50 pointer-events-none"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />
+
+              <motion.div
+                initial={{ scale: 5, opacity: 0, rotate: -10 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="z-20"
+              >
+                <h1 className="text-9xl font-comic text-white drop-shadow-[8px_8px_0px_rgba(0,0,0,1)] stroke-black tracking-tighter">
+                  TAKE
+                </h1>
+              </motion.div>
+
+              <motion.div
+                initial={{ x: -1000, skewX: 45 }}
+                animate={{ x: 0, skewX: 12 }}
+                transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 20 }}
+                className="z-20 -mt-4"
+              >
+                <h1 className="text-8xl font-comic text-black bg-white px-6 border-4 border-black shadow-[10px_10px_0px_#ff0000]">
+                  YOUR
+                </h1>
+              </motion.div>
+
+              <motion.div
+                initial={{ y: 500, rotate: 45, scale: 0.5 }}
+                animate={{ y: 0, rotate: -5, scale: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 250, damping: 15 }}
+                className="z-20 -mt-2"
+              >
+                <h1 className="text-9xl font-comic text-p5red drop-shadow-[-5px_5px_0px_#000] animate-pulse">
+                  HEART
+                </h1>
+              </motion.div>
+            </div>
+          );
+        };
+
+        // CallingCard Component
+        const CallingCard = () => {
+          return (
+            <motion.div 
+              className="relative w-full max-w-4xl perspective-1000"
+              initial={{ rotateY: 90, scale: 0.5, opacity: 0 }}
+              animate={{ rotateY: 0, scale: 1, opacity: 1 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 200, 
+                damping: 12, 
+                mass: 1.2,
+                delay: 0.2 
+              }}
+            >
+              {/* The Card Container */}
+              <div className="relative bg-p5white transform -rotate-2 shadow-[20px_20px_0px_rgba(0,0,0,0.8)] border-4 border-black p-6 md:p-12 overflow-hidden group">
+                
+                {/* Decorative Tape */}
+                <div className="absolute -top-6 left-1/2 w-32 h-12 bg-yellow-400/80 -rotate-3 transform -translate-x-1/2 shadow-sm z-20"></div>
+                
+                {/* Dynamic Stamp Animation */}
+                <motion.div 
+                  className="absolute top-4 right-4 z-30 opacity-80 pointer-events-none"
+                  initial={{ scale: 2, opacity: 0, rotate: 45 }}
+                  animate={{ scale: 1, opacity: 0.8, rotate: -15 }}
+                  transition={{ delay: 1.8, type: "spring", stiffness: 300 }}
+                >
+                  <div className="border-4 border-p5red rounded-full w-32 h-32 flex items-center justify-center">
+                     <span className="text-p5red font-comic text-xl font-bold -rotate-12 leading-none text-center">TAKE YOUR<br/>HEART</span>
+                  </div>
+                </motion.div>
+
+                {/* Header: Target */}
+                <div className="mb-8 relative">
+                  <motion.div
+                    initial={{ x: -200, opacity: 0, skewX: 20 }}
+                    animate={{ x: 0, opacity: 1, skewX: -12 }}
+                    transition={{ delay: 0.5, type: "spring" }}
+                    className="inline-block bg-black text-p5red px-4 py-2 border-2 border-white shadow-[5px_5px_0px_#ff0000]"
+                  >
+                    <h2 className="text-3xl font-black font-sans tracking-widest">致: 叶利钦老师</h2>
+                  </motion.div>
+                </div>
+
+                {/* Main Body: The "Crimes" */}
+                <div className="space-y-6 mb-12 relative z-10">
+                  <div className="transform rotate-1 hover:scale-105 transition-transform duration-100">
+                    <RansomText 
+                      text="背诵《过秦论》的暴君啊！" 
+                      baseSize="text-3xl md:text-5xl" 
+                      className="mb-4"
+                    />
+                  </div>
+                  
+                  <div className="bg-black/5 p-4 transform -skew-x-6 border-l-4 border-p5red relative overflow-hidden">
+                    <motion.div 
+                      className="absolute inset-0 bg-p5red/10"
+                      animate={{ x: ['-100%', '100%'] }}
+                      transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                    />
+                    <p className="text-xl md:text-2xl font-marker text-black leading-relaxed relative z-10">
+                      您将<span className="bg-black text-white px-1 mx-1">枯燥的背诵</span>强加于我们，
+                      <br/>
+                      用那种<span className="text-p5red font-black text-3xl mx-1">令人窒息</span>的古文
+                      <br/>
+                      扭曲了我们对语文的热爱。
+                    </p>
+                  </div>
+
+                  <div className="transform -rotate-1">
+                    <RansomText 
+                      text="这无法原谅的『强迫之罪』" 
+                      baseSize="text-2xl md:text-4xl"
+                    />
+                  </div>
+                  
+                   <div className="transform rotate-1 ml-8">
+                    <RansomText 
+                      text="我们已全数知晓！" 
+                      baseSize="text-2xl md:text-4xl"
+                    />
+                  </div>
+                </div>
+
+                {/* The Verdict/Promise */}
+                <div className="relative border-t-4 border-dashed border-black pt-8 mt-8">
+                  <motion.div 
+                    className="text-center space-y-4"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 1.5, type: "spring" }}
+                  >
+                    <p className="text-4xl font-brush text-p5red transform -rotate-2">
+                      您的“扭曲欲望”
+                    </p>
+                    <div className="inline-block bg-p5red text-white px-8 py-4 transform skew-x-12 shadow-[8px_8px_0px_#000] hover:translate-y-1 hover:shadow-[4px_4px_0px_#000] transition-all cursor-default">
+                       <h1 className="text-4xl md:text-6xl font-black font-sans uppercase animate-pulse-fast">
+                         我们收下了!
+                       </h1>
+                    </div>
+                    <p className="text-lg font-mono bg-black text-white inline-block px-2 mt-4 transform -rotate-1">
+                      从今往后，不需要再背书了 (才怪)
+                    </p>
+                  </motion.div>
+                </div>
+
+                {/* Footer / Sender */}
+                <div className="mt-12 flex justify-end items-end">
+                  <div className="text-right transform rotate-3">
+                    <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">SENDER</p>
+                    <div className="flex flex-col items-end">
+                      <span className="text-3xl font-marker text-black drop-shadow-[2px_2px_0px_rgba(255,0,0,0.5)]">
+                        王洪特
+                      </span>
+                      <span className="text-xl font-comic text-p5red">
+                        (The Phantom Thief)
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Phantom Logo Approximation */}
+                  <motion.div 
+                    className="ml-6 w-24 h-24 bg-black rounded-full flex items-center justify-center border-4 border-white shadow-lg overflow-hidden relative"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  >
+                     <span className="text-5xl relative z-10">🎩</span>
+                     <div className="absolute inset-0 bg-red-600 mix-blend-overlay animate-pulse"></div>
+                  </motion.div>
+                </div>
+
+                {/* Visual Noise / Splatters */}
+                <div className="absolute top-1/4 right-10 w-32 h-32 bg-p5red rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse"></div>
+                <div className="absolute bottom-10 left-10 w-48 h-48 bg-black rounded-full mix-blend-overlay filter blur-2xl opacity-20"></div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex flex-wrap justify-center gap-6 mt-8">
+                <motion.button 
+                  whileHover={{ scale: 1.1, rotate: -3, backgroundColor: "#ff0000", color: "#000" }}
+                  whileTap={{ scale: 0.9 }}
+                  className="bg-black text-white font-comic text-2xl px-8 py-3 border-2 border-p5red shadow-[5px_5px_0px_#ff0000] transition-colors flex items-center gap-2"
+                  onClick={() => window.location.reload()}
+                >
+                  {/* SVG Icon: Refresh */}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  <span>再次发送</span>
+                </motion.button>
+                
+                <motion.a 
+                  href="https://hundsrule.github.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1, rotate: 3, backgroundColor: "#000", color: "#fff" }}
+                  whileTap={{ scale: 0.9 }}
+                  className="bg-white text-black font-comic text-2xl px-8 py-3 border-2 border-black shadow-[5px_5px_0px_#000] flex items-center gap-2 no-underline"
+                >
+                  <span>支持怪盗团</span>
+                  {/* SVG Icon: External Link */}
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </motion.a>
+              </div>
+            </motion.div>
+          );
+        };
+
+        // App Component
+        const App = () => {
+          const [showCard, setShowCard] = useState(false);
+
+          useEffect(() => {
+            const timer = setTimeout(() => {
+              setShowCard(true);
+            }, 2500);
+            return () => clearTimeout(timer);
+          }, []);
+
+          return (
+            <div className="relative min-h-screen w-full overflow-hidden bg-p5gray text-p5white selection:bg-p5black selection:text-p5red">
+              <Background active={showCard} />
+              
+              <div className="relative z-10 flex min-h-screen flex-col items-center justify-center p-4">
+                {!showCard ? (
+                  <IntroSequence />
+                ) : (
+                  <CallingCard />
+                )}
+              </div>
+              
+              {/* Corner UI Decoration */}
+              {showCard && (
+                <>
+                  <div className="fixed top-0 left-0 p-4 text-p5red font-comic text-xl animate-pulse">
+                    WARNING: PHANTOM THIEVES
+                  </div>
+                  <div className="fixed bottom-4 right-4 text-white/20 text-xs font-mono">
+                     GITHUB_PAGES_HOSTED // SYSTEM_OVERRIDE
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        };
+
+        // Mount
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
