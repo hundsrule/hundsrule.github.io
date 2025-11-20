@@ -1,0 +1,47 @@
+/* Global Styles & Resets */
+body {
+    background-color: #101010;
+    color: #F2F2F2;
+    overflow-x: hidden;
+    margin: 0;
+    font-family: 'Anton', sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #101010;
+}
+::-webkit-scrollbar-thumb {
+    background: #E60012;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #ff1a1a;
+}
+
+/* Utility Classes */
+.clip-slant {
+    clip-path: polygon(10% 0, 100% 0, 100% 85%, 90% 100%, 0 100%, 0 15%);
+}
+
+.clip-shard {
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+}
+
+.halftone {
+    background-image: radial-gradient(#2A2A2A 20%, transparent 20%), radial-gradient(#2A2A2A 20%, transparent 20%);
+    background-color: #101010;
+    background-position: 0 0, 5px 5px;
+    background-size: 10px 10px;
+}
+
+.text-shadow-pop {
+    text-shadow: 3px 3px 0px #000000;
+}
+
+/* Prevent FOUC (Flash of Unstyled Content) */
+#root {
+    min-height: 100vh;
+}

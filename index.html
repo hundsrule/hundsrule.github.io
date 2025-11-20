@@ -1,7 +1,81 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <!-- Google tag (gtag.js) -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hongte's Velvet Room</title>
+    <link rel="icon" href="hund.ico" type="image/x-icon">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Black+Ops+One&family=Permanent+Marker&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'phantom-red': '#E60012',
+              'phantom-black': '#101010',
+              'phantom-gray': '#2A2A2A',
+              'phantom-white': '#F2F2F2'
+            },
+            fontFamily: {
+              'display': ['"Black Ops One"', 'sans-serif'],
+              'marker': ['"Permanent Marker"', 'cursive'],
+              'sans': ['"Anton"', '"Noto Sans SC"', 'sans-serif'],
+            },
+            animation: {
+              'pulse-fast': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'glitch': 'glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite',
+              'pop-in': 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+            },
+            keyframes: {
+              glitch: {
+                '0%': { transform: 'translate(0)' },
+                '20%': { transform: 'translate(-2px, 2px)' },
+                '40%': { transform: 'translate(-2px, -2px)' },
+                '60%': { transform: 'translate(2px, 2px)' },
+                '80%': { transform: 'translate(2px, -2px)' },
+                '100%': { transform: 'translate(0)' }
+              },
+              popIn: {
+                '0%': { opacity: '0', transform: 'scale(0.5) rotate(-10deg)' },
+                '100%': { opacity: '1', transform: 'scale(1) rotate(0deg)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- React & Babel for In-Browser Compiling -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Custom Styles -->
+    <style>
+        body { background-color: #101010; color: #F2F2F2; overflow-x: hidden; margin: 0; font-family: 'Anton', sans-serif; }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #101010; }
+        ::-webkit-scrollbar-thumb { background: #E60012; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff1a1a; }
+        .clip-slant { clip-path: polygon(10% 0, 100% 0, 100% 85%, 90% 100%, 0 100%, 0 15%); }
+        .clip-shard { clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); }
+        .halftone {
+            background-image: radial-gradient(#2A2A2A 20%, transparent 20%), radial-gradient(#2A2A2A 20%, transparent 20%);
+            background-color: #101010;
+            background-position: 0 0, 5px 5px;
+            background-size: 10px 10px;
+        }
+        .text-shadow-pop { text-shadow: 3px 3px 0px #000000; }
+    </style>
+
+    <!-- Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BJBDJ1J052"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -18,211 +92,520 @@
           s.parentNode.insertBefore(hm, s);
         })();
     </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="hund.ico" type="image/x-icon">
-    <title>洪特的跳转页</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .container {
-            background-color: var(--container-color);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 90%;
-            transition: background-color 0.3s ease;
-        }
-        .site-section {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ccc;
-        }
-        .site-section img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
-            margin-right: 10px;
-        }
-        .site-section img:hover {
-            transform: scale(1.1);
-        }
-        .site-section p {
-            font-size: 16px;
-            margin: 0;
-            flex: 1;
-            word-break: break-word;
-        }
-        button {
-            padding: 6px 12px;
-            margin-left: 10px;
-            border: none;
-            background-color: var(--button-color);
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-        button:hover {
-            background-color: var(--button-hover-color);
-            transform: scale(2.5);
-        }
-        .dark-mode-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .dark-mode-toggle:hover {
-            background-color: var(--button-hover-color);
-        }
-        :root {
-            --background-color: #f0f0f0;
-            --container-color: #ffffff;
-            --button-color: #6200ee;
-            --button-hover-color: #3700b3;
-            --text-color: #000000;
-        }
-        [data-theme="dark"] {
-            --background-color: #121212;
-            --container-color: #1e1e1e;
-            --button-color: #bb86fc;
-            --button-hover-color: #3700b3;
-            --text-color: #ffffff;
-        }
-    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
 </head>
-<body data-theme="dark">
-    <button class="dark-mode-toggle" onclick="toggleDarkMode()">
-        <span class="material-icons">brightness_4</span>
-    </button>
-    <div class="container">
-        <h2>欢迎来到洪特的天鹅绒房间。<br>今天想要干什么呢？</h2>
-        <h4>天鹅绒房间背景音乐</h4>
-        <audio src="subwebsite/BGM.mp3" autoplay controls></audio>
-        <h6>如果你是一个新用户，欢迎你！在界面底部找到更多信息。<br>这是一个由我（洪特）开发的个人小作品合集/工具箱。</h6>
-        <div class="site-section">
-            <img src="subwebsite/images/FlyingWHT.png" alt="博客">
-            <p>洪特的个人博客</p>
-            <button onclick="smoothRedirect('http://blog.wht.icu')">欢迎参观</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/image-demostration1/pink.jpg" alt="高考倒计时">
-            <p>功能如其名的一个倒计时工具</p>
-            <button onclick="smoothRedirect('subwebsite/codes/%E9%AB%98%E8%80%83%E5%80%92%E8%AE%A1%E6%97%B6/index.html')">开始考试</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/recite.jpeg" alt="recite">
-            <p>古诗背诵工具</p>
-            <button onclick="smoothRedirect('recite.html')">开始背书</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/WordCrusher.jpeg" alt="词汇破坏者">
-            <p>WHT征服英语</p>
-            <button onclick="smoothRedirect('subwebsite/codes/WordCrusher/WordCrusher.html')">开始背单词</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/FlyingWHT.png" alt="Apology">
-            <p>老师对不起</p>
-            <button onclick="smoothRedirect('subwebsite/codes/Apology/apology.html')">开始道歉</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/WHT.gif" alt="RollingwWHT">
-            <p>洪特的滚动模拟小游戏安卓版本</p>
-            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/RollingWHt.apk')">Android 版本下载</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/FlyingWHT.png" alt="飞行洪特">
-            <p>洪特的刷题模拟小游戏</p>
-            <button onclick="smoothRedirect('subwebsite/codes/FlyingWHT/index.html')">开始刷题之旅</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/k048.jpg" alt="K048">
-            <p>显示一个随机单词</p>
-            <button onclick="smoothRedirect('subwebsite/codes/RandomWord/index.html')">随机单词</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/k048.jpg" alt="K048">
-            <p>目标是合成出K的小游戏</p>
-            <button onclick="smoothRedirect('subwebsite/codes/K048/index.html')">开始合成K之旅</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/cover.jpg" alt="唱片墙">
-            <p>将所提供的图片转换为唱片墙</p>
-            <button onclick="smoothRedirect('subwebsite/codes/AlbumWall/index.html')">开始音乐之旅</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/imgae-demostration2/kcoffee.png" alt="网站2图片">
-            <p>将输入的任何文本的一部分随机替换为K</p>
-            <button onclick="smoothRedirect('subwebsite/codes/kkkgenerator/')">开始KK之旅</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/WHT.gif" alt="网站4图片">
-            <p>RollingWHT 滚动的洪特</p>
-            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/index.html')">开始翻滚之旅</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/WHTm.jpg" alt="wht图片">
-            <p>RollingWHT 滚动的洪特 风格化网页版</p>
-            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/4399version.html')">开始翻滚之旅</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/Fluttershy.jpg" alt="网站5图片">
-            <p>一张福瑞图片</p>
-            <button onclick="smoothRedirect('subwebsite/images/Furry1 (1).jpg')">开始福瑞之旅</button>
-        </div>
-        <div class="site-section">
-            <img src="subwebsite/images/Furry1 (2).jpg" alt="网站5图片">
-            <p>一张福瑞图片</p>
-            <button onclick="smoothRedirect('subwebsite/images/Furry1 (3).jpg')">开始福瑞之旅</button>
-        </div>
-        <p>你好，我是洪特，一个高三学生。<br>我在有限的空闲时间创建了这个网页。<br>大多数的编程都是AI完成的。<br>我本人的编程水平很有限。<br>如果有建议，欢迎发邮件（wanghongte@outlook.com）给我。<br>或者在下方找到我的其他社交媒体账号。<br><a href="https://github.com/hundsrule" style="color: blue;">Github</a><br><a href="https://space.bilibili.com/176868483" style="color: blue;">BiliBili</a>
-        <script>
-        function toggleDarkMode() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-        }
+  <body class="bg-phantom-black text-phantom-white">
+    <div id="root"></div>
 
-        function smoothRedirect(url) {
-            document.body.style.opacity = 0;
-            setTimeout(() => {
-                window.location.href = url;
-            }, 300);
-        }
+    <!-- APP LOGIC -->
+    <script type="text/babel">
+      const { useState, useEffect, useMemo } = React;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.body.style.transition = 'opacity 0.3s ease';
-            document.body.style.opacity = 1;
-        });
-        </script>
+      // --- ICONS (SVG Components to avoid external deps) ---
+      const Icons = {
+        Skull: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="M12.5 17l-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg>,
+        Book: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+        Gamepad2: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>,
+        Palette: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.093 0-.679.582-1.23 1.305-1.23h1.922C19.32 16.865 22 14.145 22 11c0-4.97-4.477-9-10-9z"/></svg>,
+        Eye: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>,
+        Zap: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+        ExternalLink: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>,
+        Globe: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+        Volume2: ({color}) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>,
+        VolumeX: ({color}) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" x2="17" y1="9" y2="15"/><line x1="17" x2="23" y1="9" y2="15"/></svg>,
+        Github: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>,
+        Mail: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
+        Video: ({size}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+      };
+
+      // --- DATA ---
+      const CategoryType = {
+          ALL: 'ALL',
+          STUDY: 'STUDY',
+          GAMES: 'GAMES',
+          CREATIVE: 'CREATIVE',
+          PERSONAL: 'PERSONAL'
+      };
+
+      const NAV_ITEMS = [
+          { label: { en: 'OVERVIEW', cn: '全息总览' }, type: CategoryType.ALL, icon: 'eye' },
+          { label: { en: 'MISSION CONTROL', cn: '核心控制' }, type: CategoryType.PERSONAL, icon: 'skull' },
+          { label: { en: 'BRAIN REBOOT', cn: '思维重塑' }, type: CategoryType.STUDY, icon: 'book' },
+          { label: { en: 'ARCADE', cn: '街机领域' }, type: CategoryType.GAMES, icon: 'gamepad' },
+          { label: { en: 'CHAOS LAB', cn: '混沌实验' }, type: CategoryType.CREATIVE, icon: 'palette' },
+      ];
+
+      const LINKS = [
+          {
+              id: 'blog',
+              title: { en: "Hongte's Blog", cn: "洪特的博客" },
+              description: { en: "The inner workings of my mind. Enter if you dare.", cn: "洪特的个人博客，欢迎参观。" },
+              url: 'http://blog.wht.icu',
+              imageUrl: 'subwebsite/images/FlyingWHT.png',
+              category: CategoryType.PERSONAL,
+              isExternal: true
+          },
+          {
+              id: 'gaokao',
+              title: { en: "GaoKao Countdown", cn: "高考倒计时" },
+              description: { en: "The doomsday clock is ticking. Functionality as named.", cn: "功能如其名的一个倒计时工具。" },
+              url: 'subwebsite/codes/%E9%AB%98%E8%80%83%E5%80%92%E8%AE%A1%E6%97%B6/index.html',
+              imageUrl: 'subwebsite/images/image-demostration1/pink.jpg',
+              category: CategoryType.STUDY
+          },
+          {
+              id: 'recite',
+              title: { en: "Poetry Recite", cn: "古诗背诵" },
+              description: { en: "Ancient words, modern suffering. Memorization tool.", cn: "古诗背诵工具，开始背书。" },
+              url: 'recite.html',
+              imageUrl: 'subwebsite/images/recite.jpeg',
+              category: CategoryType.STUDY
+          },
+          {
+              id: 'wordcrusher',
+              title: { en: "Word Crusher", cn: "词汇破坏者" },
+              description: { en: "WHT Conquers English. Destroy vocabulary.", cn: "WHT征服英语，开始背单词。" },
+              url: 'subwebsite/codes/WordCrusher/WordCrusher.html',
+              imageUrl: 'subwebsite/images/WordCrusher.jpeg',
+              category: CategoryType.STUDY
+          },
+          {
+              id: 'apology',
+              title: { en: "Apology Generator", cn: "道歉生成器" },
+              description: { en: "Sorry Teacher. Automated regret generation.", cn: "老师对不起，开始道歉。" },
+              url: 'subwebsite/codes/Apology/apology.html',
+              imageUrl: 'subwebsite/images/FlyingWHT.png',
+              category: CategoryType.STUDY
+          },
+          {
+              id: 'rolling-android',
+              title: { en: "Rolling WHT (APK)", cn: "滚动的洪特 (安卓)" },
+              description: { en: "Android version of the rolling simulation.", cn: "洪特的滚动模拟小游戏安卓版本。" },
+              url: 'subwebsite/codes/RollingWHT/RollingWHt.apk',
+              imageUrl: 'subwebsite/images/WHT.gif',
+              category: CategoryType.GAMES
+          },
+          {
+              id: 'flying-wht',
+              title: { en: "Flying WHT", cn: "飞行洪特" },
+              description: { en: "Simulation game. Start your question brushing journey.", cn: "洪特的刷题模拟小游戏。" },
+              url: 'subwebsite/codes/FlyingWHT/index.html',
+              imageUrl: 'subwebsite/images/FlyingWHT.png',
+              category: CategoryType.GAMES
+          },
+          {
+              id: 'random-word',
+              title: { en: "Random Word", cn: "随机单词" },
+              description: { en: "Displays a random word from K048.", cn: "显示一个随机单词。" },
+              url: 'subwebsite/codes/RandomWord/index.html',
+              imageUrl: 'subwebsite/images/k048.jpg',
+              category: CategoryType.CREATIVE
+          },
+          {
+              id: 'k048',
+              title: { en: "Project K048", cn: "合成K计划" },
+              description: { en: "Synthesize the ultimate K. A puzzle game.", cn: "目标是合成出K的小游戏。" },
+              url: 'subwebsite/codes/K048/index.html',
+              imageUrl: 'subwebsite/images/k048.jpg',
+              category: CategoryType.GAMES
+          },
+          {
+              id: 'album-wall',
+              title: { en: "Album Wall", cn: "唱片墙" },
+              description: { en: "Convert images into a vinyl record wall.", cn: "将所提供的图片转换为唱片墙。" },
+              url: 'subwebsite/codes/AlbumWall/index.html',
+              imageUrl: 'subwebsite/images/cover.jpg',
+              category: CategoryType.CREATIVE
+          },
+          {
+              id: 'kkk-gen',
+              title: { en: "KKK Generator", cn: "KK生成器" },
+              description: { en: "Randomly replaces text parts with K.", cn: "将输入的任何文本的一部分随机替换为K。" },
+              url: 'subwebsite/codes/kkkgenerator/',
+              imageUrl: 'subwebsite/images/imgae-demostration2/kcoffee.png',
+              category: CategoryType.CREATIVE
+          },
+          {
+              id: 'rolling-web',
+              title: { en: "Rolling WHT (Web)", cn: "滚动的洪特 (网页)" },
+              description: { en: "The rolling Hongte experience in browser.", cn: "RollingWHT 滚动的洪特。" },
+              url: 'subwebsite/codes/RollingWHT/index.html',
+              imageUrl: 'subwebsite/images/WHT.gif',
+              category: CategoryType.GAMES
+          },
+          {
+              id: 'rolling-style',
+              title: { en: "Rolling WHT (Style)", cn: "滚动的洪特 (风格化)" },
+              description: { en: "4399 Version. A stylized web variant.", cn: "RollingWHT 滚动的洪特 风格化网页版。" },
+              url: 'subwebsite/codes/RollingWHT/4399version.html',
+              imageUrl: 'subwebsite/images/WHTm.jpg',
+              category: CategoryType.GAMES
+          },
+          {
+              id: 'furry-1',
+              title: { en: "Furry Art I", cn: "福瑞图集 I" },
+              description: { en: "A furry image. Fluttershy vibe.", cn: "一张福瑞图片。" },
+              url: 'subwebsite/images/Furry1 (1).jpg',
+              imageUrl: 'subwebsite/images/Fluttershy.jpg',
+              category: CategoryType.CREATIVE
+          },
+          {
+              id: 'furry-2',
+              title: { en: "Furry Art II", cn: "福瑞图集 II" },
+              description: { en: "Another furry image entry.", cn: "一张福瑞图片。" },
+              url: 'subwebsite/images/Furry1 (3).jpg',
+              imageUrl: 'subwebsite/images/Furry1 (2).jpg',
+              category: CategoryType.CREATIVE
+          }
+      ];
+
+      // --- AUDIO SERVICE ---
+      class AudioService {
+          constructor() {
+              this.ctx = null;
+          }
+          ensureContext() {
+              if (!this.ctx) {
+                   try {
+                      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                      this.ctx = new AudioContextClass();
+                  } catch (e) {}
+              }
+              if (this.ctx && this.ctx.state === 'suspended') {
+                  this.ctx.resume();
+              }
+          }
+          playHover() {
+              this.ensureContext();
+              if (!this.ctx) return;
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'square';
+              osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+              osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.05);
+              gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start();
+              osc.stop(this.ctx.currentTime + 0.05);
+          }
+          playClick() {
+              this.ensureContext();
+              if (!this.ctx) return;
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'sawtooth';
+              osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+              osc.frequency.exponentialRampToValueAtTime(50, this.ctx.currentTime + 0.15);
+              gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start();
+              osc.stop(this.ctx.currentTime + 0.15);
+          }
+          playSwitch() {
+              this.ensureContext();
+              if (!this.ctx) return;
+              const bufferSize = this.ctx.sampleRate * 0.1;
+              const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+              const data = buffer.getChannelData(0);
+              for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+              const noise = this.ctx.createBufferSource();
+              noise.buffer = buffer;
+              const gain = this.ctx.createGain();
+              gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+              noise.connect(gain);
+              gain.connect(this.ctx.destination);
+              noise.start();
+          }
+      }
+      const audioService = new AudioService();
+
+      // --- COMPONENTS ---
+
+      const NoiseBackground = () => (
+          <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-phantom-black">
+              <div className="absolute inset-0 opacity-20 halftone"></div>
+              <div className="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-phantom-red opacity-10 rounded-full blur-[100px] animate-pulse"></div>
+              <div className="absolute bottom-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-phantom-gray opacity-20 rounded-full blur-[80px]"></div>
+              <div className="absolute inset-0 opacity-10" style={{backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`}}></div>
+              <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+                  <div className="absolute top-[20%] left-[-10%] w-[120%] h-2 bg-phantom-red transform -rotate-12 opacity-60"></div>
+                  <div className="absolute top-[22%] left-[-10%] w-[120%] h-1 bg-white transform -rotate-12 opacity-30"></div>
+                  <div className="absolute bottom-[30%] right-[-10%] w-[120%] h-4 bg-phantom-gray transform -rotate-12 opacity-40"></div>
+              </div>
+          </div>
+      );
+
+      const CategoryMenu = ({ currentCategory, onSelect, language }) => {
+          const getIcon = (iconName) => {
+              switch(iconName) {
+                  case 'skull': return <Icons.Skull size={24} />;
+                  case 'book': return <Icons.Book size={24} />;
+                  case 'gamepad': return <Icons.Gamepad2 size={24} />;
+                  case 'palette': return <Icons.Palette size={24} />;
+                  case 'eye': return <Icons.Eye size={24} />;
+                  default: return null;
+              }
+          };
+
+          return (
+              <nav className="relative z-20 flex flex-wrap justify-center gap-4 mb-12 px-4">
+                  {NAV_ITEMS.map((item) => {
+                      const isActive = currentCategory === item.type;
+                      return (
+                          <button
+                              key={item.type}
+                              onClick={() => {
+                                  audioService.playSwitch();
+                                  onSelect(item.type);
+                              }}
+                              onMouseEnter={() => audioService.playHover()}
+                              className={`
+                                  group relative overflow-hidden
+                                  transform transition-all duration-200 ease-out
+                                  ${isActive ? 'scale-105 z-10 shadow-[4px_4px_0px_0px_rgba(230,0,18,1)]' : 'opacity-80 hover:opacity-100 hover:scale-105'}
+                                  bg-phantom-black border-2
+                                  ${isActive ? 'border-phantom-red text-phantom-red' : 'border-white text-white hover:border-phantom-red'}
+                                  px-6 py-3 min-w-[140px] md:min-w-[160px]
+                                  clip-slant
+                              `}
+                          >
+                              <div className={`absolute inset-0 bg-white transform origin-left transition-transform duration-300 ease-out ${isActive ? 'scale-x-0' : 'scale-x-0 group-hover:scale-x-100'}`}></div>
+                              <div className={`relative flex items-center justify-center gap-3 font-display text-lg md:text-xl tracking-wider uppercase ${isActive ? '' : 'group-hover:text-phantom-black'}`}>
+                                  <span className={isActive ? 'animate-pulse' : ''}>{getIcon(item.icon)}</span>
+                                  <span className={language === 'cn' ? 'font-sans font-bold' : ''}>{item.label[language]}</span>
+                              </div>
+                              {isActive && (
+                                  <>
+                                      <div className="absolute top-0 left-0 w-full h-[2px] bg-phantom-red animate-ping"></div>
+                                      <div className="absolute bottom-0 right-0 w-full h-[2px] bg-phantom-red animate-ping"></div>
+                                  </>
+                              )}
+                          </button>
+                      );
+                  })}
+              </nav>
+          );
+      };
+
+      const LinkCard = ({ item, index, language }) => {
+          const handleRedirect = () => {
+              audioService.playClick();
+              const card = document.getElementById(`card-${item.id}`);
+              if (card) {
+                  card.style.transform = "scale(1.1) rotate(2deg)";
+                  card.style.filter = "invert(1)";
+                  card.style.transition = "all 0.2s ease";
+              }
+              setTimeout(() => {
+                  window.location.href = item.url;
+              }, 300);
+          };
+
+          return (
+              <div 
+                  id={`card-${item.id}`}
+                  className="relative group w-full max-w-sm mx-auto h-full"
+                  style={{ animationDelay: `${index * 50}ms` }}
+              >
+                  <div className="absolute inset-0 bg-phantom-red transform translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform duration-200 ease-out border-2 border-phantom-black"></div>
+                  <div 
+                      className="relative bg-phantom-white h-full border-2 border-phantom-black flex flex-col overflow-hidden transition-all duration-200 ease-out group-hover:-translate-y-1 group-hover:-translate-x-1"
+                      onMouseEnter={() => audioService.playHover()}
+                  >
+                      <div className="relative h-48 overflow-hidden border-b-2 border-phantom-black bg-phantom-black">
+                          <img 
+                              src={item.imageUrl} 
+                              alt={item.title[language]} 
+                              loading="lazy"
+                              decoding="async"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"
+                              onError={(e) => {
+                                  e.target.src = 'https://picsum.photos/400/200';
+                              }}
+                          />
+                          <div className="absolute inset-0 bg-phantom-red mix-blend-hard-light opacity-0 group-hover:opacity-30 transition-opacity duration-100"></div>
+                          <div className="absolute top-2 right-2 bg-phantom-black text-white text-xs font-bold px-2 py-1 transform rotate-3 border border-white">
+                              {item.category}
+                          </div>
+                      </div>
+                      <div className="p-4 flex flex-col flex-grow bg-white relative">
+                          <h3 className={`text-2xl uppercase text-phantom-black leading-none mb-3 group-hover:text-phantom-red transition-colors ${language === 'cn' ? 'font-sans font-black' : 'font-display'}`}>
+                              {item.title[language]}
+                          </h3>
+                          <div className="w-12 h-1 bg-phantom-red mb-3 transform -skew-x-12"></div>
+                          <p className={`text-phantom-gray text-sm font-bold leading-relaxed line-clamp-3 flex-grow ${language === 'cn' ? 'font-sans' : 'font-marker'}`}>
+                              {item.description[language]}
+                          </p>
+                          <div className="mt-4 flex justify-end items-end">
+                              <button 
+                                  onClick={handleRedirect}
+                                  className="bg-phantom-black text-white hover:bg-phantom-red px-4 py-2 font-display text-lg hover:scale-110 transition-all flex items-center gap-2 clip-shard border border-transparent hover:border-black"
+                              >
+                                  {language === 'en' ? 'ENTER' : '进入'} <Icons.Zap size={16} />
+                              </button>
+                          </div>
+                          {item.isExternal && (
+                              <div className="absolute top-4 right-4 text-phantom-gray opacity-30 rotate-45">
+                                  <Icons.ExternalLink size={20} />
+                              </div>
+                          )}
+                      </div>
+                  </div>
+              </div>
+          );
+      };
+
+      // --- MAIN APP COMPONENT ---
+      const App = () => {
+          const [language, setLanguage] = useState(() => {
+              const browserLang = navigator.language.toLowerCase();
+              return browserLang.startsWith('zh') ? 'cn' : 'en';
+          });
+          
+          const [category, setCategory] = useState(CategoryType.ALL);
+          const [isMuted, setIsMuted] = useState(false);
+          const [mounted, setMounted] = useState(false);
+
+          useEffect(() => {
+              setMounted(true);
+          }, []);
+
+          const toggleLanguage = () => {
+              setLanguage(prev => prev === 'en' ? 'cn' : 'en');
+          };
+
+          const filteredLinks = useMemo(() => {
+              if (category === CategoryType.ALL) return LINKS;
+              return LINKS.filter(link => link.category === category);
+          }, [category]);
+
+          return (
+              <div className={`min-h-screen w-full font-sans selection:bg-phantom-red selection:text-white transition-opacity duration-500 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+                  <NoiseBackground />
+
+                  {/* Top Bar */}
+                  <div className="fixed top-4 right-4 z-50 flex gap-4">
+                      <button 
+                          onClick={toggleLanguage}
+                          className="bg-phantom-black border-2 border-white text-white p-2 hover:bg-white hover:text-phantom-black transition-colors transform hover:scale-110 flex items-center gap-2 font-display shadow-lg"
+                      >
+                          <Icons.Globe size={20} />
+                          <span className="font-bold">{language === 'en' ? 'CN' : 'EN'}</span>
+                      </button>
+                  </div>
+
+                  {/* Audio Control */}
+                  <div className="fixed bottom-4 left-4 z-50 bg-phantom-black border-2 border-white p-2 transform -skew-x-12 hover:scale-110 transition-transform shadow-[4px_4px_0px_0px_rgba(255,255,255,0.5)] cursor-pointer">
+                      <button 
+                          onClick={() => {
+                              setIsMuted(!isMuted);
+                              const audio = document.getElementById('bgm-audio');
+                              if(audio) audio.muted = !audio.muted;
+                          }}
+                          className="text-white flex items-center gap-2 font-display transform skew-x-12"
+                      >
+                          {isMuted ? <Icons.VolumeX color="#E60012" /> : <Icons.Volume2 color="#E60012" />}
+                          <span className="hidden md:inline text-xs tracking-widest">BGM: VELVET ROOM</span>
+                      </button>
+                      <audio id="bgm-audio" src="subwebsite/BGM.mp3" autoPlay loop className="hidden" />
+                  </div>
+
+                  {/* Social Links */}
+                  <div className="fixed bottom-4 right-4 z-50 flex gap-2">
+                      {[
+                          { icon: Icons.Github, href: "https://github.com/hundsrule", color: "hover:text-phantom-red" },
+                          { icon: Icons.Video, href: "https://space.bilibili.com/176868483", color: "hover:text-blue-400" },
+                          { icon: Icons.Mail, href: "mailto:wanghongte@outlook.com", color: "hover:text-yellow-400" }
+                      ].map((social, idx) => (
+                          <a 
+                              key={idx}
+                              href={social.href} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className={`bg-phantom-black border border-white p-3 text-white ${social.color} transition-transform hover:-translate-y-2 shadow-lg`}
+                          >
+                              <social.icon size={20} />
+                          </a>
+                      ))}
+                  </div>
+
+                  {/* Main Content */}
+                  <div className="relative z-10 container mx-auto px-4 py-8 min-h-screen flex flex-col">
+                      
+                      <header className="text-center mb-12 mt-8">
+                          <div className="inline-block relative group cursor-default select-none">
+                              <h1 className="font-display text-6xl md:text-9xl text-white tracking-tighter uppercase transform -rotate-2 relative z-10 text-shadow-pop group-hover:animate-glitch">
+                                  HONGTE'S
+                                  <br />
+                                  <span className="text-phantom-red">VELVET ROOM</span>
+                              </h1>
+                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-black blur-xl -z-10 opacity-80"></div>
+                          </div>
+                          
+                          <div className="mt-8 max-w-3xl mx-auto bg-phantom-white transform rotate-1 p-6 border-l-8 border-phantom-red shadow-xl hover:scale-[1.02] transition-transform">
+                              <p className={`text-phantom-black text-xl md:text-2xl transform -rotate-1 ${language === 'cn' ? 'font-sans font-bold' : 'font-marker'}`}>
+                                  {language === 'en' 
+                                      ? '"Welcome to the Velvet Room. What is your desire today?"'
+                                      : '"欢迎来到洪特的天鹅绒房间。今天想要干什么呢？"'}
+                              </p>
+                          </div>
+                      </header>
+
+                      <CategoryMenu currentCategory={category} onSelect={setCategory} language={language} />
+
+                      <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-32">
+                          {filteredLinks.map((link, index) => (
+                              <div key={link.id} className="animate-pop-in" style={{ animationDelay: `${index * 50}ms` }}>
+                                  <LinkCard item={link} index={index} language={language} />
+                              </div>
+                          ))}
+                      </main>
+
+                      <footer className="mt-auto text-center py-12 border-t-4 border-phantom-red bg-phantom-black text-white relative overflow-hidden">
+                           <div className="absolute inset-0 opacity-10 pointer-events-none halftone"></div>
+                           <div className="relative z-10 max-w-2xl mx-auto px-4">
+                              <div className="mb-8">
+                                  <h4 className={`text-2xl mb-4 text-phantom-red ${language === 'cn' ? 'font-sans font-black' : 'font-display'}`}>
+                                      {language === 'en' ? 'ABOUT THE CREATOR' : '关于创作者'}
+                                  </h4>
+                                  <p className={`text-gray-300 leading-loose text-lg ${language === 'cn' ? 'font-sans' : 'font-mono text-sm'}`}>
+                                      {language === 'en' 
+                                          ? "Hello, I am Hongte, a high school senior. I created this webpage in my limited free time. Most of the programming was done by AI. My own programming skills are limited. If you have suggestions, please email me."
+                                          : "你好，我是洪特，一个高三学生。我在有限的空闲时间创建了这个网页。大多数的编程都是AI完成的。我本人的编程水平很有限。如果有建议，欢迎发邮件给我。"}
+                                  </p>
+                              </div>
+                              <div className="w-full h-[1px] bg-gray-700 my-6"></div>
+                              <p className="font-mono text-xs text-gray-500">
+                                  DESIGNED BY AI // CURATED BY HONGTE<br/>
+                                  SYSTEM VERSION 2.1 // REBEL EDITION
+                              </p>
+                           </div>
+                      </footer>
+                  </div>
+              </div>
+          );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+  <script type="module" src="/index.tsx"></script>
 </body>
 </html>
