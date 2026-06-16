@@ -136,6 +136,14 @@ export const LINKS: LinkItem[] = [
         category: CategoryType.GAMES
     },
     {
+        id: 'snake',
+        title: { en: "Snake Game", cn: "贪吃蛇" },
+        description: { en: "Classic snake arcade. Eat, grow, and avoid yourself.", cn: "经典贪吃蛇小游戏。吃食物、变长、别撞到自己。" },
+        url: 'subwebsite/codes/Snake/index.html',
+        imageUrl: 'subwebsite/images/snake.svg',
+        category: CategoryType.GAMES
+    },
+    {
         id: 'furry-1',
         title: { en: "Furry Art I", cn: "福瑞图集 I" },
         description: { en: "A furry image. Fluttershy vibe.", cn: "一张福瑞图片。" },
