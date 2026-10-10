@@ -1,39 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chrome Dino Game</title>
+    <title>JUMPING WHT | 恐龙快跑 - 天鹅绒疾走</title>
+    <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../../velvet-theme.css">
+    <script src="../../velvet-nav.js" data-root="../../../index.html"></script>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #f7f7f7;
-            font-family: Arial, sans-serif;
+            background-color: var(--phantom-black, #101010);
+            font-family: var(--font-sans, 'Noto Sans SC'), Arial, sans-serif;
+            color: var(--phantom-white, #f2f2f2);
+            user-select: none;
         }
+
         canvas {
             display: block;
+            width: 100vw;
+            height: 100vh;
         }
-        #message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 24px;
-            color: #333;
-        }
-        #score {
+
+        /* Top HUD score banner */
+        .p5-score-dock {
             position: absolute;
             top: 20px;
-            right: 20px;
-            font-size: 24px;
-            color: #333;
+            right: 25px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #000;
+            border: 2px solid var(--phantom-white);
+            box-shadow: 4px 4px 0px var(--phantom-red);
+            padding: 8px 18px;
+            transform: skewX(-10deg);
+        }
+
+        .score-label {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.8rem;
+            color: var(--phantom-red);
+            letter-spacing: 2px;
+        }
+
+        #score {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 1.8rem;
+            color: #fff;
+            letter-spacing: 1px;
+            min-width: 4ch;
+            text-align: right;
+        }
+
+        /* Center modal prompt */
+        #message {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            background: rgba(16, 16, 16, 0.94);
+            border: 3px solid #000;
+            border-top: 6px solid var(--phantom-red);
+            box-shadow: 8px 8px 0px #000;
+            padding: 30px 40px;
+            text-align: center;
+            max-width: 460px;
+            width: 85%;
+            backdrop-filter: blur(8px);
+        }
+
+        .msg-badge {
+            background: var(--phantom-red);
+            color: #fff;
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            letter-spacing: 2px;
+            display: inline-block;
+            transform: skewX(-10deg);
+            margin-bottom: 12px;
+        }
+
+        .msg-title {
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 1.8rem;
+            color: #fff;
+            margin: 0 0 10px;
+            letter-spacing: 1px;
+        }
+
+        .msg-desc {
+            font-size: 0.95rem;
+            color: #ccc;
+            line-height: 1.6;
+            margin: 0 0 20px;
+        }
+
+        .start-btn {
+            background: var(--phantom-red);
+            color: #fff;
+            border: 2px solid #000;
+            padding: 10px 24px;
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #fff;
+            transform: skewX(-8deg);
+            transition: all 0.15s ease;
+        }
+
+        .start-btn:hover {
+            background: #fff;
+            color: #000;
+            transform: skewX(-8deg) scale(1.05);
+        }
+
+        /* Mobile controls dock */
+        .mobile-controls {
+            display: none;
+            position: absolute;
+            bottom: 25px;
+            left: 0;
+            width: 100%;
+            justify-content: space-around;
+            z-index: 10;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .ctrl-btn {
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid var(--phantom-red);
+            color: #fff;
+            padding: 14px 30px;
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 1rem;
+            box-shadow: 4px 4px 0px var(--phantom-red);
+            transform: skewX(-8deg);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-controls {
+                display: flex;
+            }
+            #message {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="message">无法连接到互联网<br>按下空格键或点击恐龙以启动游戏</div>
-    <div id="score">0</div>
+    <div class="p5-score-dock">
+        <span class="score-label">DISTANCE</span>
+        <span id="score">0</span>
+    </div>
+
+    <div id="message">
+        <div class="msg-badge">MISSION STANDBY // 离线疾走</div>
+        <div class="msg-title">JUMPING WHT</div>
+        <div class="msg-desc">网络连接断开？进入天鹅绒疾走训练！<br>按 [空格键] 或点击屏幕跳跃，按 [方向下键] 下蹲避开障碍。</div>
+        <button class="start-btn" id="startBtn">[▶ START ESCAPE]</button>
+    </div>
+
+    <div class="mobile-controls">
+        <button class="ctrl-btn" id="mobileJumpBtn">JUMP ▲</button>
+        <button class="ctrl-btn" id="mobileDuckBtn">DUCK ▼</button>
+    </div>
+
     <canvas id="dinoGame"></canvas>
 
     <script src="game.js"></script>

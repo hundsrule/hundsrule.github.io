@@ -31,6 +31,22 @@ export const NAV_ITEMS: NavItem[] = [
 
 export const LINKS: LinkItem[] = [
     {
+        id: 'bili-comment',
+        title: { en: "Bilibili Comment Simulator", cn: "B站移动端评论区生成器" },
+        description: { en: "Realistic Bilibili mobile video comment simulator with live in-place visual editing, authentic likes animation, and long screenshot export.", cn: "逼真哔哩哔哩移动端评论区生成器，支持可视化点击编辑、真实点赞互动、等级勋章与超清长截图导出。" },
+        url: 'subwebsite/codes/BiliComment/index.html',
+        imageUrl: 'subwebsite/images/bilibili.svg',
+        category: CategoryType.CREATIVE
+    },
+    {
+        id: 'chaoxing-comment',
+        title: { en: "Chaoxing Video Simulator", cn: "超星学习通模拟器" },
+        description: { en: "Ultra-realistic video discussion simulator with live visual in-place editor.", cn: "逼真学习通视频评论区生成器，支持可视化编辑、点赞、弹幕与任务点。" },
+        url: 'subwebsite/codes/ChaoxingComment/index.html',
+        imageUrl: 'subwebsite/images/chaoxing-cover.svg',
+        category: CategoryType.STUDY
+    },
+    {
         id: 'blog',
         title: { en: "Hongte's Blog", cn: "洪特的博客" },
         description: { en: "The inner workings of my mind. Enter if you dare.", cn: "洪特的个人博客，欢迎参观。" },
@@ -149,6 +165,14 @@ export const LINKS: LinkItem[] = [
         description: { en: "A furry image. Fluttershy vibe.", cn: "一张福瑞图片。" },
         url: 'subwebsite/images/Furry1 (1).jpg',
         imageUrl: 'subwebsite/images/Fluttershy.jpg',
+        category: CategoryType.CREATIVE
+    },
+    {
+        id: 'xiaohongshu',
+        title: { en: "RED Note Simulator", cn: "小红书生成器" },
+        description: { en: "Ultra-realistic RED mobile simulator & visual editor.", cn: "超拟真小红书移动端页面生成器，所见即所得可视化编辑与互动。" },
+        url: 'subwebsite/codes/Xiaohongshu/index.html',
+        imageUrl: 'subwebsite/images/xiaohongshu-cover.jpg',
         category: CategoryType.CREATIVE
     },
     {

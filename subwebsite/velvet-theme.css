@@ -1,0 +1,403 @@
+/* ==========================================================================
+   VELVET ROOM DESIGN SYSTEM (PERSONA 5 THEME)
+   Unified Design Tokens, Components, and Textures for hundsrule.github.io
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Black+Ops+One&family=Permanent+Marker&family=Noto+Sans+SC:wght@400;700;900&display=swap');
+
+:root {
+  --phantom-red: #E60012;
+  --phantom-red-hover: #ff1a1a;
+  --phantom-red-glow: rgba(230, 0, 18, 0.45);
+  --phantom-black: #101010;
+  --phantom-dark: #181818;
+  --phantom-gray: #2A2A2A;
+  --phantom-light-gray: #3a3a3a;
+  --phantom-white: #F2F2F2;
+  --font-display: 'Black Ops One', 'Anton', sans-serif;
+  --font-marker: 'Permanent Marker', cursive;
+  --font-sans: 'Anton', 'Noto Sans SC', sans-serif;
+  --font-body: 'Noto Sans SC', sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--phantom-black);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--phantom-red);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--phantom-red-hover);
+}
+
+/* Global Selection */
+::selection {
+  background: var(--phantom-red);
+  color: var(--phantom-white);
+}
+
+/* Utility Clip Paths */
+.clip-slant, .velvet-clip-slant {
+  clip-path: polygon(10% 0, 100% 0, 100% 85%, 90% 100%, 0 100%, 0 15%);
+}
+
+.clip-shard, .velvet-clip-shard {
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+}
+
+.clip-cut-corner, .velvet-clip-cut {
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+/* Halftone Texture */
+.halftone, .velvet-halftone {
+  background-image: radial-gradient(var(--phantom-gray) 20%, transparent 20%), radial-gradient(var(--phantom-gray) 20%, transparent 20%);
+  background-color: var(--phantom-black);
+  background-position: 0 0, 5px 5px;
+  background-size: 10px 10px;
+}
+
+/* Pop Shadows */
+.text-shadow-pop, .velvet-text-pop {
+  text-shadow: 3px 3px 0px #000000;
+}
+
+.velvet-text-pop-red {
+  text-shadow: 3px 3px 0px var(--phantom-red);
+}
+
+.velvet-shadow-pop {
+  box-shadow: 4px 4px 0px 0px var(--phantom-red);
+}
+
+.velvet-shadow-pop-black {
+  box-shadow: 5px 5px 0px 0px #000000;
+}
+
+.velvet-shadow-pop-white {
+  box-shadow: 4px 4px 0px 0px #ffffff;
+}
+
+/* Ambient Red Background Glow and Speed Stripes */
+.velvet-bg-effects {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: var(--phantom-black);
+}
+
+.velvet-bg-effects .glow-spot {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: var(--phantom-red);
+  opacity: 0.12;
+  border-radius: 50%;
+  filter: blur(100px);
+  animation: velvet-pulse 4s ease-in-out infinite alternate;
+}
+
+.velvet-bg-effects .glow-spot-2 {
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 40vw;
+  height: 40vw;
+  background: var(--phantom-gray);
+  opacity: 0.25;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+
+.velvet-bg-effects .stripe-1 {
+  position: absolute;
+  top: 18%;
+  left: -10%;
+  width: 120%;
+  height: 8px;
+  background: var(--phantom-red);
+  transform: rotate(-12deg);
+  opacity: 0.55;
+}
+
+.velvet-bg-effects .stripe-2 {
+  position: absolute;
+  top: 20%;
+  left: -10%;
+  width: 120%;
+  height: 3px;
+  background: #ffffff;
+  transform: rotate(-12deg);
+  opacity: 0.25;
+}
+
+.velvet-bg-effects .stripe-3 {
+  position: absolute;
+  bottom: 25%;
+  right: -10%;
+  width: 120%;
+  height: 12px;
+  background: var(--phantom-gray);
+  transform: rotate(-12deg);
+  opacity: 0.35;
+}
+
+@keyframes velvet-pulse {
+  0% { transform: scale(1); opacity: 0.1; }
+  100% { transform: scale(1.15); opacity: 0.18; }
+}
+
+@keyframes velvet-glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+/* ==========================================================================
+   UNIFIED VELVET ROOM TOP NAVIGATION BAR
+   ========================================================================== */
+.velvet-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  background-color: rgba(16, 16, 16, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 3px solid var(--phantom-red);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+}
+
+.velvet-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.velvet-nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--phantom-black);
+  color: var(--phantom-white);
+  border: 2px solid #ffffff;
+  padding: 6px 16px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transform: skewX(-10deg);
+  box-shadow: 3px 3px 0px 0px var(--phantom-red);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.velvet-nav-back span {
+  display: inline-block;
+  transform: skewX(10deg);
+}
+
+.velvet-nav-back:hover {
+  background: var(--phantom-red);
+  border-color: var(--phantom-red);
+  color: #ffffff;
+  transform: skewX(-10deg) translate(-2px, -2px);
+  box-shadow: 5px 5px 0px 0px #ffffff;
+}
+
+.velvet-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: #ffffff;
+  letter-spacing: 1.5px;
+  user-select: none;
+}
+
+.velvet-nav-brand .brand-red {
+  color: var(--phantom-red);
+}
+
+.velvet-nav-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: 17px;
+  color: var(--phantom-white);
+  background: var(--phantom-gray);
+  padding: 4px 14px;
+  border-left: 4px solid var(--phantom-red);
+  transform: skewX(-6deg);
+}
+
+.velvet-nav-title span {
+  display: inline-block;
+  transform: skewX(6deg);
+}
+
+.velvet-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.velvet-nav-tag {
+  background: var(--phantom-red);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 12px;
+  padding: 3px 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transform: rotate(2deg);
+}
+
+/* ==========================================================================
+   BUTTONS & CARDS
+   ========================================================================== */
+.velvet-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--phantom-black);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  padding: 10px 22px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 4px 4px 0px 0px var(--phantom-red);
+  text-decoration: none;
+}
+
+.velvet-btn:hover {
+  background: var(--phantom-red);
+  border-color: #ffffff;
+  color: #ffffff;
+  transform: translate(-2px, -2px) scale(1.02);
+  box-shadow: 6px 6px 0px 0px #ffffff;
+}
+
+.velvet-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px var(--phantom-red);
+}
+
+.velvet-btn-primary {
+  background: var(--phantom-red);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 4px 4px 0px 0px #000000;
+}
+
+.velvet-btn-primary:hover {
+  background: #ffffff;
+  color: var(--phantom-black);
+  border-color: var(--phantom-black);
+  box-shadow: 6px 6px 0px 0px var(--phantom-red);
+}
+
+.velvet-card {
+  background: var(--phantom-white);
+  color: var(--phantom-black);
+  border: 3px solid var(--phantom-black);
+  box-shadow: 6px 6px 0px 0px var(--phantom-red);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.velvet-card-dark {
+  background: var(--phantom-black);
+  color: var(--phantom-white);
+  border: 2px solid #ffffff;
+  box-shadow: 6px 6px 0px 0px var(--phantom-red);
+}
+
+.velvet-input {
+  background: var(--phantom-black);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  padding: 10px 14px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.velvet-input:focus {
+  border-color: var(--phantom-red);
+  box-shadow: 0 0 0 2px var(--phantom-red), 4px 4px 0px 0px #000000;
+}
+
+/* Dialog / Modal */
+.velvet-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.velvet-modal {
+  background: var(--phantom-white);
+  color: var(--phantom-black);
+  border: 4px solid var(--phantom-black);
+  box-shadow: 10px 10px 0px 0px var(--phantom-red);
+  max-width: 520px;
+  width: 100%;
+  padding: 28px;
+  box-sizing: border-box;
+  animation: velvet-pop-in 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes velvet-pop-in {
+  0% { transform: scale(0.85) rotate(-3deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  .velvet-nav {
+    padding: 8px 12px;
+  }
+  .velvet-nav-brand span.full-brand {
+    display: none;
+  }
+  .velvet-nav-title {
+    font-size: 14px;
+    padding: 2px 8px;
+  }
+}

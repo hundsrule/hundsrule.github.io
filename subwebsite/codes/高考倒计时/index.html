@@ -1,7 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh" data-theme="dark">
+<html lang="zh-CN">
 <head>
-    <!-- Google tag (gtag.js) -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAOKAO COUNTDOWN | 高考全真倒计时模拟器</title>
+    <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+
+    <!-- Unified Velvet Room Theme -->
+    <link rel="stylesheet" href="../../velvet-theme.css">
+
+    <!-- Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BJBDJ1J052"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -18,324 +26,479 @@
           s.parentNode.insertBefore(hm, s);
         })();
     </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>高考倒计时</title>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
 
-    body {
-      font-family: 'Roboto', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
+    <style>
+        body {
+            background-color: var(--phantom-black);
+            color: var(--phantom-white);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .container {
-      background-color: var(--container-color);
-      padding: 2%;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      width: 90%;
-      transition: background-color 0.3s ease;
-    }
+        .main-container {
+            position: relative;
+            z-index: 10;
+            max-width: 860px;
+            width: 100%;
+            margin: 20px auto 60px;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
 
-    .page {
-      display: none;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    .page.active {
-      display: block;
-      opacity: 1;
-    }
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
 
-    h1, h2 {
-      font-weight: bold;
-      margin-bottom: 2%;
-      font-size: 3vw;
-    }
+        .banner-card {
+            background: var(--phantom-black);
+            border: 3px solid #ffffff;
+            box-shadow: 6px 6px 0px 0px var(--phantom-red);
+            padding: 24px;
+            text-align: center;
+            transform: rotate(-1deg);
+            margin-bottom: 24px;
+        }
 
-    .subject-btn, #end-btn {
-      display: block;
-      margin: 2% auto;
-      padding: 1% 2%;
-      font-size: 1.8vw;
-      background-color: var(--button-color);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
+        .banner-card h1 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: clamp(24px, 4.5vw, 42px);
+            letter-spacing: 2px;
+            color: #ffffff;
+            text-shadow: 3px 3px 0px var(--phantom-red);
+        }
 
-    .subject-btn:hover, #end-btn:hover {
-      background-color: var(--button-hover-color);
-      transform: scale(1.05);
-    }
+        .panel-card {
+            background: #ffffff;
+            color: var(--phantom-black);
+            border: 4px solid var(--phantom-black);
+            box-shadow: 8px 8px 0px 0px var(--phantom-red);
+            padding: 32px 24px;
+            position: relative;
+            box-sizing: border-box;
+        }
 
-    .flip-clock {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 2%;
-    }
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
 
-    .flip {
-      font-size: 10vw;
-      font-weight: bold;
-      margin: 0 1%;
-      width: 20%;
-      height: 25%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: var(--flip-background-color);
-      color: white;
-      border-radius: 10px;
-      position: relative;
-      perspective: 1000px;
-    }
+        .subject-btn {
+            background: var(--phantom-black);
+            color: #ffffff;
+            border: 2px solid #000000;
+            padding: 16px 14px;
+            font-family: var(--font-sans);
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transform: skewX(-8deg);
+            box-shadow: 4px 4px 0px 0px var(--phantom-red);
+            transition: all 0.2s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .flip::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 100%;
-      height: 50%;
-      background-color: rgba(255, 255, 255, 0.1);
-    }
+        .subject-btn span.subtext {
+            font-size: 13px;
+            color: #ff9999;
+            font-weight: 400;
+            font-family: var(--font-body);
+        }
 
-    .result {
-      font-size: 9vw;
-      font-weight: bold;
-    }
+        .subject-btn:hover {
+            background: var(--phantom-red);
+            color: #ffffff;
+            transform: skewX(-8deg) translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px #000000;
+        }
 
-    #time-used.green {
-      color: green;
-    }
+        .custom-box {
+            background: #f4f4f4;
+            border: 2px dashed var(--phantom-black);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+        }
 
-    #time-used.red {
-      color: red;
-    }
+        .custom-input {
+            padding: 10px 14px;
+            border: 2px solid var(--phantom-black);
+            font-size: 16px;
+            font-family: var(--font-body);
+            font-weight: 700;
+            min-width: 160px;
+            box-sizing: border-box;
+        }
 
-    .exam-info {
-      margin: 2% 0;
-      font-size: 2vw;
-    }
+        /* Clock Display */
+        .mission-timer-box {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--phantom-black);
+            border: 4px solid #ffffff;
+            box-shadow: 10px 10px 0px 0px var(--phantom-red);
+        }
 
-    .dark-mode-toggle {
-      position: absolute;
-      top: 2%;
-      right: 2%;
-      background-color: var(--button-color);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 5%;
-      height: 5%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: background-color 0.8s ease;
-    }
+        .mission-header {
+            font-family: var(--font-display);
+            font-size: clamp(20px, 3.5vw, 32px);
+            color: var(--phantom-red);
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
 
-    .dark-mode-toggle:hover {
-      background-color: var(--button-hover-color);
-    }
+        .flip-clock {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0 36px;
+        }
 
-    :root {
-      --background-color: #f0f0f0;
-      --container-color: #ffffff;
-      --button-color: #6200ee;
-      --button-hover-color: #3700b3;
-      --flip-background-color: #333;
-      --text-color: #000000;
-    }
+        .flip-unit {
+            background: #000000;
+            border: 3px solid var(--phantom-red);
+            box-shadow: 5px 5px 0px 0px var(--phantom-red);
+            padding: 16px 20px;
+            min-width: 110px;
+            text-align: center;
+        }
 
-    [data-theme="dark"] {
-      --background-color: #121212;
-      --container-color: #1e1e1e;
-      --button-color: #bb86fc;
-      --button-hover-color: #3700b3;
-      --flip-background-color: #444;
-      --text-color: #ffffff;
-    }
-  </style>
+        .flip-number {
+            font-family: var(--font-display);
+            font-size: clamp(48px, 10vw, 84px);
+            line-height: 1;
+            color: #ffffff;
+        }
+
+        .flip-label {
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: #aaaaaa;
+            margin-top: 6px;
+        }
+
+        .clock-colon {
+            font-family: var(--font-display);
+            font-size: clamp(40px, 8vw, 70px);
+            color: var(--phantom-red);
+            animation: pulse-colon 1s infinite;
+        }
+
+        @keyframes pulse-colon {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        /* Result Panel */
+        .result-panel {
+            background: #ffffff;
+            color: var(--phantom-black);
+            border: 4px solid var(--phantom-black);
+            box-shadow: 10px 10px 0px 0px var(--phantom-red);
+            padding: 36px 28px;
+            text-align: center;
+            position: relative;
+        }
+
+        .result-badge {
+            display: inline-block;
+            background: var(--phantom-red);
+            color: #ffffff;
+            font-family: var(--font-display);
+            font-size: 16px;
+            padding: 4px 16px;
+            letter-spacing: 1.5px;
+            transform: skewX(-10deg);
+            margin-bottom: 16px;
+        }
+
+        .result-time {
+            font-family: var(--font-display);
+            font-size: clamp(32px, 6vw, 56px);
+            margin: 16px 0;
+        }
+
+        .time-green { color: #16a34a; }
+        .time-red { color: var(--phantom-red); }
+
+        .encouragement-quote {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 18px;
+            color: #333333;
+            background: #f5f5f5;
+            border-left: 6px solid var(--phantom-red);
+            padding: 16px 20px;
+            margin: 24px auto;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
-  <button class="dark-mode-toggle" onclick="toggleDarkMode()">
-    <span class="material-icons">brightness_4</span>
-  </button>
-  <div class="container">
-    <!-- Page 1: Subject Selection -->
-    <div id="page1" class="page active">
-      <h1>牢房里的艺术家，今天想考什么？</h1>
-      <input type="text" id="exam-name" placeholder="考试名称">
-      <input type="number" id="exam-duration" placeholder="时长（分钟）">
-      <button class="subject-btn" onclick="startExam('', )">自定义考试</button>
-      <button class="subject-btn" onclick="startExam('语文', 150)">语文 (2小时30分钟)</button>
-      <button class="subject-btn" onclick="startExam('语文 无作文', 90)">语文（无作文） (1小时30分钟)</button>
-      <button class="subject-btn" onclick="startExam('数学/英语', 120)">数学/英语 (2小时)</button>
-      <button class="subject-btn" onclick="startExam('英语', 80)">英语 (无作文)（80分钟）</button>
-      <button class="subject-btn" onclick="startExam('其他科目', 75)">其他科目 (75分钟)</button>
-      <p6>Made With Love To USSR</p6>
+    <div class="velvet-bg-effects">
+        <div class="glow-spot"></div>
+        <div class="glow-spot-2"></div>
+        <div class="stripe-1"></div>
+        <div class="stripe-2"></div>
+        <div class="stripe-3"></div>
+        <div class="halftone" style="position:absolute; inset:0; opacity:0.18;"></div>
     </div>
 
-    <!-- Page 2: Countdown Timer -->
-    <div id="page2" class="page">
-      <h2>距离考试结束还有</h2>
-      <div class="flip-clock">
-        <div id="minutes" class="flip">00</div>
-        <div id="seconds" class="flip">00</div>
-      </div>
-      <button id="end-btn" onclick="endExam()">结束</button>
-    </div>
+    <!-- Unified Velvet Room Nav Script -->
+    <script src="../../velvet-nav.js" data-root="../../../index.html"></script>
 
-    <!-- Page 3: Exam Results -->
-    <div id="page3" class="page">
-      <div class="exam-info">
-        <h3 id="final-exam-name"></h3>
-        <div class="result">
-          <span id="time-used"></span>
+    <div class="main-container">
+        <!-- Page 1: Subject Selection -->
+        <div id="page1" class="page active">
+            <div class="banner-card">
+                <h1>EXAM SIMULATOR // 考场模拟</h1>
+                <div style="margin-top:6px; color:#ddd; font-size:15px; font-weight:700;">牢房里的艺术家，今天想挑战哪一科？</div>
+            </div>
+
+            <div class="panel-card">
+                <div class="custom-box">
+                    <input type="text" id="custom-name" class="custom-input" placeholder="自定义测试科目名称">
+                    <input type="number" id="custom-minutes" class="custom-input" style="width:120px;" placeholder="时长(分钟)" min="1">
+                    <button class="velvet-btn velvet-btn-primary" onclick="startCustomExam()">
+                        <span>启动自定义测试</span>
+                    </button>
+                </div>
+
+                <div class="subject-grid">
+                    <button class="subject-btn" onclick="startExam('语文', 150)">
+                        <span>语文全卷</span>
+                        <span class="subtext">150分钟 // 2小时30分</span>
+                    </button>
+                    <button class="subject-btn" onclick="startExam('语文 (无作文)', 90)">
+                        <span>语文 (无作文)</span>
+                        <span class="subtext">90分钟 // 1小时30分</span>
+                    </button>
+                    <button class="subject-btn" onclick="startExam('数学 / 英语', 120)">
+                        <span>数学 / 英语</span>
+                        <span class="subtext">120分钟 // 2小时00分</span>
+                    </button>
+                    <button class="subject-btn" onclick="startExam('英语 (听力/专项)', 80)">
+                        <span>英语专项</span>
+                        <span class="subtext">80分钟 // 1小时20分</span>
+                    </button>
+                    <button class="subject-btn" onclick="startExam('选考科目 (物理/历史/化生政地)', 75)">
+                        <span>等级考 / 选考科目</span>
+                        <span class="subtext">75分钟 // 1小时15分</span>
+                    </button>
+                    <button class="subject-btn" onclick="startExam('闪电速测', 45)">
+                        <span>闪电速测</span>
+                        <span class="subtext">45分钟 // 课后随堂</span>
+                    </button>
+                </div>
+
+                <div style="text-align:center; font-family:var(--font-display); font-size:12px; color:#777; margin-top:20px;">
+                    MISSION CODE: GAOKAO-SIM // RED EDITION
+                </div>
+            </div>
         </div>
-        <div id="encouragement"></div>
-      </div>
-      <button class="subject-btn" onclick="continueExam()">继续本次测试</button>
-      <button class="subject-btn" onclick="resetExam()">开始下一场测试</button>
+
+        <!-- Page 2: Countdown Timer -->
+        <div id="page2" class="page">
+            <div class="mission-timer-box">
+                <div class="mission-header" id="current-exam-title">EXAM IN PROGRESS</div>
+                <div class="flip-clock">
+                    <div class="flip-unit">
+                        <div class="flip-number" id="minutes">00</div>
+                        <div class="flip-label">MINUTES // 分钟</div>
+                    </div>
+                    <div class="clock-colon">:</div>
+                    <div class="flip-unit">
+                        <div class="flip-number" id="seconds">00</div>
+                        <div class="flip-label">SECONDS // 秒</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:center; gap:16px;">
+                    <button class="velvet-btn velvet-btn-primary" style="padding:12px 36px; font-size:18px;" onclick="endExam()">
+                        <span>SUBMIT & FINISH // 交卷结束</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 3: Exam Results -->
+        <div id="page3" class="page">
+            <div class="result-panel">
+                <div class="result-badge">EVALUATION // 模拟结果</div>
+                <h2 id="final-exam-name" style="margin:10px 0; font-family:var(--font-sans); font-size:24px;"></h2>
+                
+                <div class="result-time" id="time-used">00 分钟 00 秒</div>
+                <div class="encouragement-quote" id="encouragement"></div>
+
+                <div style="display:flex; justify-content:center; gap:16px; margin-top:28px; flex-wrap:wrap;">
+                    <button class="velvet-btn" onclick="continueExam()">
+                        <span>CONTINUE // 继续本次测试</span>
+                    </button>
+                    <button class="velvet-btn velvet-btn-primary" onclick="resetExam()">
+                        <span>NEW MISSION // 开始下一场</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    let countdownInterval;
-    let examDuration;
-    let timeLeft;
-    let timeout = false;
-    let endTime = 0;
-    const encouragementMessages = [
-      "坚持就是胜利！",
-      "相信自己，你能做到！",
-      "向着共产主义前进！",
-      "为了社会主义而奋斗！",
-      "劳动创造一切！",
-      "团结就是力量！",
-      "向科学和技术进军！",
-      "无产阶级团结起来！",
-      "胜利属于劳动者！",
-      "为伟大的事业而奋斗！",
-      "共产主义的未来是光明的！",
-      "我们将保卫列宁的城市！",
-      "欧洲将获得自由",
-      "不是列宁格勒惧怕死亡，而是死亡惧怕列宁格勒！",
-      "钢铁般的意志，铸就了苏维埃的辉煌，人民的力量，汇聚成红色的海洋。",
-      "红色经典是历史的见证，记录着苏联人民的英勇与智慧。",
-      "只要我们不停止前进，我们就一定能够取得胜利！",
-      "“我们要让历史的车轮前行，奋发向前！” —— 赫鲁晓夫 ",
-      "“无产者们，联合起来！” —— 利巴赫诺夫 ",
-      "在那烽火连天的岁月里，红色经典是我们精神的食粮，激励我们前行。",
-      "武装保卫苏维埃，赤旗飘扬映山红！以铁血担当，守护红色政权，不负人民重托！",
-      "苏维埃的荣光，由我们武装来捍卫！手握钢枪，心向光明，誓将革命进行到底！",
-      "社会主义的花朵，在风雨中绽放，散发出迷人的芬芳。",
-      "保卫苏维埃，是我们坚定不移的信念！以武装之躯，筑起红色堡垒，捍卫革命成果！",
-      "下定决心，不怕牺牲，排除万难，去争取胜利。",
-      "前途是光明的，道路是曲折的。",
-      "青年最要紧的精神，是要与命运奋斗，要在任何环境中间都能够解决自己乃至中国的问题。",
-      "努力过后，一定会有回报！",
-      "你已经尽力了，加油！"
-    ];
+    <script>
+        let countdownInterval;
+        let examDuration = 0;
+        let timeLeft = 0;
+        let timeout = false;
 
-    // Page Transitions
-    function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
-    }
+        const encouragementMessages = [
+            "坚持就是胜利！",
+            "相信自己，你能做到！",
+            "向着共产主义前进！",
+            "为了社会主义而奋斗！",
+            "劳动创造一切！",
+            "团结就是力量！",
+            "向科学和技术进军！",
+            "无产阶级团结起来！",
+            "胜利属于劳动者！",
+            "为伟大的事业而奋斗！",
+            "共产主义的未来是光明的！",
+            "我们将保卫列宁的城市！",
+            "欧洲将获得自由",
+            "不是列宁格勒惧怕死亡，而是死亡惧怕列宁格勒！",
+            "钢铁般的意志，铸就了苏维埃的辉煌，人民的力量，汇聚成红色的海洋。",
+            "红色经典是历史的见证，记录着苏联人民的英勇与智慧。",
+            "只要我们不停止前进，我们就一定能够取得胜利！",
+            "“我们要让历史的车轮前行，奋发向前！” —— 赫鲁晓夫",
+            "“无产者们，联合起来！” —— 利巴赫诺夫",
+            "在那烽火连天的岁月里，红色经典是我们精神的食粮，激励我们前行。",
+            "武装保卫苏维埃，赤旗飘扬映山红！以铁血担当，守护红色政权，不负人民重托！",
+            "苏维埃的荣光，由我们武装来捍卫！手握钢枪，心向光明，誓将革命进行到底！",
+            "社会主义的花朵，在风雨中绽放，散发出迷人的芬芳。",
+            "保卫苏维埃，是我们坚定不移的信念！以武装之躯，筑起红色堡垒，捍卫革命成果！",
+            "下定决心，不怕牺牲，排除万难，去争取胜利。",
+            "前途是光明的，道路是曲折的。",
+            "青年最要紧的精神，是要与命运奋斗，要在任何环境中间都能够解决自己乃至中国的问题。",
+            "努力过后，一定会有回报！",
+            "你已经尽力了，加油！"
+        ];
 
-    function startExam(subject, minutes) {
-      const examName = document.getElementById('exam-name').value || subject;
-      examDuration = document.getElementById('exam-duration').value * 60 || minutes * 60;
-      timeLeft = examDuration;
-      document.getElementById('final-exam-name').textContent = `测试名称：${examName}`;
-      updateTime();
-      showPage('page2');
-      startCountdown();
-    }
-
-    function startCountdown() {
-      countdownInterval = setInterval(() => {
-        if (timeLeft > 0) {
-          timeLeft--;
-        } else {
-          timeLeft--;
-          if (!timeout) {
-            document.getElementById('minutes').style.color = 'red';
-            document.getElementById('seconds').style.color = 'red';
-            timeout = true;
-          }
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
         }
-        updateTime();
-      }, 1000);
-    }
 
-    function updateTime() {
-      const minutes = Math.floor(Math.abs(timeLeft) / 60);
-      const seconds = Math.abs(timeLeft) % 60;
-      
-      document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
-      document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
-    }
+        function startCustomExam() {
+            const name = document.getElementById('custom-name').value.trim() || '自定义测试';
+            const mins = parseInt(document.getElementById('custom-minutes').value);
+            if (!mins || mins <= 0) {
+                if (window.VelvetAlert) VelvetAlert('请输入有效的考试时长（分钟）！', 'WARNING');
+                return;
+            }
+            startExam(name, mins);
+        }
 
-    function endExam() {
-      clearInterval(countdownInterval);
-      showPage('page3');
-      const timeUsed = examDuration - timeLeft;
-      const minutesUsed = Math.floor(timeUsed / 60);
-      const secondsUsed = timeUsed % 60;
-      
-      const timeUsedElement = document.getElementById('time-used');
-      if (timeLeft >= 0) {
-        timeUsedElement.textContent = `${minutesUsed} 分钟 ${secondsUsed} 秒`;
-        timeUsedElement.className = 'green';
-      } else {
-        timeUsedElement.textContent = `${Math.abs(minutesUsed)} 分钟 ${Math.abs(secondsUsed)} 秒 (超时)`;
-        timeUsedElement.className = 'red';
-      }
+        function startExam(subject, minutes) {
+            examDuration = minutes * 60;
+            timeLeft = examDuration;
+            timeout = false;
 
-      // Show random encouragement message
-      const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-      document.getElementById('encouragement').textContent = randomMessage;
-    }
+            document.getElementById('current-exam-title').textContent = `IN PROGRESS // ${subject}`;
+            document.getElementById('final-exam-name').textContent = `测试科目：${subject} (设定时长: ${minutes}分钟)`;
+            
+            document.getElementById('minutes').style.color = '#ffffff';
+            document.getElementById('seconds').style.color = '#ffffff';
 
-    function continueExam() {
-      showPage('page2');
-      startCountdown();
-    }
+            updateTime();
+            showPage('page2');
+            startCountdown();
 
-    function resetExam() {
-      timeout = false;
-      document.getElementById('minutes').style.color = 'white';
-      document.getElementById('seconds').style.color = 'white';
-      showPage('page1');
-    }
+            if (window.VelvetAudio) window.VelvetAudio.playClick();
+        }
 
-    function toggleDarkMode() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', newTheme);
-    }
-  </script>
+        function startCountdown() {
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft < 0 && !timeout) {
+                    timeout = true;
+                    document.getElementById('minutes').style.color = 'var(--phantom-red)';
+                    document.getElementById('seconds').style.color = 'var(--phantom-red)';
+                    if (window.VelvetAudio) window.VelvetAudio.playError();
+                }
+                updateTime();
+            }, 1000);
+        }
+
+        function updateTime() {
+            const absTime = Math.abs(timeLeft);
+            const minutes = Math.floor(absTime / 60);
+            const seconds = absTime % 60;
+
+            document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
+        }
+
+        function endExam() {
+            clearInterval(countdownInterval);
+            showPage('page3');
+
+            const timeUsed = examDuration - timeLeft;
+            const absTimeUsed = Math.abs(timeUsed);
+            const minutesUsed = Math.floor(absTimeUsed / 60);
+            const secondsUsed = absTimeUsed % 60;
+
+            const timeUsedElement = document.getElementById('time-used');
+            if (timeLeft >= 0) {
+                timeUsedElement.textContent = `用时：${minutesUsed} 分钟 ${secondsUsed} 秒 (准时完卷)`;
+                timeUsedElement.className = 'result-time time-green';
+                if (window.VelvetAudio) window.VelvetAudio.playSuccess();
+            } else {
+                timeUsedElement.textContent = `用时：${minutesUsed} 分钟 ${secondsUsed} 秒 (超时交卷)`;
+                timeUsedElement.className = 'result-time time-red';
+                if (window.VelvetAudio) window.VelvetAudio.playError();
+            }
+
+            const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+            document.getElementById('encouragement').textContent = `“${randomMessage}”`;
+        }
+
+        function continueExam() {
+            showPage('page2');
+            startCountdown();
+            if (window.VelvetAudio) window.VelvetAudio.playClick();
+        }
+
+        function resetExam() {
+            clearInterval(countdownInterval);
+            timeout = false;
+            showPage('page1');
+            if (window.VelvetAudio) window.VelvetAudio.playClick();
+        }
+    </script>
 </body>
 </html>

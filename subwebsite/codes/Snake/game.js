@@ -93,6 +93,7 @@
         if (head.x === food.x && head.y === food.y) {
             score += 10;
             scoreEl.textContent = score;
+            if (window.VelvetAudio) window.VelvetAudio.playClick();
             if (score > highScore) {
                 highScore = score;
                 highScoreEl.textContent = highScore;
@@ -177,12 +178,14 @@
         hideOverlay();
         draw();
         restartTickTimer();
+        if (window.VelvetAudio) window.VelvetAudio.playSuccess();
     }
 
     function endGame() {
         running = false;
         paused = false;
         clearInterval(tickTimer);
+        if (window.VelvetAudio) window.VelvetAudio.playError();
         showOverlay('游戏结束', `得分 ${score} · 按空格或点击重新开始`);
     }
 

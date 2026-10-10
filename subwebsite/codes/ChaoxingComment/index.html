@@ -1,0 +1,2986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>超星学习通 - 视频讨论与评论区模拟器</title>
+  <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+  
+  <!-- html2canvas 用于生成超清截屏长图 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* ========================================================
+       1. 基础全局与仿真超星学习通字体排版规范
+       ======================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --cx-blue: #0084ff;
+      --cx-blue-dark: #006dd4;
+      --cx-blue-light: #e6f3ff;
+      --cx-green: #00b578;
+      --cx-green-bg: #e6f8f1;
+      --cx-orange: #ff7d00;
+      --cx-orange-bg: #fff5eb;
+      --cx-red: #f53f3f;
+      --cx-red-bg: #feecec;
+      --cx-text-primary: #1d2129;
+      --cx-text-secondary: #4e5969;
+      --cx-text-muted: #86909c;
+      --cx-text-placeholder: #c9cdd4;
+      --cx-bg-page: #ffffff;
+      --cx-bg-gray: #f7f8fa;
+      --cx-border: #f2f3f5;
+      --cx-border-light: #f7f8fa;
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      background-color: #12141a;
+      color: var(--cx-text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    /* 背景暗色纹理与装饰（外壳桌面环境） */
+    .viewport-bg {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 20%, #1e2638 0%, #0e1219 75%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ========================================================
+       2. 浮动顶栏控制中心（天鹅绒房间 & 模拟器工具箱）
+       ======================================================== */
+    .toolbox-bar {
+      position: fixed;
+      top: 14px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(22, 26, 38, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 6px 14px;
+      border-radius: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+    .toolbox-bar::-webkit-scrollbar { display: none; }
+    .toolbox-bar.hidden-pure {
+      transform: translateY(-90px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .tool-btn {
+      background: transparent;
+      border: none;
+      color: #e2e8f0;
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tool-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .tool-btn.active {
+      background: var(--cx-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 132, 255, 0.45);
+    }
+    .tool-btn.btn-pure {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      font-weight: 600;
+    }
+    .tool-btn.btn-screenshot {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white;
+      font-weight: 600;
+    }
+    .tool-btn.btn-export {
+      background: linear-gradient(135deg, #e60012, #b91c1c);
+      color: white;
+      font-weight: 600;
+    }
+    .tool-btn.btn-home {
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      padding-right: 12px;
+      border-radius: 0;
+      text-decoration: none;
+    }
+
+    /* 纯净模式下召唤工具箱的角落微晶按钮 */
+    .pure-mode-summoner {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(0, 132, 255, 0.85);
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 9999;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+      font-size: 20px;
+    }
+    .pure-mode-summoner:hover {
+      transform: scale(1.1);
+      background: var(--cx-blue);
+    }
+
+    /* ========================================================
+       3. 手机真机壳容器 vs 全屏模式容器
+       ======================================================== */
+    .app-wrapper {
+      position: relative;
+      z-index: 10;
+      margin: 70px auto 40px auto;
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    /* 手机外壳模式 */
+    .app-wrapper.mode-phone {
+      width: 395px;
+      height: 844px; /* iPhone 14 / 标准高分辨率移动端比例 */
+      background: #000000;
+      border-radius: 50px;
+      padding: 12px;
+      box-shadow: 
+        0 0 0 2px #3e4451,
+        0 0 0 7px #1c202a,
+        0 30px 70px rgba(0, 0, 0, 0.7);
+    }
+    .app-wrapper.mode-phone .screen-container {
+      width: 100%;
+      height: 100%;
+      border-radius: 40px;
+      overflow: hidden;
+      position: relative;
+      background: var(--cx-bg-page);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 手机顶端灵动岛/听筒 */
+    .app-wrapper.mode-phone .phone-island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 24px;
+      background: #000000;
+      border-radius: 20px;
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 10px;
+    }
+    .island-lens {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #111a2e;
+      border: 1px solid #1f2d48;
+    }
+    .island-speaker {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: #17181c;
+    }
+
+    /* 全屏流式响应式模式 */
+    .app-wrapper.mode-fullscreen {
+      width: 100%;
+      max-width: 600px;
+      height: 100vh;
+      margin: 0 auto;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+    .app-wrapper.mode-fullscreen .screen-container {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      overflow: hidden;
+      position: relative;
+      background: var(--cx-bg-page);
+      display: flex;
+      flex-direction: column;
+    }
+    .app-wrapper.mode-fullscreen .phone-island {
+      display: none;
+    }
+
+    /* ========================================================
+       4. 手机状态栏（Status Bar）
+       ======================================================== */
+    .status-bar {
+      height: 42px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      background: #000000; /* 与视频顶部融为一体 */
+      user-select: none;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .status-bar.hidden-status {
+      display: none;
+    }
+    .status-left {
+      letter-spacing: -0.3px;
+      font-size: 14px;
+    }
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .battery-icon {
+      width: 22px;
+      height: 11px;
+      border: 1.5px solid #ffffff;
+      border-radius: 3px;
+      padding: 1px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .battery-icon::after {
+      content: '';
+      position: absolute;
+      right: -3.5px;
+      top: 2.5px;
+      width: 2px;
+      height: 4px;
+      background: #ffffff;
+      border-radius: 0 1px 1px 0;
+    }
+    .battery-fill {
+      height: 100%;
+      background: #ffffff;
+      border-radius: 1px;
+      width: 85%;
+    }
+
+    /* ========================================================
+       5. 视频播放器区域（超星标志性网课视频UI）
+       ======================================================== */
+    .video-viewport {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    /* 播放器内PPT教学画面 */
+    .video-canvas {
+      width: 100%;
+      height: 100%;
+      background: #182030;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      color: #ffffff;
+      overflow: hidden;
+    }
+    .ppt-slide {
+      width: 100%;
+      height: 100%;
+      padding: 22px 18px;
+      background: linear-gradient(145deg, #182236 0%, #0d131f 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .ppt-watermark {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .ppt-watermark-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulseDot 2s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    .ppt-header-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #60a5fa;
+      border-bottom: 2px solid #3b82f6;
+      padding-bottom: 5px;
+      margin-bottom: 8px;
+    }
+    .ppt-body-content {
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #e2e8f0;
+      flex: 1;
+    }
+    .ppt-formula {
+      margin-top: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px 10px;
+      border-left: 3px solid #f59e0b;
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 13.5px;
+      color: #fef08a;
+    }
+    .ppt-footer-tip {
+      font-size: 11px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* 讲师小窗口画面仿真 */
+    .teacher-pip {
+      position: absolute;
+      bottom: 22px;
+      right: 14px;
+      width: 74px;
+      height: 56px;
+      background: #2a354c;
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    .teacher-avatar-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+    .teacher-name-tag {
+      font-size: 9px;
+      color: #cbd5e1;
+      background: rgba(0, 0, 0, 0.6);
+      width: 100%;
+      text-align: center;
+    }
+
+    /* 弹幕轨道容器 */
+    .danmaku-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 50;
+    }
+    .danmaku-item {
+      position: absolute;
+      white-space: nowrap;
+      color: #ffffff;
+      font-size: 13px;
+      text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
+      opacity: 0.92;
+      animation: danmakuFly 8s linear infinite;
+    }
+    @keyframes danmakuFly {
+      from { transform: translateX(400px); }
+      to { transform: translateX(-400px); }
+    }
+
+    /* 播放器顶栏浮层 */
+    .video-top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 44px;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      color: #ffffff;
+      z-index: 80;
+    }
+    .video-back-btn {
+      cursor: pointer;
+      font-size: 22px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .video-title-text {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+    .video-top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+    }
+
+    /* 居中大播放按钮 (暂停状态) */
+    .video-center-play {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 22px;
+      cursor: pointer;
+      z-index: 80;
+      transition: all 0.2s;
+    }
+    .video-center-play:hover {
+      transform: translate(-50%, -50%) scale(1.1);
+      background: rgba(0, 132, 255, 0.8);
+    }
+    .video-center-play.playing {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* 播放器底栏控制条 */
+    .video-bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      color: #ffffff;
+      z-index: 80;
+      font-size: 11px;
+    }
+    .video-play-btn {
+      cursor: pointer;
+      font-size: 16px;
+      width: 24px;
+      text-align: center;
+    }
+    .video-time-display {
+      font-size: 11px;
+      color: #e2e8f0;
+      margin: 0 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .video-progress-wrapper {
+      flex: 1;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin: 0 8px;
+      position: relative;
+    }
+    .video-progress-track {
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .video-progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 32%;
+      background: var(--cx-blue);
+      border-radius: 2px;
+    }
+    .video-progress-thumb {
+      position: absolute;
+      left: 32%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    }
+    .video-ctrl-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ctrl-pill {
+      background: rgba(255, 255, 255, 0.18);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .ctrl-pill.active {
+      background: var(--cx-blue);
+      color: #ffffff;
+    }
+
+    /* 随堂弹窗做题测试 (超星经典防作弊弹题) */
+    .video-quiz-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 150;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      padding: 18px;
+      color: #ffffff;
+    }
+    .video-quiz-modal.open {
+      display: flex;
+    }
+    .quiz-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .quiz-question {
+      font-size: 12.5px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      color: #f1f5f9;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .quiz-option-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-option-btn:hover, .quiz-option-btn.selected {
+      background: var(--cx-blue);
+      border-color: var(--cx-blue);
+    }
+    .quiz-submit-btn {
+      background: var(--cx-green);
+      color: white;
+      border: none;
+      padding: 7px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ========================================================
+       6. 任务点提示条 (超星标志性灵魂)
+       ======================================================== */
+    .task-status-bar {
+      background: var(--cx-green-bg);
+      border-bottom: 1px solid #d4f2e6;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--cx-green);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .task-status-bar.in-progress {
+      background: var(--cx-orange-bg);
+      border-bottom: 1px solid #ffe3c7;
+      color: var(--cx-orange);
+    }
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+    .task-icon-circle {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cx-green);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    .task-status-bar.in-progress .task-icon-circle {
+      background: var(--cx-orange);
+    }
+    .task-right-btn {
+      font-size: 11px;
+      color: var(--cx-text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* ========================================================
+       7. Tab 选项卡（超星移动端规范）
+       ======================================================== */
+    .chaoxing-tabs {
+      height: 44px;
+      display: flex;
+      border-bottom: 1px solid var(--cx-border);
+      background: #ffffff;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .tab-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--cx-text-secondary);
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-item.active {
+      color: var(--cx-blue);
+      font-weight: 700;
+    }
+    .tab-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 3px;
+      background: var(--cx-blue);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* ========================================================
+       8. 评论与讨论区主体容器（支持丝滑上下滚动）
+       ======================================================== */
+    .content-scroll-viewport {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      background: var(--cx-bg-page);
+      position: relative;
+    }
+    /* 模拟超星移动端原生细滚动条 */
+    .content-scroll-viewport::-webkit-scrollbar {
+      width: 4px;
+    }
+    .content-scroll-viewport::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 2px;
+    }
+
+    /* 讨论区头部小计与排序 */
+    .comments-header-bar {
+      padding: 12px 16px 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      user-select: none;
+    }
+    .comments-total-count {
+      color: var(--cx-text-primary);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .comments-sort-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--cx-text-muted);
+    }
+    .sort-btn {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .sort-btn.active {
+      color: var(--cx-blue);
+      font-weight: 600;
+    }
+
+    /* 评论列表项 Container */
+    .comments-list {
+      padding: 4px 16px 80px 16px; /* 底部留白防止被吸底输入框遮挡 */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 每一条评论卡片 */
+    .comment-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--cx-border);
+      position: relative;
+      transition: background 0.2s;
+    }
+    /* 编辑模式下鼠标悬停提示 */
+    body.is-editing .comment-item {
+      border-radius: 8px;
+      margin: 2px -6px;
+      padding: 12px 6px;
+    }
+    body.is-editing .comment-item:hover {
+      background: rgba(0, 132, 255, 0.04);
+      outline: 1px dashed rgba(0, 132, 255, 0.4);
+    }
+
+    /* 评论操作悬浮小胶囊 (仅在编辑模式展示) */
+    .item-edit-actions {
+      position: absolute;
+      top: 6px;
+      right: 0;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 14px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 20;
+    }
+    body.is-editing .comment-item:hover .item-edit-actions {
+      display: flex;
+    }
+    .edit-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--cx-text-secondary);
+      font-size: 11px;
+      padding: 2px 4px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .edit-action-btn:hover {
+      color: var(--cx-blue);
+      background: var(--cx-blue-light);
+    }
+    .edit-action-btn.btn-del:hover {
+      color: var(--cx-red);
+      background: var(--cx-red-bg);
+    }
+
+    /* 头像样式 */
+    .comment-avatar-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    .comment-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 评论主体 */
+    .comment-content-box {
+      flex: 1;
+      min-width: 0;
+    }
+    .comment-user-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .comment-user-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .comment-author-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #333333;
+      cursor: text;
+    }
+    /* 角色标签徽章（学生、助教、教师） */
+    .author-badge {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .badge-teacher {
+      background: var(--cx-orange-bg);
+      color: var(--cx-orange);
+      border: 0.5px solid #ffd8af;
+    }
+    .badge-assistant {
+      background: var(--cx-blue-light);
+      color: var(--cx-blue);
+      border: 0.5px solid #bae0ff;
+    }
+    .badge-student {
+      background: var(--cx-bg-gray);
+      color: var(--cx-text-muted);
+    }
+    .badge-pinned {
+      background: var(--cx-red-bg);
+      color: var(--cx-red);
+      border: 0.5px solid #ffccc7;
+    }
+    .comment-class-name {
+      font-size: 11px;
+      color: var(--cx-text-muted);
+    }
+
+    /* 点赞区域 */
+    .comment-like-box {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--cx-text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .comment-like-box:hover {
+      color: var(--cx-text-secondary);
+    }
+    .comment-like-box.liked {
+      color: var(--cx-blue);
+      font-weight: 600;
+    }
+    .comment-like-box.liked .like-icon {
+      transform: scale(1.15);
+      animation: likeBounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes likeBounce {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.35); }
+      100% { transform: scale(1.15); }
+    }
+    .like-icon {
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+
+    /* 评论正文 */
+    .comment-text {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--cx-text-primary);
+      margin-bottom: 6px;
+      word-break: break-word;
+      cursor: text;
+    }
+    /* 视频时间点高亮链接（如 04:15） */
+    .time-stamp-link {
+      color: var(--cx-blue);
+      cursor: pointer;
+      font-weight: 500;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+    .time-stamp-link:hover {
+      text-decoration: underline;
+      background: var(--cx-blue-light);
+    }
+
+    /* 发布时间与IP属地与回复 */
+    .comment-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11.5px;
+      color: var(--cx-text-muted);
+      margin-top: 4px;
+    }
+    .reply-trigger-btn {
+      color: var(--cx-text-secondary);
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .reply-trigger-btn:hover {
+      color: var(--cx-blue);
+    }
+
+    /* 二级楼中楼子评论容器 (超星典型设计) */
+    .nested-replies-box {
+      margin-top: 8px;
+      background: var(--cx-bg-gray);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+    .nested-reply-item {
+      margin-bottom: 4px;
+      color: var(--cx-text-primary);
+    }
+    .nested-reply-item:last-child {
+      margin-bottom: 0;
+    }
+    .nested-author {
+      color: #3b5998;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ========================================================
+       9. 底部吸底评论输入栏（真实互动）
+       ======================================================== */
+    .bottom-input-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid var(--cx-border);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+    }
+    .input-field-wrapper {
+      flex: 1;
+      height: 36px;
+      background: #f2f3f5;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+    }
+    .input-field {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 13.5px;
+      color: var(--cx-text-primary);
+    }
+    .input-field::placeholder {
+      color: var(--cx-text-placeholder);
+    }
+    .emoji-picker-btn {
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--cx-text-muted);
+      user-select: none;
+      transition: transform 0.15s;
+    }
+    .emoji-picker-btn:hover {
+      transform: scale(1.15);
+    }
+    .send-comment-btn {
+      background: #d8d8d8;
+      color: #ffffff;
+      border: none;
+      border-radius: 18px;
+      padding: 0 16px;
+      height: 36px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .send-comment-btn.can-send {
+      background: var(--cx-blue);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 132, 255, 0.35);
+    }
+
+    /* 表情选择悬浮面板 */
+    .emoji-popover {
+      position: absolute;
+      bottom: 56px;
+      left: 12px;
+      right: 12px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--cx-border);
+      display: none;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      z-index: 150;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .emoji-popover.open {
+      display: grid;
+    }
+    .emoji-unit {
+      font-size: 22px;
+      text-align: center;
+      cursor: pointer;
+      padding: 4px 0;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .emoji-unit:hover {
+      background: var(--cx-bg-gray);
+    }
+
+    /* ========================================================
+       10. 详情 Tab 与 目录 Tab 真实模拟
+       ======================================================== */
+    .tab-panel {
+      display: none;
+      padding: 16px;
+      background: #ffffff;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+    .course-detail-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .course-detail-meta {
+      font-size: 12px;
+      color: var(--cx-text-muted);
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .course-detail-desc {
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--cx-text-secondary);
+    }
+    .catalog-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--cx-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+    .catalog-item:hover {
+      background: #fafafa;
+    }
+    .catalog-item.current {
+      color: var(--cx-blue);
+      font-weight: 600;
+    }
+
+    /* ========================================================
+       11. 高级可视化编辑抽屉（侧边展开控制台）
+       ======================================================== */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+    }
+    .drawer-overlay.open {
+      display: block;
+    }
+    .editor-drawer {
+      position: fixed;
+      top: 0;
+      right: -480px;
+      width: 440px;
+      max-width: 90vw;
+      height: 100vh;
+      background: #181d28;
+      color: #e2e8f0;
+      z-index: 2001;
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+      transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .editor-drawer.open {
+      right: 0;
+    }
+    .drawer-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #131722;
+    }
+    .drawer-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .drawer-close {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .drawer-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .drawer-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: #232938;
+      border: 1px solid #333d52;
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--cx-blue);
+      box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.25);
+    }
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    /* 预设场景按钮网格 */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .preset-card {
+      background: #232a3b;
+      border: 1px solid #364157;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .preset-card:hover {
+      background: #2c364c;
+      border-color: var(--cx-blue);
+      transform: translateY(-2px);
+    }
+    .preset-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .preset-card-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    /* 头像颜色选择小块 */
+    .color-swatches {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .color-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s;
+    }
+    .color-swatch:hover, .color-swatch.active {
+      transform: scale(1.15);
+      border-color: #ffffff;
+    }
+
+    /* 抽屉底部按钮操作 */
+    .drawer-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: #131722;
+      display: flex;
+      gap: 10px;
+    }
+    .action-btn-primary {
+      flex: 1;
+      background: var(--cx-blue);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .action-btn-secondary {
+      background: #333d52;
+      color: #e2e8f0;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+
+    /* ========================================================
+       12. 原地就地修改的高亮样式 (In-place edit)
+       ======================================================== */
+    [contenteditable="true"] {
+      outline: 1.5px dashed #0084ff !important;
+      background: rgba(0, 132, 255, 0.08) !important;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+
+    /* 气泡轻提示 Toast */
+    .toast-msg {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0, 0, 0, 0.85);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-msg.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="is-editing">
+
+  <div class="viewport-bg"></div>
+
+  <!-- 顶部控制条（仅在编辑调试模式展示，纯净模式自动隐藏） -->
+  <header class="toolbox-bar" id="toolboxBar">
+    <a href="../../../index.html" class="tool-btn btn-home" title="返回天鹅绒房间导航主页">
+      <span>🏛️ 返回导航页</span>
+    </a>
+    <button class="tool-btn active" id="btnToggleEdit" onclick="toggleEditMode()" title="切换编辑模式与锁定模式">
+      <span id="editIcon">✏️</span> <span id="editText">编辑模式中</span>
+    </button>
+    <button class="tool-btn" id="btnViewport" onclick="toggleViewportMode()" title="切换真机手机框 / 全屏响应式">
+      <span id="viewportIcon">📱</span> <span id="viewportText">手机外观</span>
+    </button>
+    <button class="tool-btn" onclick="openDrawer('newComment')" title="添加新讨论">
+      <span>➕ 添加评论</span>
+    </button>
+    <button class="tool-btn" onclick="openDrawer('presets')" title="加载经典场景预设">
+      <span>🎭 经典预设</span>
+    </button>
+    <button class="tool-btn" onclick="openDrawer('subjects')" title="切换网课学科科目">
+      <span>📚 切换学科</span>
+    </button>
+    <button class="tool-btn" onclick="openDrawer('settings')" title="视频与课程全局参数">
+      <span>⚙️ 视频设置</span>
+    </button>
+    <button class="tool-btn" onclick="triggerQuizModal()" title="模拟超星视频随堂测试/人脸识别弹题">
+      <span>⚠️ 随堂测验</span>
+    </button>
+    <button class="tool-btn btn-screenshot" onclick="captureScreenshot()" title="生成并下载高保真长图">
+      <span>📸 截长图</span>
+    </button>
+    <button class="tool-btn btn-export" onclick="exportStandaloneHTML()" title="打包生成无依赖单文件HTML">
+      <span>💾 导出独立HTML</span>
+    </button>
+    <button class="tool-btn btn-pure" onclick="enterPureMode()" title="隐藏所有编辑工具，进入100%纯净拟真展示">
+      <span>👁️ 拟真模式</span>
+    </button>
+  </header>
+
+  <!-- 纯净模式下右下角的唤醒悬浮球 -->
+  <div class="pure-mode-summoner" id="pureSummoner" onclick="exitPureMode()" title="点击或按Esc唤出控制台">
+    ⚙️
+  </div>
+
+  <!-- 核心视口容器 -->
+  <main class="app-wrapper mode-phone" id="appWrapper">
+    <!-- 手机屏幕框架 -->
+    <div class="screen-container" id="screenContainer">
+      
+      <!-- 手机灵动岛/听筒 (真机模式显示) -->
+      <div class="phone-island">
+        <div class="island-lens"></div>
+        <div class="island-speaker"></div>
+      </div>
+
+      <!-- 手机系统顶部状态栏 -->
+      <div class="status-bar" id="statusBar">
+        <div class="status-left" id="statusTime">14:28</div>
+        <div class="status-right">
+          <span style="font-size: 11px;">5G</span>
+          <svg width="14" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z" opacity="0.3"/>
+            <path d="M12 6a6 6 0 0 0-6 6c0 1.48.54 2.84 1.43 3.91L12 20.1l4.57-4.19A5.96 5.96 0 0 0 18 12a6 6 0 0 0-6-6z"/>
+          </svg>
+          <div class="battery-icon">
+            <div class="battery-fill" id="batteryFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 视频播放器区域 -->
+      <section class="video-viewport" id="videoViewport">
+        <!-- 视频画面幻灯片 / 画布 -->
+        <div class="video-canvas" id="videoCanvas">
+          <div class="ppt-slide">
+            <div class="ppt-watermark">
+              <span class="ppt-watermark-dot"></span>
+              <span id="watermarkText">超星泛雅课堂 · 在线录播</span>
+            </div>
+            <div>
+              <div class="ppt-header-title" id="pptHeaderTitle">§ 2.4 微积分基本定理及工程应用</div>
+              <div class="ppt-body-content" id="pptBodyContent">
+                1. 设函数 f(x) 在闭区间 [a, b] 上连续<br>
+                2. 若 F(x) 为 f(x) 的一个原函数，则定积分计算式成立：
+                <div class="ppt-formula" id="pptFormula">∫ [a, b] f(x) dx = F(b) - F(a) = [F(x)]_a^b</div>
+              </div>
+            </div>
+            <div class="ppt-footer-tip">
+              <span id="pptExamTip">【重点考点】牛顿-莱布尼茨公式 (★★★)</span>
+              <span id="pptPageInfo">P. 18 / 42</span>
+            </div>
+          </div>
+
+          <!-- 教师画中画小窗 -->
+          <div class="teacher-pip" id="teacherPip">
+            <div class="teacher-avatar-icon" id="teacherIcon">👨‍🏫</div>
+            <div class="teacher-name-tag" id="teacherTag">主讲：王教授</div>
+          </div>
+        </div>
+
+        <!-- 弹幕滚动层 -->
+        <div class="danmaku-container" id="danmakuContainer">
+          <div class="danmaku-item" style="top: 25px; animation-delay: 0s;">打卡签到！老师讲得太透彻了！</div>
+          <div class="danmaku-item" style="top: 55px; animation-delay: 2.8s;">08:15 这里期末必考，赶紧截图</div>
+          <div class="danmaku-item" style="top: 85px; animation-delay: 5.2s;">1111111</div>
+          <div class="danmaku-item" style="top: 40px; animation-delay: 7.5s;">救命，进度条撑住啊千万别防切屏</div>
+        </div>
+
+        <!-- 顶部覆盖控制栏 -->
+        <div class="video-top-bar">
+          <div class="video-back-btn" title="返回" onclick="history.back()">‹</div>
+          <div class="video-title-text" id="videoBarTitle">第2章 微积分基本定理推导</div>
+          <div class="video-top-actions">
+            <span title="投屏" onclick="showToast('正在搜索可投屏电视设备...')">📺</span>
+            <span title="选集" onclick="switchTab('catalog')">📑</span>
+            <span title="更多设置" onclick="openDrawer('settings')">···</span>
+          </div>
+        </div>
+
+        <!-- 中间大播放按钮 -->
+        <div class="video-center-play" id="centerPlayBtn" onclick="togglePlayVideo()">
+          ▶
+        </div>
+
+        <!-- 底部控制栏 -->
+        <div class="video-bottom-bar">
+          <div class="video-play-btn" id="bottomPlayBtn" onclick="togglePlayVideo()">▶</div>
+          <div class="video-time-display" id="timeDisplay">06:42 / 24:18</div>
+          <div class="video-progress-wrapper" onclick="seekVideo(event)">
+            <div class="video-progress-track">
+              <div class="video-progress-fill" id="progressFill"></div>
+            </div>
+            <div class="video-progress-thumb" id="progressThumb"></div>
+          </div>
+          <div class="video-ctrl-right">
+            <span class="ctrl-pill active" id="danmakuToggle" onclick="toggleDanmaku()">弹</span>
+            <span class="ctrl-pill" id="speedToggle" onclick="toggleSpeed()">1.0X</span>
+            <span class="ctrl-pill" style="font-size: 13px;" onclick="toggleFullscreenVideo()">⛶</span>
+          </div>
+        </div>
+
+        <!-- 超星随堂测试弹窗仿真 -->
+        <div class="video-quiz-modal" id="videoQuizModal">
+          <div class="quiz-title">
+            <span>⚠️ 随堂测验</span>
+            <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">(完成答题后自动恢复视频播放)</span>
+          </div>
+          <div class="quiz-question" id="quizQuestionText">
+            【单选题】使用牛顿-莱布尼茨公式计算定积分的前提条件是：
+          </div>
+          <div class="quiz-options" id="quizOptions">
+            <button class="quiz-option-btn selected" onclick="selectQuizOption(this)">A. 被积函数在区间上连续</button>
+            <button class="quiz-option-btn" onclick="selectQuizOption(this)">B. 被积函数必须为奇函数</button>
+            <button class="quiz-option-btn" onclick="selectQuizOption(this)">C. 区间长度必须为正无穷</button>
+          </div>
+          <button class="quiz-submit-btn" onclick="submitQuiz()">提交答案并继续学习</button>
+        </div>
+      </section>
+
+      <!-- 任务点横幅 (超星绿圈打勾) -->
+      <section class="task-status-bar" id="taskStatusBar" onclick="toggleTaskStatus()">
+        <div class="task-left">
+          <div class="task-icon-circle" id="taskIcon">✓</div>
+          <span id="taskStatusText">任务点：视频任务（已完成）</span>
+        </div>
+        <div class="task-right-btn" id="taskSubText">
+          防作弊开启 · 点击切换状态 ›
+        </div>
+      </section>
+
+      <!-- 选项卡 Tab -->
+      <nav class="chaoxing-tabs">
+        <div class="tab-item" onclick="switchTab('detail')">详情</div>
+        <div class="tab-item" onclick="switchTab('catalog')">目录</div>
+        <div class="tab-item active" id="tabDiscussion" onclick="switchTab('discussion')">
+          讨论(<span id="tabCount">128</span>)
+        </div>
+        <div class="tab-item" onclick="switchTab('question')">提问</div>
+      </nav>
+
+      <!-- 讨论与评论区可滚动区域 -->
+      <div class="content-scroll-viewport" id="scrollViewport">
+        
+        <!-- 讨论 Tab 视图 -->
+        <div id="tabPanelDiscussion">
+          <!-- 评论过滤与排序头部 -->
+          <div class="comments-header-bar">
+            <div class="comments-total-count">
+              <span>全部讨论</span>
+              <span style="color: var(--cx-text-muted); font-weight: normal; font-size: 12px;">(<span id="listTotalCount">128</span>)</span>
+            </div>
+            <div class="comments-sort-group">
+              <span class="sort-btn active" id="sortHot" onclick="sortComments('hot')">最热</span>
+              <span>|</span>
+              <span class="sort-btn" id="sortNew" onclick="sortComments('new')">最新</span>
+            </div>
+          </div>
+
+          <!-- 评论流容器 -->
+          <div class="comments-list" id="commentsList">
+            <!-- 评论项将由 JavaScript 渲染并支持动态编辑 -->
+          </div>
+        </div>
+
+        <!-- 课程详情 Tab 视图 -->
+        <div class="tab-panel" id="tabPanelDetail">
+          <div class="course-detail-title" id="courseDetailTitle">高等数学（下）- 重点例题解析</div>
+          <div class="course-detail-meta">
+            <div>授课教师：<span id="detailTeacher">王立平 教授</span></div>
+            <div>开课院校：全国大学优质课程联盟</div>
+            <div>学分学时：4.0 学分 / 64 学时</div>
+          </div>
+          <div class="course-detail-desc" id="courseDetailDesc">
+            本课程为国家级精品在线开放课程，系统梳理多元函数微积分、常微分方程与无穷级数的核心考点与典型题型推导。结合实际工程应用案例，深入浅出。
+          </div>
+        </div>
+
+        <!-- 课程目录 Tab 视图 -->
+        <div class="tab-panel" id="tabPanelCatalog">
+          <div class="catalog-item" onclick="switchCatalogItem('§ 1.1 空间解析几何基础')">
+            <span>§ 1.1 空间解析几何基础</span>
+            <span style="color: var(--cx-green); font-size: 11px;">已完成 ✓</span>
+          </div>
+          <div class="catalog-item" onclick="switchCatalogItem('§ 1.2 平面及其方程')">
+            <span>§ 1.2 平面及其方程</span>
+            <span style="color: var(--cx-green); font-size: 11px;">已完成 ✓</span>
+          </div>
+          <div class="catalog-item current" onclick="switchCatalogItem('§ 2.4 微积分基本定理推导')">
+            <span id="catalogCurrentTitle">§ 2.4 微积分基本定理推导</span>
+            <span style="color: var(--cx-blue); font-size: 11px;">学习中 ▶</span>
+          </div>
+          <div class="catalog-item" onclick="switchCatalogItem('§ 2.5 换元积分法与分部积分')">
+            <span>§ 2.5 换元积分法与分部积分</span>
+            <span style="color: var(--cx-text-muted); font-size: 11px;">未开始</span>
+          </div>
+        </div>
+
+        <!-- 提问 Tab 视图 -->
+        <div class="tab-panel" id="tabPanelQuestion">
+          <div style="text-align: center; color: var(--cx-text-muted); padding: 40px 0; font-size: 13px;">
+            暂无学生提问，点击底部输入框可提出疑问
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 底部吸底评论输入栏 -->
+      <footer class="bottom-input-bar" id="bottomInputBar">
+        <div class="input-field-wrapper">
+          <input type="text" class="input-field" id="mainInput" placeholder="写讨论、打卡或提问..." oninput="onCommentInput(this)" onkeydown="if(event.key==='Enter') sendMainComment()">
+          <span class="emoji-picker-btn" onclick="toggleEmojiPicker()" title="插入表情">😊</span>
+        </div>
+        <button class="send-comment-btn" id="sendBtn" onclick="sendMainComment()">发送</button>
+
+        <!-- 表情选择悬浮面板 -->
+        <div class="emoji-popover" id="emojiPopover">
+          <span class="emoji-unit" onclick="insertEmoji('👍')">👍</span>
+          <span class="emoji-unit" onclick="insertEmoji('😭')">😭</span>
+          <span class="emoji-unit" onclick="insertEmoji('🤣')">🤣</span>
+          <span class="emoji-unit" onclick="insertEmoji('🤡')">🤡</span>
+          <span class="emoji-unit" onclick="insertEmoji('💯')">💯</span>
+          <span class="emoji-unit" onclick="insertEmoji('👏')">👏</span>
+          <span class="emoji-unit" onclick="insertEmoji('🎓')">🎓</span>
+          <span class="emoji-unit" onclick="insertEmoji('🔥')">🔥</span>
+          <span class="emoji-unit" onclick="insertEmoji('✍️')">✍️</span>
+          <span class="emoji-unit" onclick="insertEmoji('📚')">📚</span>
+          <span class="emoji-unit" onclick="insertEmoji('🙏')">🙏</span>
+          <span class="emoji-unit" onclick="insertEmoji('🤯')">🤯</span>
+          <span class="emoji-unit" onclick="insertEmoji('☕')">☕</span>
+          <span class="emoji-unit" onclick="insertEmoji('😴')">😴</span>
+          <span class="emoji-unit" onclick="insertEmoji('💀')">💀</span>
+          <span class="emoji-unit" onclick="insertEmoji('✨')">✨</span>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- 侧边高级可视化控制抽屉 -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <aside class="editor-drawer" id="editorDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawerHeaderTitle">🛠️ 控制台</div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    
+    <div class="drawer-body" id="drawerBody">
+      <!-- 动态插入不同面板 -->
+    </div>
+
+    <div class="drawer-footer" id="drawerFooter">
+      <button class="action-btn-secondary" onclick="closeDrawer()">关闭</button>
+      <button class="action-btn-primary" id="drawerSaveBtn" onclick="saveDrawerForm()">保存修改</button>
+    </div>
+  </aside>
+
+  <!-- 轻量提示条 -->
+  <div class="toast-msg" id="toastMsg"></div>
+
+  <!-- ========================================================
+       13. 核心驱动脚本：数据模型、预设、学科切换、编辑与导出逻辑
+       ======================================================== */
+  -->
+  <script>
+    // ----------------------------------------------------
+    // A. 经典学科与预设数据集
+    // ----------------------------------------------------
+    const AVATAR_COLORS = ['#ff7d00', '#00b578', '#1677ff', '#722ed1', '#f53f3f', '#eb2f96', '#13c2c2', '#fa8c16'];
+
+    // 5大学科真实题库与板书
+    const SUBJECT_PRESETS = {
+      math: {
+        name: "高等数学（微积分）",
+        course: "高等数学（下）- 重点例题解析",
+        title: "§ 2.4 微积分基本定理推导",
+        teacher: "王立平 教授",
+        formula: "∫ [a, b] f(x) dx = F(b) - F(a) = [F(x)]_a^b",
+        pptTip: "【重点考点】牛顿-莱布尼茨公式 (★★★)",
+        pptBody: "1. 设函数 f(x) 在闭区间 [a, b] 上连续\n2. 若 F(x) 为 f(x) 的一个原函数，则定积分计算式成立：",
+        quizQ: "【单选题】使用牛顿-莱布尼茨公式计算定积分的前提条件是：",
+        quizOpts: ["A. 被积函数在区间上连续", "B. 被积函数必须为奇函数", "C. 区间长度必须为正无穷"]
+      },
+      marxism: {
+        name: "马克思主义基本原理",
+        course: "马克思主义基本原理（新版教材）",
+        title: "第2章 实践与认识的辩证运动规律",
+        teacher: "张德胜 教授",
+        formula: "实践 ➔ 认识 ➔ 再实践 ➔ 再认识 (循环往复以至无穷)",
+        pptTip: "【核心考点】真理的绝对性与相对性统一",
+        pptBody: "1. 实践是认识的基础，实践是检验真理的唯一标准\n2. 认识对实践具有反作用，科学理论对实践具有指导作用",
+        quizQ: "【单选题】认识发展的根本动力是：",
+        quizOpts: ["A. 社会实践的不断发展", "B. 主观想象的丰富", "C. 纯粹逻辑的推演"]
+      },
+      cs: {
+        name: "数据结构与算法",
+        course: "数据结构与算法深度剖析",
+        title: "第4讲 二叉树前序遍历与递归时间复杂度",
+        teacher: "李明 博士",
+        formula: "T(n) = 2T(n/2) + O(1) ⟹ T(n) = O(n)",
+        pptTip: "【高频面试考题】二叉树前序遍历栈模拟",
+        pptBody: "void PreOrder(TreeNode* root) {\n  if(!root) return;\n  visit(root->val);\n  PreOrder(root->left);\n  PreOrder(root->right);\n}",
+        quizQ: "【单选题】深度为 k 的完全二叉树最多含有多少个结点：",
+        quizOpts: ["A. 2^k - 1", "B. 2^k", "C. 2^(k-1)"]
+      },
+      english: {
+        name: "大学英语（四六级）",
+        course: "大学通用学术英语（三）",
+        title: "Unit 3 Academic Critical Thinking & Long Sentences",
+        teacher: "Prof. Sarah Smith",
+        formula: "Subject + Verb + Object + [Relative Clause] + [Adverbial]",
+        pptTip: "【Key Vocabulary】ubiquitous, indispensable, empirical",
+        pptBody: "The ubiquitous application of digital technologies has revolutionized empirical research methodologies across disciplines.",
+        quizQ: "【单选题】Choose the closest synonym for 'indispensable':",
+        quizOpts: ["A. essential", "B. redundant", "C. superficial"]
+      },
+      physics: {
+        name: "大学物理实验",
+        course: "大学物理实验（电磁学与光学）",
+        title: "实验七 示波器的使用与李萨如图形观察",
+        teacher: "陈工 实验主任",
+        formula: "fx / fy = ny / nx (相切切点法测量未知频率)",
+        pptTip: "【操作规程】辉度调节勿过亮，防止荧光粉灼伤",
+        pptBody: "1. 调节聚焦与辅助聚焦旋钮，获得清晰光圆\n2. 在 x-y 模式下输入两路正弦信号，观察稳定李萨如图形",
+        quizQ: "【单选题】李萨如图形呈稳定正椭圆时，两信号相位差为：",
+        quizOpts: ["A. π/2 (90度)", "B. 0度", "C. π (180度)"]
+      }
+    };
+
+    const PRESETS = {
+      exam_collapse: {
+        name: "期末考前破防大赏",
+        desc: "熬夜补课、倍速被抓、高能吐槽真实大学网课评论",
+        title: "§ 2.4 微积分基本定理推导",
+        course: "高等数学（下）- 重点例题解析",
+        teacher: "王立平 教授",
+        taskDone: true,
+        comments: [
+          {
+            id: 'c1',
+            name: '助教-陈学长',
+            badge: 'teacher',
+            badgeText: '助教·置顶',
+            avatar: '陈',
+            avatarColor: '#1677ff',
+            text: '【重要通知】本讲 08:35 的链式求导法则与偏导数几何意义为期末必考大题，请务必掌握例题推导，不要只挂机刷时长！',
+            likes: 689,
+            time: '2天前',
+            ip: '北京',
+            pinned: true,
+            replies: [
+              { name: '高数受害者', text: '收到学长！今晚通宵硬啃！' },
+              { name: '早睡是不可能的', text: '学长能不能再划划课后习题哪几道必做啊😭' }
+            ]
+          },
+          {
+            id: 'c2',
+            name: '张三不挂科',
+            badge: 'student',
+            badgeText: '自动化2201班',
+            avatar: '张',
+            avatarColor: '#ff7d00',
+            text: '家人们谁懂啊，刚才开着二倍速突然跳出来一个人脸识别，我直接对着镜头愣了三秒，结果判定防切屏违规时长重新算了！！！好崩溃啊啊啊！！！',
+            likes: 421,
+            time: '昨天 23:14',
+            ip: '江苏',
+            replies: [
+              { name: '同舟共济', text: '哈哈哈哈我也被弹了，大半夜在被窝里还要端正坐姿' },
+              { name: '李四', text: '加一，甚至还要做三道单选题才给继续播' }
+            ]
+          },
+          {
+            id: 'c3',
+            name: '林微凉',
+            badge: 'student',
+            badgeText: '计算机科学与技术',
+            avatar: '林',
+            avatarColor: '#00b578',
+            text: '04:20 这里的讲师讲得真的太清晰了，比我们线下老师讲半天都透彻。打卡第15节视频，还有8个任务点！',
+            likes: 153,
+            time: '5小时前',
+            ip: '浙江',
+            replies: []
+          },
+          {
+            id: 'c4',
+            name: '王小波的猪',
+            badge: 'student',
+            badgeText: '经管2103',
+            avatar: '王',
+            avatarColor: '#722ed1',
+            text: '进度条撑住啊！离截止时间还有45分钟，能不能保佑我全部绿圈勾选完成！',
+            likes: 88,
+            time: '2小时前',
+            ip: '山东',
+            replies: []
+          },
+          {
+            id: 'c5',
+            name: '躺平大师',
+            badge: 'student',
+            badgeText: '软件工程',
+            avatar: '躺',
+            avatarColor: '#f53f3f',
+            text: '111111111 打卡打卡打卡',
+            likes: 32,
+            time: '10分钟前',
+            ip: '广东',
+            replies: []
+          }
+        ]
+      },
+      check_in_flood: {
+        name: "水课刷屏打卡打1",
+        desc: "满屏的111、收到、老师好、打卡",
+        title: "第1章 思想政治理论前沿专题",
+        course: "思想道德与法治",
+        teacher: "李德胜 教授",
+        taskDone: true,
+        comments: [
+          {
+            id: 'c1',
+            name: '李建国 (任课教师)',
+            badge: 'teacher',
+            badgeText: '任课教师',
+            avatar: '李',
+            avatarColor: '#ff7d00',
+            text: '同学们观看完视频后请在讨论区回复“学号+姓名+已打卡”，计入平时出勤考核成绩。',
+            likes: 1240,
+            time: '3天前',
+            ip: '上海',
+            pinned: true,
+            replies: [
+              { name: '辅导员助理', text: '请各班班长统一督促，周五前完成。' }
+            ]
+          },
+          {
+            id: 'c2',
+            name: '20230101张明',
+            badge: 'student',
+            badgeText: '电气2301',
+            avatar: '明',
+            avatarColor: '#1677ff',
+            text: '20230101 张明 已打卡。老师讲得很深刻，受益匪浅！',
+            likes: 19,
+            time: '昨天 10:20',
+            ip: '湖北',
+            replies: []
+          },
+          {
+            id: 'c3',
+            name: '刘畅',
+            badge: 'student',
+            badgeText: '信通2302',
+            avatar: '刘',
+            avatarColor: '#00b578',
+            text: '11111 收到打卡',
+            likes: 12,
+            time: '昨天 11:05',
+            ip: '四川',
+            replies: []
+          },
+          {
+            id: 'c4',
+            name: '赵宇轩',
+            badge: 'student',
+            badgeText: '机械2303',
+            avatar: '赵',
+            avatarColor: '#eb2f96',
+            text: '20230304 赵宇轩 已按时完成视频学习打卡！',
+            likes: 8,
+            time: '昨天 12:44',
+            ip: '陕西',
+            replies: []
+          },
+          {
+            id: 'c5',
+            name: '王涵',
+            badge: 'student',
+            badgeText: '土木2301',
+            avatar: '王',
+            avatarColor: '#722ed1',
+            text: '11111111',
+            likes: 5,
+            time: '2小时前',
+            ip: '湖南',
+            replies: []
+          }
+        ]
+      },
+      academic_debate: {
+        name: "学术讨论神仙打架",
+        desc: "认真研讨、公式推导、探讨边界条件",
+        title: "第4讲 傅里叶变换的收敛性与对偶性质",
+        course: "信号与系统",
+        teacher: "严立 教授",
+        taskDone: true,
+        comments: [
+          {
+            id: 'c1',
+            name: '学委-周思远',
+            badge: 'assistant',
+            badgeText: '优秀学员',
+            avatar: '周',
+            avatarColor: '#1677ff',
+            text: '在 12:40 处老师推导频域对称性时，对于奇异脉冲狄拉克δ函数是否必须假定狄利克雷条件在全实轴绝对可积？感觉这里用广义函数分布理论更严谨。',
+            likes: 245,
+            time: '3天前',
+            ip: '北京',
+            pinned: true,
+            replies: [
+              { name: '严立 (主讲老师)', text: '思远同学观察非常敏锐！本科教学中为照顾直观性简化了分布理论，课后可以参考《现代信号处理引论》第2章。' },
+              { name: '数模国一选手', text: '膜拜大佬，我在第5分钟就听懵了...' }
+            ]
+          },
+          {
+            id: 'c2',
+            name: '电磁场受害者',
+            badge: 'student',
+            badgeText: '微电子2101',
+            avatar: '电',
+            avatarColor: '#ff7d00',
+            text: '08:19 处的卷积定理证明太妙了，时域卷积等于频域相乘，整个频带响应一下子直观了！',
+            likes: 83,
+            time: '昨天 14:15',
+            ip: '上海',
+            replies: []
+          }
+        ]
+      }
+    };
+
+    // ----------------------------------------------------
+    // B. 全局状态存储
+    // ----------------------------------------------------
+    let state = {
+      isEditing: true,
+      isPureMode: false,
+      isPhoneMode: true,
+      currentTab: 'discussion',
+      currentSort: 'hot',
+      taskCompleted: true,
+      videoPlaying: false,
+      videoCurrentSec: 402, // 06:42
+      videoTotalSec: 1458,  // 24:18
+      videoSpeedIndex: 0,
+      speeds: ['1.0X', '1.25X', '1.5X', '2.0X'],
+      danmakuEnabled: true,
+      currentSubject: 'math',
+      
+      // 课程与视频参数
+      courseTitle: SUBJECT_PRESETS.math.course,
+      videoTitle: SUBJECT_PRESETS.math.title,
+      teacher: SUBJECT_PRESETS.math.teacher,
+      watermark: "超星泛雅课堂 · 在线录播",
+      pptContent: SUBJECT_PRESETS.math.pptBody,
+      pptFormula: SUBJECT_PRESETS.math.formula,
+      pptTip: SUBJECT_PRESETS.math.pptTip,
+      
+      // 评论数据集
+      comments: JSON.parse(JSON.stringify(PRESETS.exam_collapse.comments))
+    };
+
+    // ----------------------------------------------------
+    // C. 页面初始化
+    // ----------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+      initKeyboard();
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function initKeyboard() {
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && state.isPureMode) {
+          exitPureMode();
+        }
+      });
+    }
+
+    // ----------------------------------------------------
+    // D. 评论渲染引擎与点赞交互
+    // ----------------------------------------------------
+    function renderComments() {
+      const container = document.getElementById('commentsList');
+      const countSpan = document.getElementById('listTotalCount');
+      const tabCountSpan = document.getElementById('tabCount');
+      
+      let list = [...state.comments];
+
+      // 排序机制
+      if (state.currentSort === 'hot') {
+        list.sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return (b.likes || 0) - (a.likes || 0);
+        });
+      }
+
+      countSpan.innerText = list.length;
+      tabCountSpan.innerText = list.length;
+
+      container.innerHTML = list.map(c => {
+        // 头像内容：如果是图片URL还是单字
+        const isImg = c.avatar && (c.avatar.startsWith('http') || c.avatar.startsWith('data:image'));
+        const avatarHtml = isImg 
+          ? `<img src="${c.avatar}" class="comment-avatar-img" alt="avatar" />`
+          : `<span>${(c.avatar || c.name || '学').slice(-1)}</span>`;
+
+        // 标签
+        let badgeHtml = '';
+        if (c.pinned) {
+          badgeHtml += `<span class="author-badge badge-pinned">置顶</span>`;
+        }
+        if (c.badgeText) {
+          const badgeClass = c.badge === 'teacher' ? 'badge-teacher' : (c.badge === 'assistant' ? 'badge-assistant' : 'badge-student');
+          badgeHtml += `<span class="author-badge ${badgeClass}">${c.badgeText}</span>`;
+        }
+
+        // 正文解析时间跳转标签 (如 08:35)
+        const parsedText = escapeHtml(c.text).replace(/(\d{2}:\d{2})/g, '<span class="time-stamp-link" onclick="jumpToTimestamp(\'$1\')">$1</span>');
+
+        // 二级回复列表
+        let repliesHtml = '';
+        if (c.replies && c.replies.length > 0) {
+          repliesHtml = `
+            <div class="nested-replies-box">
+              ${c.replies.map(r => `
+                <div class="nested-reply-item">
+                  <span class="nested-author">${escapeHtml(r.name)}:</span>
+                  <span>${escapeHtml(r.text)}</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        // 编辑模式下的浮动管理胶囊
+        const editActions = `
+          <div class="item-edit-actions">
+            <button class="edit-action-btn" onclick="togglePinComment('${c.id}')" title="置顶">${c.pinned ? '取消置顶' : '置顶📌'}</button>
+            <button class="edit-action-btn" onclick="openEditCommentDrawer('${c.id}')" title="详细编辑">编辑✏️</button>
+            <button class="edit-action-btn" onclick="addReplyPrompt('${c.id}')" title="添加回复">+回复</button>
+            <button class="edit-action-btn btn-del" onclick="deleteComment('${c.id}')" title="删除">🗑️</button>
+          </div>
+        `;
+
+        return `
+          <div class="comment-item" id="item-${c.id}">
+            ${editActions}
+            <!-- 头像 (点击可更换头像) -->
+            <div class="comment-avatar-box" style="background-color: ${c.avatarColor || '#ff7d00'};" 
+                 onclick="onAvatarClick('${c.id}')" title="点击可修改头像">
+              ${avatarHtml}
+            </div>
+
+            <!-- 右侧主体 -->
+            <div class="comment-content-box">
+              <div class="comment-user-row">
+                <div class="comment-user-info">
+                  <span class="comment-author-name" id="author-${c.id}" 
+                        onclick="makeEditable(this, '${c.id}', 'name')">${escapeHtml(c.name)}</span>
+                  ${badgeHtml}
+                </div>
+
+                <!-- 点赞 -->
+                <div class="comment-like-box ${c.userLiked ? 'liked' : ''}" onclick="toggleLike('${c.id}')">
+                  <span class="like-icon">👍</span>
+                  <span id="likes-${c.id}" onclick="makeEditable(this, '${c.id}', 'likes'); event.stopPropagation();">${c.likes || 0}</span>
+                </div>
+              </div>
+
+              <!-- 正文 -->
+              <div class="comment-text" id="text-${c.id}" 
+                   onclick="makeEditable(this, '${c.id}', 'text')">${parsedText}</div>
+
+              <!-- 时间 & IP & 回复 -->
+              <div class="comment-meta-row">
+                <span id="time-${c.id}" onclick="makeEditable(this, '${c.id}', 'time')">${escapeHtml(c.time || '刚刚')}</span>
+                <span>·</span>
+                <span id="ip-${c.id}" onclick="makeEditable(this, '${c.id}', 'ip')">IP属地：${escapeHtml(c.ip || '北京')}</span>
+                <span class="reply-trigger-btn" onclick="addReplyPrompt('${c.id}')">回复</span>
+              </div>
+
+              <!-- 楼中楼回复 -->
+              ${repliesHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ----------------------------------------------------
+    // E. 点赞与时间戳跳转真实交互
+    // ----------------------------------------------------
+    function toggleLike(id) {
+      const comment = state.comments.find(c => c.id === id);
+      if (!comment) return;
+
+      if (comment.userLiked) {
+        comment.userLiked = false;
+        comment.likes = Math.max(0, (comment.likes || 1) - 1);
+      } else {
+        comment.userLiked = true;
+        comment.likes = (comment.likes || 0) + 1;
+      }
+      renderComments();
+    }
+
+    function jumpToTimestamp(timestampStr) {
+      const parts = timestampStr.split(':');
+      if (parts.length === 2) {
+        const min = parseInt(parts[0], 10);
+        const sec = parseInt(parts[1], 10);
+        state.videoCurrentSec = Math.min(state.videoTotalSec, min * 60 + sec);
+        updateVideoProgressUI();
+        showToast(`已跳转至视频 ${timestampStr}`);
+      }
+    }
+
+    // ----------------------------------------------------
+    // F. 所见即所得原地编辑 (In-Place Inline Edit)
+    // ----------------------------------------------------
+    function makeEditable(element, commentId, field) {
+      if (!state.isEditing) return; // 纯净模式不可原地编辑
+
+      element.contentEditable = "true";
+      element.focus();
+
+      // 全选文本方便快速修改
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      const finishEdit = () => {
+        element.contentEditable = "false";
+        const val = element.innerText.trim();
+        const comment = state.comments.find(c => c.id === commentId);
+        if (comment) {
+          if (field === 'likes') {
+            comment.likes = parseInt(val, 10) || 0;
+          } else if (field === 'ip') {
+            comment.ip = val.replace(/^IP属地[：:]\s*/, '');
+          } else {
+            comment[field] = val;
+          }
+          renderComments();
+        }
+      };
+
+      element.onblur = finishEdit;
+      element.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          element.blur();
+        }
+      };
+    }
+
+    function onAvatarClick(commentId) {
+      if (!state.isEditing) return;
+      openEditCommentDrawer(commentId);
+    }
+
+    function togglePinComment(id) {
+      const c = state.comments.find(item => item.id === id);
+      if (c) {
+        c.pinned = !c.pinned;
+        renderComments();
+        showToast(c.pinned ? '已置顶该讨论' : '已取消置顶');
+      }
+    }
+
+    function deleteComment(id) {
+      if (confirm('确认删除该条评论？')) {
+        state.comments = state.comments.filter(item => item.id !== id);
+        renderComments();
+        showToast('评论已删除');
+      }
+    }
+
+    function addReplyPrompt(commentId) {
+      const comment = state.comments.find(c => c.id === commentId);
+      if (!comment) return;
+      const replyText = prompt(`回复给 ${comment.name}：`, '确实，我也觉得！');
+      if (replyText && replyText.trim()) {
+        if (!comment.replies) comment.replies = [];
+        comment.replies.push({
+          name: '我',
+          text: replyText.trim()
+        });
+        renderComments();
+        showToast('回复已成功发送');
+      }
+    }
+
+    // ----------------------------------------------------
+    // G. 底部吸底发送评论交互
+    // ----------------------------------------------------
+    function onCommentInput(input) {
+      const btn = document.getElementById('sendBtn');
+      if (input.value.trim().length > 0) {
+        btn.classList.add('can-send');
+      } else {
+        btn.classList.remove('can-send');
+      }
+    }
+
+    function toggleEmojiPicker() {
+      const popover = document.getElementById('emojiPopover');
+      popover.classList.toggle('open');
+    }
+
+    function insertEmoji(emoji) {
+      const input = document.getElementById('mainInput');
+      input.value += emoji;
+      input.focus();
+      onCommentInput(input);
+      document.getElementById('emojiPopover').classList.remove('open');
+    }
+
+    function sendMainComment() {
+      const input = document.getElementById('mainInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const randomColor = AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
+      const newComment = {
+        id: 'c_' + Date.now(),
+        name: '我',
+        badge: 'student',
+        badgeText: '我的班级',
+        avatar: '我',
+        avatarColor: randomColor,
+        text: val,
+        likes: 0,
+        time: '刚刚',
+        ip: '本地',
+        pinned: false,
+        replies: []
+      };
+
+      state.comments.unshift(newComment);
+      input.value = '';
+      onCommentInput(input);
+      document.getElementById('emojiPopover').classList.remove('open');
+      renderComments();
+      showToast('讨论发表成功！');
+
+      // 平滑滚到顶部
+      const viewport = document.getElementById('scrollViewport');
+      viewport.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ----------------------------------------------------
+    // H. 视频播放器控制与任务点逻辑
+    // ----------------------------------------------------
+    let videoTimer = null;
+
+    function togglePlayVideo() {
+      state.videoPlaying = !state.videoPlaying;
+      const centerBtn = document.getElementById('centerPlayBtn');
+      const bottomBtn = document.getElementById('bottomPlayBtn');
+
+      if (state.videoPlaying) {
+        centerBtn.classList.add('playing');
+        bottomBtn.innerText = '⏸';
+        videoTimer = setInterval(() => {
+          if (state.videoCurrentSec < state.videoTotalSec) {
+            state.videoCurrentSec++;
+            updateVideoProgressUI();
+          } else {
+            togglePlayVideo(); // 播放完毕自动暂停
+          }
+        }, 1000);
+      } else {
+        centerBtn.classList.remove('playing');
+        bottomBtn.innerText = '▶';
+        if (videoTimer) clearInterval(videoTimer);
+      }
+    }
+
+    function updateVideoProgressUI() {
+      const formatTime = (s) => {
+        const m = Math.floor(s / 60).toString().padStart(2, '0');
+        const sec = (s % 60).toString().padStart(2, '0');
+        return `${m}:${sec}`;
+      };
+
+      const percent = (state.videoCurrentSec / state.videoTotalSec) * 100;
+      document.getElementById('timeDisplay').innerText = `${formatTime(state.videoCurrentSec)} / ${formatTime(state.videoTotalSec)}`;
+      document.getElementById('progressFill').style.width = `${percent}%`;
+      document.getElementById('progressThumb').style.left = `${percent}%`;
+    }
+
+    function seekVideo(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const percent = Math.max(0, Math.min(1, clickX / rect.width));
+      state.videoCurrentSec = Math.floor(percent * state.videoTotalSec);
+      updateVideoProgressUI();
+    }
+
+    function toggleSpeed() {
+      state.videoSpeedIndex = (state.videoSpeedIndex + 1) % state.speeds.length;
+      document.getElementById('speedToggle').innerText = state.speeds[state.videoSpeedIndex];
+      showToast(`倍速已切换至 ${state.speeds[state.videoSpeedIndex]}`);
+    }
+
+    function toggleDanmaku() {
+      state.danmakuEnabled = !state.danmakuEnabled;
+      const pill = document.getElementById('danmakuToggle');
+      const container = document.getElementById('danmakuContainer');
+      if (state.danmakuEnabled) {
+        pill.classList.add('active');
+        container.style.display = 'block';
+      } else {
+        pill.classList.remove('active');
+        container.style.display = 'none';
+      }
+    }
+
+    function toggleFullscreenVideo() {
+      const el = document.getElementById('videoViewport');
+      if (!document.fullscreenElement) {
+        el.requestFullscreen ? el.requestFullscreen() : showToast('已最大化画面');
+      } else {
+        document.exitFullscreen && document.exitFullscreen();
+      }
+    }
+
+    function toggleTaskStatus() {
+      state.taskCompleted = !state.taskCompleted;
+      const bar = document.getElementById('taskStatusBar');
+      const icon = document.getElementById('taskIcon');
+      const text = document.getElementById('taskStatusText');
+
+      if (state.taskCompleted) {
+        bar.classList.remove('in-progress');
+        icon.innerText = '✓';
+        text.innerText = '任务点：视频任务（已完成）';
+        showToast('任务点状态：已完成 (绿标)');
+      } else {
+        bar.classList.add('in-progress');
+        icon.innerText = '⏳';
+        text.innerText = '任务点：视频任务（进行中，还需观看12分钟）';
+        showToast('任务点状态：未完成/进行中 (黄标)');
+      }
+    }
+
+    // ----------------------------------------------------
+    // I. 随堂测试/人脸防作弊弹窗仿真
+    // ----------------------------------------------------
+    function triggerQuizModal() {
+      const modal = document.getElementById('videoQuizModal');
+      const subj = SUBJECT_PRESETS[state.currentSubject] || SUBJECT_PRESETS.math;
+      document.getElementById('quizQuestionText').innerText = subj.quizQ;
+      
+      const optContainer = document.getElementById('quizOptions');
+      optContainer.innerHTML = subj.quizOpts.map((opt, i) => `
+        <button class="quiz-option-btn ${i === 0 ? 'selected' : ''}" onclick="selectQuizOption(this)">${opt}</button>
+      `).join('');
+
+      if (state.videoPlaying) togglePlayVideo(); // 暂停视频
+      modal.classList.add('open');
+      showToast('⚠️ 视频触发超星随堂测验防切屏弹窗！');
+    }
+
+    function selectQuizOption(btn) {
+      document.querySelectorAll('.quiz-option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function submitQuiz() {
+      document.getElementById('videoQuizModal').classList.remove('open');
+      showToast('✅ 答题通过！已恢复学习进度');
+      togglePlayVideo(); // 自动恢复播放
+    }
+
+    // ----------------------------------------------------
+    // J. Tab 切换与目录联动
+    // ----------------------------------------------------
+    function switchTab(tabKey) {
+      state.currentTab = tabKey;
+      const tabs = document.querySelectorAll('.tab-item');
+      tabs.forEach(t => t.classList.remove('active'));
+
+      document.getElementById('tabPanelDiscussion').style.display = 'none';
+      document.getElementById('tabPanelDetail').classList.remove('active');
+      document.getElementById('tabPanelCatalog').classList.remove('active');
+      document.getElementById('tabPanelQuestion').classList.remove('active');
+
+      if (tabKey === 'discussion') {
+        tabs[2].classList.add('active');
+        document.getElementById('tabPanelDiscussion').style.display = 'block';
+      } else if (tabKey === 'detail') {
+        tabs[0].classList.add('active');
+        document.getElementById('tabPanelDetail').classList.add('active');
+      } else if (tabKey === 'catalog') {
+        tabs[1].classList.add('active');
+        document.getElementById('tabPanelCatalog').classList.add('active');
+      } else if (tabKey === 'question') {
+        tabs[3].classList.add('active');
+        document.getElementById('tabPanelQuestion').classList.add('active');
+      }
+    }
+
+    function switchCatalogItem(title) {
+      state.videoTitle = title;
+      applyGlobalSettingsUI();
+      switchTab('discussion');
+      showToast(`已切换至章节：${title}`);
+    }
+
+    function sortComments(type) {
+      state.currentSort = type;
+      document.getElementById('sortHot').classList.toggle('active', type === 'hot');
+      document.getElementById('sortNew').classList.toggle('active', type === 'new');
+      renderComments();
+    }
+
+    // ----------------------------------------------------
+    // K. 模式切换：手机外壳 vs 全屏响应式 / 编辑 vs 纯净拟真
+    // ----------------------------------------------------
+    function toggleViewportMode() {
+      state.isPhoneMode = !state.isPhoneMode;
+      const wrapper = document.getElementById('appWrapper');
+      const icon = document.getElementById('viewportIcon');
+      const text = document.getElementById('viewportText');
+
+      if (state.isPhoneMode) {
+        wrapper.className = 'app-wrapper mode-phone';
+        icon.innerText = '📱';
+        text.innerText = '手机外观';
+        showToast('已切换至手机真机框架模式');
+      } else {
+        wrapper.className = 'app-wrapper mode-fullscreen';
+        icon.innerText = '💻';
+        text.innerText = '全屏视口';
+        showToast('已切换至全屏自适应网页模式');
+      }
+    }
+
+    function toggleEditMode() {
+      state.isEditing = !state.isEditing;
+      document.body.classList.toggle('is-editing', state.isEditing);
+      const icon = document.getElementById('editIcon');
+      const text = document.getElementById('editText');
+
+      if (state.isEditing) {
+        icon.innerText = '✏️';
+        text.innerText = '编辑模式中';
+        showToast('编辑模式：点击头像/名字/正文即可就地修改');
+      } else {
+        icon.innerText = '🔒';
+        text.innerText = '锁定浏览';
+        showToast('已锁定，禁止原地误触修改');
+      }
+    }
+
+    function enterPureMode() {
+      state.isPureMode = true;
+      document.body.classList.remove('is-editing');
+      document.getElementById('toolboxBar').classList.add('hidden-pure');
+      document.getElementById('pureSummoner').style.display = 'flex';
+      showToast('已进入100%纯净拟真展示！(按Esc或点击右下角圆点退出)');
+    }
+
+    function exitPureMode() {
+      state.isPureMode = false;
+      if (state.isEditing) document.body.classList.add('is-editing');
+      document.getElementById('toolboxBar').classList.remove('hidden-pure');
+      document.getElementById('pureSummoner').style.display = 'none';
+      showToast('已唤出控制台工具条');
+    }
+
+    // ----------------------------------------------------
+    // L. 侧边抽屉控制台 (Drawer Console)
+    // ----------------------------------------------------
+    let currentDrawerMode = 'newComment';
+    let editingCommentId = null;
+
+    function openDrawer(mode) {
+      currentDrawerMode = mode;
+      const drawer = document.getElementById('editorDrawer');
+      const overlay = document.getElementById('drawerOverlay');
+      const body = document.getElementById('drawerBody');
+      const title = document.getElementById('drawerHeaderTitle');
+      const saveBtn = document.getElementById('drawerSaveBtn');
+
+      if (mode === 'newComment') {
+        title.innerHTML = '➕ 添加新讨论';
+        saveBtn.style.display = 'block';
+        saveBtn.innerText = '立即发布';
+        body.innerHTML = `
+          <div class="form-group">
+            <label class="form-label">发布者姓名 / 昵称</label>
+            <input type="text" class="form-input" id="df_name" value="陈某某">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">身份角色</label>
+              <select class="form-select" id="df_badge">
+                <option value="student">普通学生</option>
+                <option value="assistant">助教</option>
+                <option value="teacher">任课教师</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">班级 / 角色徽章文本</label>
+              <input type="text" class="form-input" id="df_badgetext" value="计算机2201">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">头像类型与颜色</label>
+            <div class="form-row">
+              <input type="text" class="form-input" id="df_avatarChar" placeholder="头像单字(默认取姓名尾字)" value="陈" style="width: 140px;">
+              <input type="text" class="form-input" id="df_avatarUrl" placeholder="或输入图片网络链接/留空">
+            </div>
+            <div class="color-swatches" id="df_swatches">
+              ${AVATAR_COLORS.map(c => `<div class="color-swatch" style="background: ${c};" onclick="selectDrawerColor('${c}', this)"></div>`).join('')}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">讨论正文 (输入时间如 05:20 自动可点击跳转)</label>
+            <textarea class="form-textarea" id="df_text" rows="3">老师讲得很清晰，08:15 这里的考点非常重要，已打卡！</textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">初始点赞数</label>
+              <input type="number" class="form-input" id="df_likes" value="12">
+            </div>
+            <div class="form-group">
+              <label class="form-label">发布时间</label>
+              <input type="text" class="form-input" id="df_time" value="2小时前">
+            </div>
+            <div class="form-group">
+              <label class="form-label">IP属地</label>
+              <input type="text" class="form-input" id="df_ip" value="北京">
+            </div>
+          </div>
+        `;
+        window.selectedDrawerColor = AVATAR_COLORS[0];
+      } else if (mode === 'presets') {
+        title.innerHTML = '🎭 加载经典名场面预设';
+        saveBtn.style.display = 'none';
+        body.innerHTML = `
+          <div class="presets-grid">
+            ${Object.keys(PRESETS).map(key => {
+              const p = PRESETS[key];
+              return `
+                <div class="preset-card" onclick="applyPreset('${key}')">
+                  <div class="preset-card-title">${p.name}</div>
+                  <div class="preset-card-desc">${p.desc}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div style="font-size: 12px; color: #94a3b8; line-height: 1.6;">
+            💡 提示：点击任意预设卡片将一键载入真实的超星讨论内容，包含置顶助教通知、高赞神评、时间戳与班级属性。
+          </div>
+        `;
+      } else if (mode === 'subjects') {
+        title.innerHTML = '📚 切换网课学科科目';
+        saveBtn.style.display = 'none';
+        body.innerHTML = `
+          <div class="presets-grid">
+            ${Object.keys(SUBJECT_PRESETS).map(key => {
+              const s = SUBJECT_PRESETS[key];
+              return `
+                <div class="preset-card" onclick="applySubject('${key}')">
+                  <div class="preset-card-title">${s.name}</div>
+                  <div class="preset-card-desc">${s.course}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div style="font-size: 12px; color: #94a3b8; line-height: 1.6;">
+            💡 提示：切换学科将自动同步更新视频 PPT 板书、讲师名字、随堂测试题目及相关考点。
+          </div>
+        `;
+      } else if (mode === 'settings') {
+        title.innerHTML = '⚙️ 视频与页面全局参数';
+        saveBtn.style.display = 'block';
+        saveBtn.innerText = '保存全局参数';
+        body.innerHTML = `
+          <div class="form-group">
+            <label class="form-label">视频章节标题</label>
+            <input type="text" class="form-input" id="set_videoTitle" value="${escapeHtml(state.videoTitle)}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">课程全名</label>
+            <input type="text" class="form-input" id="set_courseTitle" value="${escapeHtml(state.courseTitle)}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">授课教师</label>
+            <input type="text" class="form-input" id="set_teacher" value="${escapeHtml(state.teacher)}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">PPT板书内容 (支持换行)</label>
+            <textarea class="form-textarea" id="set_ppt" rows="3">${escapeHtml(state.pptContent)}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">PPT重点公式</label>
+            <input type="text" class="form-input" id="set_formula" value="${escapeHtml(state.pptFormula)}">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">总时长 (秒)</label>
+              <input type="number" class="form-input" id="set_totalsec" value="${state.videoTotalSec}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">当前进度 (秒)</label>
+              <input type="number" class="form-input" id="set_currentsec" value="${state.videoCurrentSec}">
+            </div>
+          </div>
+        `;
+      }
+
+      drawer.classList.add('open');
+      overlay.classList.add('open');
+    }
+
+    function openEditCommentDrawer(id) {
+      editingCommentId = id;
+      const c = state.comments.find(item => item.id === id);
+      if (!c) return;
+
+      currentDrawerMode = 'editComment';
+      const drawer = document.getElementById('editorDrawer');
+      const overlay = document.getElementById('drawerOverlay');
+      const body = document.getElementById('drawerBody');
+      const title = document.getElementById('drawerHeaderTitle');
+      const saveBtn = document.getElementById('drawerSaveBtn');
+
+      title.innerHTML = '✏️ 编辑讨论详情';
+      saveBtn.style.display = 'block';
+      saveBtn.innerText = '保存修改';
+
+      body.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">姓名 / 昵称</label>
+          <input type="text" class="form-input" id="edit_name" value="${escapeHtml(c.name)}">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">身份角色</label>
+            <select class="form-select" id="edit_badge">
+              <option value="student" ${c.badge === 'student' ? 'selected' : ''}>普通学生</option>
+              <option value="assistant" ${c.badge === 'assistant' ? 'selected' : ''}>助教</option>
+              <option value="teacher" ${c.badge === 'teacher' ? 'selected' : ''}>任课教师</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">班级 / 角色徽章文字</label>
+            <input type="text" class="form-input" id="edit_badgetext" value="${escapeHtml(c.badgeText || '')}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">头像设置</label>
+          <div class="form-row">
+            <input type="text" class="form-input" id="edit_avatar" value="${escapeHtml(c.avatar || '')}" placeholder="文字或图片URL">
+            <input type="file" id="edit_fileUpload" accept="image/*" style="display:none;" onchange="handleAvatarFileUpload(event)">
+            <button class="action-btn-secondary" type="button" onclick="document.getElementById('edit_fileUpload').click()">传本地图</button>
+          </div>
+          <div class="color-swatches" id="edit_swatches">
+            ${AVATAR_COLORS.map(color => `
+              <div class="color-swatch ${c.avatarColor === color ? 'active' : ''}" 
+                   style="background: ${color};" 
+                   onclick="selectDrawerColor('${color}', this)"></div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">评论正文</label>
+          <textarea class="form-textarea" id="edit_text" rows="4">${escapeHtml(c.text)}</textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">点赞数</label>
+            <input type="number" class="form-input" id="edit_likes" value="${c.likes || 0}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">发布时间</label>
+            <input type="text" class="form-input" id="edit_time" value="${escapeHtml(c.time || '刚刚')}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">IP属地</label>
+            <input type="text" class="form-input" id="edit_ip" value="${escapeHtml(c.ip || '北京')}">
+          </div>
+        </div>
+      `;
+
+      window.selectedDrawerColor = c.avatarColor || AVATAR_COLORS[0];
+      drawer.classList.add('open');
+      overlay.classList.add('open');
+    }
+
+    function handleAvatarFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        document.getElementById('edit_avatar').value = event.target.result;
+        showToast('已上传头像图片预览');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function selectDrawerColor(color, el) {
+      window.selectedDrawerColor = color;
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      if (el) el.classList.add('active');
+    }
+
+    function closeDrawer() {
+      document.getElementById('editorDrawer').classList.remove('open');
+      document.getElementById('drawerOverlay').classList.remove('open');
+    }
+
+    function saveDrawerForm() {
+      if (currentDrawerMode === 'newComment') {
+        const name = document.getElementById('df_name').value.trim() || '同学';
+        const badge = document.getElementById('df_badge').value;
+        const badgeText = document.getElementById('df_badgetext').value.trim();
+        const avatarChar = document.getElementById('df_avatarChar').value.trim() || name.slice(-1);
+        const avatarUrl = document.getElementById('df_avatarUrl').value.trim();
+        const text = document.getElementById('df_text').value.trim();
+        const likes = parseInt(document.getElementById('df_likes').value, 10) || 0;
+        const time = document.getElementById('df_time').value.trim() || '刚刚';
+        const ip = document.getElementById('df_ip').value.trim() || '北京';
+
+        const newC = {
+          id: 'c_' + Date.now(),
+          name: name,
+          badge: badge,
+          badgeText: badgeText,
+          avatar: avatarUrl || avatarChar,
+          avatarColor: window.selectedDrawerColor || '#ff7d00',
+          text: text,
+          likes: likes,
+          time: time,
+          ip: ip,
+          pinned: false,
+          replies: []
+        };
+        state.comments.unshift(newC);
+        renderComments();
+        closeDrawer();
+        showToast('讨论已添加');
+      } else if (currentDrawerMode === 'editComment' && editingCommentId) {
+        const c = state.comments.find(item => item.id === editingCommentId);
+        if (c) {
+          c.name = document.getElementById('edit_name').value.trim() || '同学';
+          c.badge = document.getElementById('edit_badge').value;
+          c.badgeText = document.getElementById('edit_badgetext').value.trim();
+          c.avatar = document.getElementById('edit_avatar').value.trim();
+          c.avatarColor = window.selectedDrawerColor || c.avatarColor;
+          c.text = document.getElementById('edit_text').value.trim();
+          c.likes = parseInt(document.getElementById('edit_likes').value, 10) || 0;
+          c.time = document.getElementById('edit_time').value.trim();
+          c.ip = document.getElementById('edit_ip').value.trim();
+          renderComments();
+          closeDrawer();
+          showToast('修改已保存');
+        }
+      } else if (currentDrawerMode === 'settings') {
+        state.videoTitle = document.getElementById('set_videoTitle').value.trim();
+        state.courseTitle = document.getElementById('set_courseTitle').value.trim();
+        state.teacher = document.getElementById('set_teacher').value.trim();
+        state.pptContent = document.getElementById('set_ppt').value;
+        state.pptFormula = document.getElementById('set_formula').value;
+        state.videoTotalSec = parseInt(document.getElementById('set_totalsec').value, 10) || 1200;
+        state.videoCurrentSec = parseInt(document.getElementById('set_currentsec').value, 10) || 0;
+        
+        applyGlobalSettingsUI();
+        closeDrawer();
+        showToast('全局参数已更新');
+      }
+    }
+
+    function applyPreset(presetKey) {
+      const p = PRESETS[presetKey];
+      if (!p) return;
+      state.videoTitle = p.title;
+      state.courseTitle = p.course;
+      state.teacher = p.teacher;
+      state.comments = JSON.parse(JSON.stringify(p.comments));
+      applyGlobalSettingsUI();
+      renderComments();
+      closeDrawer();
+      showToast(`已载入预设：${p.name}`);
+    }
+
+    function applySubject(subjectKey) {
+      const s = SUBJECT_PRESETS[subjectKey];
+      if (!s) return;
+      state.currentSubject = subjectKey;
+      state.courseTitle = s.course;
+      state.videoTitle = s.title;
+      state.teacher = s.teacher;
+      state.pptContent = s.pptBody;
+      state.pptFormula = s.formula;
+      state.pptTip = s.pptTip;
+      applyGlobalSettingsUI();
+      closeDrawer();
+      showToast(`已切换学科为：${s.name}`);
+    }
+
+    function applyGlobalSettingsUI() {
+      document.getElementById('videoBarTitle').innerText = state.videoTitle;
+      document.getElementById('pptHeaderTitle').innerText = state.videoTitle;
+      document.getElementById('catalogCurrentTitle').innerText = state.videoTitle;
+      document.getElementById('courseDetailTitle').innerText = state.courseTitle;
+      document.getElementById('detailTeacher').innerText = state.teacher;
+      document.getElementById('teacherTag').innerText = `主讲：${state.teacher}`;
+      document.getElementById('pptFormula').innerText = state.pptFormula;
+      document.getElementById('pptExamTip').innerText = state.pptTip;
+      
+      const lines = state.pptContent.split('\n');
+      document.getElementById('pptBodyContent').innerHTML = lines.map(l => escapeHtml(l)).join('<br>') + 
+        `<div class="ppt-formula">${escapeHtml(state.pptFormula)}</div>`;
+      updateVideoProgressUI();
+    }
+
+    function renderAll() {
+      applyGlobalSettingsUI();
+      renderComments();
+    }
+
+    // ----------------------------------------------------
+    // M. 截取超清长图 (html2canvas)
+    // ----------------------------------------------------
+    function captureScreenshot() {
+      showToast('正在生成超清截图，请稍候...');
+      const target = document.getElementById('screenContainer');
+      
+      // 临时隐藏编辑虚线
+      const wasEditing = state.isEditing;
+      if (wasEditing) document.body.classList.remove('is-editing');
+
+      html2canvas(target, {
+        scale: 2, // 视网膜两倍高清
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      }).then(canvas => {
+        if (wasEditing) document.body.classList.add('is-editing');
+        const link = document.createElement('a');
+        link.download = `学习通截图-${state.videoTitle.replace(/[\\/:*?"<>|]/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('📸 高清截图已下载！');
+      }).catch(err => {
+        if (wasEditing) document.body.classList.add('is-editing');
+        console.error(err);
+        showToast('截图生成失败，请检查浏览器权限');
+      });
+    }
+
+    // ----------------------------------------------------
+    // N. 导出纯净独立 HTML 文件 (关键需求)
+    // ----------------------------------------------------
+    function exportStandaloneHTML() {
+      const dataJson = JSON.stringify(state.comments);
+      const cleanHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>超星学习通 - ${escapeHtml(state.videoTitle)}</title>
+  <style>
+    ${document.querySelector('style').innerHTML}
+    /* 导出文件中移除所有编辑器辅助样式与多余边框 */
+    .toolbox-bar, .pure-mode-summoner, .item-edit-actions { display: none !important; }
+    body { background-color: #f7f8fa; margin: 0; padding: 0; }
+    .app-wrapper.mode-phone { margin: 20px auto; }
+  </style>
+</head>
+<body class="exported-pure">
+  <div class="viewport-bg" style="display:none;"></div>
+  ${document.getElementById('appWrapper').outerHTML}
+  <script>
+    const INITIAL_COMMENTS = ${dataJson};
+    let comments = INITIAL_COMMENTS;
+    ${jumpToTimestamp.toString()}
+    ${toggleLike.toString().replace('state.comments', 'comments')}
+    ${togglePlayVideo.toString()}
+    ${seekVideo.toString()}
+    ${toggleSpeed.toString()}
+    ${toggleDanmaku.toString()}
+    ${toggleFullscreenVideo.toString()}
+    ${toggleTaskStatus.toString()}
+    ${switchTab.toString()}
+    ${sortComments.toString().replace('state.comments', 'comments')}
+    ${escapeHtml.toString()}
+    ${renderComments.toString()
+      .replace(/state\.comments/g, 'comments')
+      .replace(/state\.currentSort/g, "'hot'")
+      .replace(/editActions/g, "''")}
+
+    let state = {
+      videoPlaying: false,
+      videoCurrentSec: ${state.videoCurrentSec},
+      videoTotalSec: ${state.videoTotalSec},
+      videoSpeedIndex: 0,
+      speeds: ['1.0X', '1.25X', '1.5X', '2.0X'],
+      danmakuEnabled: true,
+      taskCompleted: ${state.taskCompleted}
+    };
+    ${updateVideoProgressUI.toString()}
+    window.addEventListener('DOMContentLoaded', () => {
+      renderComments();
+      updateVideoProgressUI();
+    });
+  <\/script>
+</body>
+</html>`;
+
+      const blob = new Blob([cleanHtml], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `学习通视频讨论-${state.videoTitle.replace(/[\\/:*?"<>|]/g, '_')}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('🎉 独立单文件 HTML 已生成并开始下载！');
+    }
+  </script>
+</body>
+</html>

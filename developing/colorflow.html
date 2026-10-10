@@ -1,61 +1,158 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>色彩流动</title>
+    <title>COLOR FLOW | 色彩流动 - 天鹅绒认知空间</title>
+    <link rel="icon" href="../hund.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../subwebsite/velvet-theme.css">
+    <script src="../subwebsite/velvet-nav.js" data-root="../index.html"></script>
     <style>
         body {
             margin: 0;
             padding: 0;
             width: 100vw;
-            height: 100vh;
+            min-height: 100vh;
             overflow: hidden;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96e6a1);
+            justify-content: center;
+            background: linear-gradient(45deg, #e60012, #2b0008, #101010, #e60012);
             background-size: 200% 200%;
-            animation: gradientBG 30s ease infinite;
+            animation: gradientBG 24s ease infinite;
             transition: background 1s ease;
+            font-family: var(--font-sans, 'Noto Sans SC'), sans-serif;
         }
 
         @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        .content {
-            text-align: center;
-            color: white;
-            font-size: 3em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            font-family: "Microsoft YaHei", sans-serif;
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .interactive-area {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .p5-hud-container {
+            position: relative;
+            z-index: 10;
+            pointer-events: auto;
+            text-align: center;
+            background: rgba(16, 16, 16, 0.88);
+            border: 3px solid #000;
+            border-top: 5px solid var(--phantom-red, #e60012);
+            box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.8);
+            padding: 30px 40px;
+            max-width: 600px;
+            width: 85%;
+            transform: skewX(-2deg);
+            backdrop-filter: blur(8px);
+        }
+
+        .p5-hud-badge {
+            display: inline-block;
+            background: var(--phantom-red, #e60012);
+            color: #fff;
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            padding: 4px 12px;
+            transform: skewX(-10deg);
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-family: var(--font-display, 'Anton'), var(--font-sans), sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            letter-spacing: 2px;
+            margin: 0 0 10px;
+            text-shadow: 3px 3px 0px #000000;
+        }
+
+        p {
+            color: #d0d0d0;
+            font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+            margin: 0 0 20px;
+            letter-spacing: 1px;
+        }
+
+        .hud-stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            background: #000;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            padding: 6px 14px;
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.85rem;
+            color: var(--phantom-white);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-chip span {
+            color: var(--phantom-red);
+        }
+
+        .p5-action-btn {
+            background: var(--phantom-red, #e60012);
+            color: #fff;
+            border: 2px solid #000;
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            padding: 8px 18px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #fff;
+            transform: skewX(-8deg);
+            transition: all 0.15s ease;
+        }
+
+        .p5-action-btn:hover {
+            background: #fff;
+            color: #000;
+            transform: skewX(-8deg) scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            .p5-hud-container {
+                padding: 20px;
+                width: 90%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="interactive-area"></div>
-    <div class="content">
+    <div class="interactive-area" id="touchArea"></div>
+
+    <div class="p5-hud-container">
+        <div class="p5-hud-badge">VELVET FLOW // COGNITIVE CHROMATICS</div>
         <h1>色彩流动</h1>
-        <p>移动鼠标体验更多效果</p>
+        <p>滑动鼠标或触摸屏幕，激荡认知空间光谱</p>
+        
+        <div class="hud-stats-row">
+            <div class="stat-chip">ANGLE: <span id="angleVal">45°</span></div>
+            <div class="stat-chip">HUE: <span id="hueVal">DYNAMIC</span></div>
+            <button class="p5-action-btn" onclick="randomizeColors()">[🎲 PULSE RANDOM]</button>
+        </div>
     </div>
 
     <script>
-        const interactiveArea = document.querySelector('.interactive-area');
+        const interactiveArea = document.getElementById('touchArea');
         let isMouseMoving = false;
         let lastMouseMoveTime = 0;
         let currentColors = {
@@ -66,21 +163,17 @@
             angle: 45,
             hues: [0, 90, 180, 270]
         };
-        
-        // 生成随机HSL颜色
+
         function getRandomHue() {
             return Math.floor(Math.random() * 360);
         }
 
-        // 计算两个角度之间的最短距离
         function getAngleDifference(angle1, angle2) {
             const diff = (angle2 - angle1 + 360) % 360;
             return diff > 180 ? diff - 360 : diff;
         }
 
-        // 在两个值之间进行平滑插值
         function lerp(start, end, t) {
-            // 如果是角度，使用特殊的插值方法
             if (Math.abs(end - start) > 180) {
                 if (end > start) {
                     start += 360;
@@ -92,23 +185,23 @@
             return result % 360;
         }
 
-        // 更新背景渐变
         function updateBackground(angle, hues) {
-            // 增加颜色停止点，使过渡更平滑
             document.body.style.background = `linear-gradient(
-                ${angle}deg,
-                hsl(${hues[0]}, 60%, 60%) 0%,
-                hsl(${(hues[0] + hues[1]) / 2}, 60%, 60%) 20%,
-                hsl(${hues[1]}, 60%, 60%) 40%,
-                hsl(${(hues[1] + hues[2]) / 2}, 60%, 60%) 60%,
-                hsl(${hues[2]}, 60%, 60%) 80%,
-                hsl(${(hues[2] + hues[3]) / 2}, 60%, 60%) 90%,
-                hsl(${hues[3]}, 60%, 60%) 100%
+                ${Math.round(angle)}deg,
+                hsl(${Math.round(hues[0])}, 70%, 45%) 0%,
+                hsl(${Math.round((hues[0] + hues[1]) / 2)}, 75%, 40%) 25%,
+                hsl(${Math.round(hues[1])}, 80%, 35%) 50%,
+                hsl(${Math.round(hues[2])}, 75%, 40%) 75%,
+                hsl(${Math.round(hues[3])}, 70%, 45%) 100%
             )`;
             document.body.style.backgroundSize = '200% 200%';
+
+            const aEl = document.getElementById('angleVal');
+            const hEl = document.getElementById('hueVal');
+            if (aEl) aEl.textContent = `${Math.round(angle)}°`;
+            if (hEl) hEl.textContent = `${Math.round(hues[0])}°`;
         }
 
-        // 生成新的目标颜色
         function generateNewTargetColors() {
             targetColors.angle = Math.random() * 360;
             const baseHue = getRandomHue();
@@ -120,37 +213,35 @@
             ];
         }
 
-        // 平滑过渡到目标颜色
+        function randomizeColors() {
+            generateNewTargetColors();
+            currentColors.angle = targetColors.angle;
+            currentColors.hues = [...targetColors.hues];
+            updateBackground(currentColors.angle, currentColors.hues);
+        }
+
         function smoothTransition() {
             if (!isMouseMoving && Date.now() - lastMouseMoveTime > 1000) {
-                const t = 0.005; // 保持较慢的过渡速度
-                
+                const t = 0.006;
                 currentColors.angle = lerp(currentColors.angle, targetColors.angle, t);
-                
                 for (let i = 0; i < 4; i++) {
                     currentColors.hues[i] = lerp(currentColors.hues[i], targetColors.hues[i], t);
                 }
-                
                 updateBackground(currentColors.angle, currentColors.hues);
-                
-                // 如果所有颜色都接近目标值，生成新的目标颜色
-                if (Math.abs(getAngleDifference(currentColors.angle, targetColors.angle)) < 0.1 &&
-                    currentColors.hues.every((hue, i) => 
-                        Math.abs(getAngleDifference(hue, targetColors.hues[i])) < 0.1)) {
+
+                if (Math.abs(getAngleDifference(currentColors.angle, targetColors.angle)) < 0.2 &&
+                    currentColors.hues.every((hue, i) => Math.abs(getAngleDifference(hue, targetColors.hues[i])) < 0.2)) {
                     generateNewTargetColors();
                 }
             }
         }
 
-        // 每帧更新颜色过渡
         function animate() {
             smoothTransition();
             requestAnimationFrame(animate);
         }
-        
-        // 启动动画
         animate();
-        
+
         interactiveArea.addEventListener('mousemove', (e) => {
             isMouseMoving = true;
             lastMouseMoveTime = Date.now();
@@ -166,16 +257,13 @@
             
             updateBackground(currentColors.angle, currentColors.hues);
 
-            // 停止移动2秒后重新启用自动变化
             setTimeout(() => {
                 isMouseMoving = false;
                 generateNewTargetColors();
             }, 2000);
         });
 
-        // 添加触摸支持
         interactiveArea.addEventListener('touchmove', (e) => {
-            e.preventDefault();
             isMouseMoving = true;
             lastMouseMoveTime = Date.now();
             const touch = e.touches[0];
@@ -191,12 +279,11 @@
             
             updateBackground(currentColors.angle, currentColors.hues);
 
-            // 停止触摸2秒后重新启用自动变化
             setTimeout(() => {
                 isMouseMoving = false;
                 generateNewTargetColors();
             }, 2000);
-        });
+        }, { passive: true });
     </script>
 </body>
 </html>

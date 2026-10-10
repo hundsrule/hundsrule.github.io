@@ -1,27 +1,138 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>电子烟花</title>
+    <title>PHANTOM FIREWORKS | 电子烟花 - 天鹅绒庆典</title>
+    <link rel="icon" href="../hund.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../subwebsite/velvet-theme.css">
+    <script src="../subwebsite/velvet-nav.js" data-root="../index.html"></script>
     <style>
         body {
             margin: 0;
+            padding: 0;
             overflow: hidden;
-            background: #000;
+            background-color: #050505;
+            font-family: var(--font-sans, 'Noto Sans SC'), sans-serif;
+            user-select: none;
         }
+
         canvas {
             display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .hud-overlay {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: rgba(16, 16, 16, 0.88);
+            border: 2px solid #000;
+            border-top: 4px solid var(--phantom-red, #e60012);
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.9);
+            padding: 10px 18px;
+            backdrop-filter: blur(6px);
+        }
+
+        .hud-title {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.85rem;
+            color: #fff;
+            letter-spacing: 1.5px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hud-title .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--phantom-red);
+            border-radius: 50%;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.6; }
+            100% { transform: scale(1.3); opacity: 1; }
+        }
+
+        .p5-btn {
+            background: var(--phantom-red, #e60012);
+            color: #fff;
+            border: 2px solid #000;
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            padding: 6px 14px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #fff;
+            transform: skewX(-8deg);
+            transition: all 0.15s ease;
+        }
+
+        .p5-btn:hover {
+            background: #fff;
+            color: #000;
+            transform: skewX(-8deg) scale(1.05);
+        }
+
+        .stat-badge {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.8rem;
+            color: #aaa;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+        }
+
+        .stat-badge span {
+            color: var(--phantom-red);
+        }
+
+        @media (max-width: 600px) {
+            .hud-overlay {
+                bottom: 12px;
+                padding: 8px 12px;
+                width: 90%;
+            }
         }
     </style>
 </head>
 <body>
     <canvas id="fireworks"></canvas>
+
+    <div class="hud-overlay">
+        <div class="hud-title">
+            <span class="dot"></span>
+            ALL-OUT CELEBRATION
+        </div>
+        <button class="p5-btn" onclick="triggerSalute()">[💥 ALL-OUT ATTACK BURST]</button>
+        <button class="p5-btn" id="autoBtn" onclick="toggleAuto()">[⚡ AUTO: ON]</button>
+        <div class="stat-badge">PARTICLES: <span id="pCount">0</span></div>
+    </div>
+
     <script>
         const canvas = document.getElementById('fireworks');
         const ctx = canvas.getContext('2d');
+        const pCountEl = document.getElementById('pCount');
 
-        // 设置画布尺寸
+        let autoEnabled = true;
+        let autoInterval = null;
+
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -29,7 +140,6 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // 烟花粒子类
         class Particle {
             constructor(x, y, targetY, color, isRocket = false) {
                 this.x = x;
@@ -37,26 +147,27 @@
                 this.color = color;
                 this.isRocket = isRocket;
                 if (isRocket) {
-                    // 计算到目标高度的速度
                     const distance = y - targetY;
-                    const time = 30; // 大约30帧到达
+                    const time = 28;
                     this.velocity = {
                         x: (Math.random() - 0.5) * 2,
                         y: -distance / time
                     };
-                    this.gravity = distance / (time * time * 0.5); // 使用简单的物理公式计算重力
-                    this.size = 2;
+                    this.gravity = distance / (time * time * 0.5);
+                    this.size = 2.5;
                 } else {
+                    const speed = Math.random() * 12 + 4;
+                    const angle = Math.random() * Math.PI * 2;
                     this.velocity = {
-                        x: (Math.random() - 0.5) * (Math.random() * 12 + 4),
-                        y: (Math.random() - 0.5) * (Math.random() * 12 + 4)
+                        x: Math.cos(angle) * speed,
+                        y: Math.sin(angle) * speed
                     };
-                    this.size = Math.random() * 3 + 1;
+                    this.size = Math.random() * 3 + 1.2;
                 }
                 this.alpha = 1;
-                this.decay = Math.random() * 0.02 + 0.01;
-                this.flicker = Math.random() > 0.5;
-                this.flickerRate = Math.random() * 0.2;
+                this.decay = Math.random() * 0.02 + 0.012;
+                this.flicker = Math.random() > 0.4;
+                this.flickerRate = Math.random() * 0.25;
                 this.targetY = targetY;
             }
 
@@ -66,7 +177,7 @@
                     this.alpha * (1 - Math.random() * this.flickerRate) : 
                     this.alpha;
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${this.color}, ${flickerAlpha})`;
+                ctx.fillStyle = `rgba(${this.color}, ${Math.max(0, flickerAlpha)})`;
                 ctx.fill();
             }
 
@@ -74,11 +185,11 @@
                 if (this.isRocket) {
                     this.velocity.y += this.gravity;
                     if (this.y <= this.targetY) {
-                        return false; // 火箭达到目标高度
+                        return false;
                     }
                 } else {
-                    this.velocity.y += 0.08 + Math.random() * 0.04;
-                    this.velocity.x += (Math.random() - 0.5) * 0.1;
+                    this.velocity.y += 0.09 + Math.random() * 0.03;
+                    this.velocity.x *= 0.98;
                     this.alpha -= this.decay;
                 }
                 this.x += this.velocity.x;
@@ -87,20 +198,18 @@
             }
         }
 
-        // 创建烟花
+        const colors = [
+            '230, 0, 18',    // Phantom Red
+            '255, 255, 255',  // Phantom White
+            '255, 215, 0',    // Velvet Gold
+            '255, 75, 75',    // Crimson
+            '255, 170, 0',    // Amber
+            '220, 20, 60',    // Crimson Red
+            '255, 255, 180'   // Pale Gold
+        ];
+
         function createFirework(x, y, targetY = null, isRocket = false) {
             const particles = [];
-            const colors = [
-                '255, 0, 0',
-                '0, 255, 0',
-                '0, 0, 255',
-                '255, 255, 0',
-                '255, 0, 255',
-                '0, 255, 255',
-                '255, 165, 0',
-                '255, 192, 203',
-                '128, 0, 128'
-            ];
             
             if (isRocket) {
                 const color = colors[Math.floor(Math.random() * colors.length)];
@@ -112,7 +221,7 @@
                     selectedColors.push(colors[Math.floor(Math.random() * colors.length)]);
                 }
                 
-                const particleCount = Math.floor(Math.random() * 100) + 50;
+                const particleCount = Math.floor(Math.random() * 110) + 60;
                 for (let i = 0; i < particleCount; i++) {
                     const color = selectedColors[Math.floor(Math.random() * selectedColors.length)];
                     particles.push(new Particle(x, y, null, color, false));
@@ -124,9 +233,8 @@
         let fireworks = [];
         let rockets = [];
 
-        // 动画循环
         function animate() {
-            ctx.fillStyle = `rgba(0, 0, 0, ${Math.random() * 0.1 + 0.05})`;
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.18)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // 更新火箭
@@ -136,7 +244,6 @@
                     if (alive) {
                         rocket.draw();
                     } else {
-                        // 火箭达到目标高度时爆炸
                         fireworks.push(createFirework(rocket.x, rocket.y));
                     }
                     return alive;
@@ -145,8 +252,10 @@
             });
 
             // 更新爆炸效果
+            let activeCount = 0;
             fireworks = fireworks.filter(particles => {
                 particles = particles.filter(particle => particle.alpha > 0);
+                activeCount += particles.length;
                 particles.forEach(particle => {
                     particle.update();
                     particle.draw();
@@ -154,29 +263,56 @@
                 return particles.length > 0;
             });
 
+            if (pCountEl) {
+                pCountEl.textContent = activeCount;
+            }
+
             requestAnimationFrame(animate);
         }
 
-        // 点击或触摸时创建烟花
         function handleInteraction(e) {
-            const x = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-            const y = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-            // 直接在点击位置创建爆炸效果
+            if (e.target.closest('.hud-overlay') || e.target.closest('#velvet-nav-host')) return;
+            const x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const y = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
             fireworks.push(createFirework(x, y));
         }
 
-        canvas.addEventListener('click', handleInteraction);
-        canvas.addEventListener('touchstart', handleInteraction);
+        window.addEventListener('click', handleInteraction);
+        window.addEventListener('touchstart', handleInteraction, { passive: true });
 
-        // 随机生成烟花
-        setInterval(() => {
-            const x = Math.random() * canvas.width;
-            const targetY = Math.random() * (canvas.height * 0.6) + canvas.height * 0.2; // 在20%-80%的高度范围内爆炸
-            if(Math.random() > 0.3) { // 70%的概率生成烟花
-                rockets.push(createFirework(x, canvas.height, targetY, true));
+        function triggerSalute() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const x = (canvas.width * 0.15) + (canvas.width * 0.7 * Math.random());
+                    const targetY = canvas.height * (0.2 + Math.random() * 0.4);
+                    rockets.push(createFirework(x, canvas.height, targetY, true));
+                }, i * 180);
             }
-        }, Math.random() * 500 + 500); // 0.5-1秒间隔
+        }
 
+        function toggleAuto() {
+            autoEnabled = !autoEnabled;
+            document.getElementById('autoBtn').textContent = autoEnabled ? '[⚡ AUTO: ON]' : '[💤 AUTO: OFF]';
+            if (autoEnabled) {
+                startAutoLoop();
+            } else if (autoInterval) {
+                clearInterval(autoInterval);
+            }
+        }
+
+        function startAutoLoop() {
+            if (autoInterval) clearInterval(autoInterval);
+            autoInterval = setInterval(() => {
+                if (!autoEnabled) return;
+                const x = Math.random() * canvas.width;
+                const targetY = Math.random() * (canvas.height * 0.5) + canvas.height * 0.15;
+                if(Math.random() > 0.25) {
+                    rockets.push(createFirework(x, canvas.height, targetY, true));
+                }
+            }, 650);
+        }
+
+        startAutoLoop();
         animate();
     </script>
 </body>

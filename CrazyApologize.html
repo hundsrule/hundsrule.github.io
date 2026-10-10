@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BJBDJ1J052"></script>
@@ -19,19 +19,26 @@
         })();
     </script>
     <meta charset="UTF-8">
-    <title>致歉信 - 给叶利钦老师 🙏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRAZY APOLOGY | 狂暴道歉信 - 给叶利钦老师 🙏</title>
+    <link rel="icon" href="hund.ico" type="image/x-icon">
+    <link rel="stylesheet" href="subwebsite/velvet-theme.css">
+    <script src="subwebsite/velvet-nav.js" data-root="./index.html"></script>
     <style>
         body {
-            font-family: '微软雅黑', sans-serif;
-            background: linear-gradient(45deg, #f6d365, #fda085, #fd85a0, #85fda7);
+            font-family: var(--font-sans, 'Noto Sans SC'), '微软雅黑', sans-serif;
+            background: linear-gradient(135deg, #101010, #2b0000, #400004, #101010);
             background-size: 400% 400%;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
             margin: 0;
-            animation: gradientBG 10s ease infinite;
+            padding: 0;
+            animation: gradientBG 8s ease infinite;
             perspective: 1000px;
+            overflow-x: hidden;
         }
 
         @keyframes gradientBG {
@@ -40,21 +47,54 @@
             100% { background-position: 0% 50%; }
         }
 
+        .controls-dock {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .toggle-btn {
+            background: var(--phantom-red, #e60012);
+            color: #fff;
+            border: 2px solid #000;
+            padding: 8px 18px;
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #fff;
+            transform: skewX(-10deg);
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn:hover {
+            background: #fff;
+            color: #000;
+            transform: skewX(-10deg) scale(1.05);
+        }
+
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 3rem;
-            border-radius: 30px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.2);
-            max-width: 90%;
+            background: #ffffff;
+            color: #101010;
+            padding: clamp(1.5rem, 4vw, 3rem);
+            border: 4px solid #000000;
+            box-shadow: 10px 10px 0px 0px var(--phantom-red, #e60012);
+            max-width: 820px;
+            width: 90%;
             text-align: center;
             transform-style: preserve-3d;
             position: relative;
-            margin: 20px;
+            margin: 20px auto 60px;
+            box-sizing: border-box;
         }
 
         .char {
             display: inline-block;
-            animation: randomWobble 0.01s ease-in-out infinite;
+        }
+
+        body.crazy-mode .char {
+            animation: randomWobble 0.04s ease-in-out infinite;
         }
 
         @keyframes randomWobble {
@@ -76,105 +116,121 @@
         }
 
         h1 {
-            color: #e74c3c;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            margin-bottom: 1.5em;
+            color: var(--phantom-red, #e60012);
+            font-family: var(--font-display, 'Anton'), var(--font-sans), sans-serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            text-shadow: 2px 2px 0px #000000;
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
         }
 
         p {
-            font-size: 1.8em;
+            font-size: clamp(1.1rem, 2.8vw, 1.4rem);
             line-height: 1.8;
-            margin: 30px 0;
-            color: #2c3e50;
+            margin: 20px 0;
+            color: #222222;
+            word-break: break-word;
+        }
+
+        .emoji-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
         }
 
         .emoji {
-            font-size: 4em;
-            margin: 20px;
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
             display: inline-block;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
         }
 
         .promise-list {
-            font-size: 1.6em;
-            background: linear-gradient(45deg, #ffefba, #ffffff);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            margin: 40px 0;
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            background: #fff8f8;
+            border: 3px solid #101010;
+            border-left: 8px solid var(--phantom-red, #e60012);
+            padding: 20px 25px;
+            box-shadow: 5px 5px 0px #101010;
+            margin: 30px 0;
+            text-align: left;
         }
 
         .star {
             display: inline-block;
-            color: #f1c40f;
-            font-size: 1.2em;
-            margin-right: 10px;
+            color: var(--phantom-red, #e60012);
+            font-size: 1.1em;
+            margin-right: 8px;
+            font-weight: bold;
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-            border-radius: 32px;
-            z-index: -1;
-            animation: glowing 20s linear infinite;
-            background-size: 400%;
-            filter: blur(10px);
-            opacity: 0.5;
+        .p5-warning-banner {
+            background: var(--phantom-red, #e60012);
+            color: #fff;
+            padding: 6px 12px;
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: inline-block;
+            transform: skewX(-12deg);
+            border: 2px solid #000;
         }
 
-        @keyframes glowing {
-            0% { background-position: 0 0; }
-            50% { background-position: 400% 0; }
-            100% { background-position: 0 0; }
-        }
-
-        @media (max-width: 768px) {
-            p { font-size: 1.6em; }
-            .promise-list { font-size: 1.4em; }
-            .emoji { font-size: 3.5em; }
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.2rem;
+                margin: 15px auto 40px;
+            }
+            .promise-list {
+                padding: 15px;
+            }
         }
     </style>
 </head>
-<body>
+<body class="crazy-mode">
+    <div class="controls-dock">
+        <button class="toggle-btn" id="modeBtn" onclick="toggleCrazyMode()">[⚡ TOGGLE STABLE / CRAZY]</button>
+    </div>
+
     <div class="container">
+        <div class="p5-warning-banner">⚠️ MAXIMUM SHAKE PROTOCOL // 极度狂暴忏悔</div>
         <h1 id="title">深切的忏悔与道歉 🙏</h1>
         
-        <div class="emoji">😔</div>
-        <div class="emoji">💔</div>
-        <div class="emoji">🥺</div>
+        <div class="emoji-group">
+            <span class="emoji">😔</span>
+            <span class="emoji">💔</span>
+            <span class="emoji">🥺</span>
+        </div>
         
-        <p>尊敬的叶利钦老师：</p>
+        <p><strong>尊敬的叶利钦老师：</strong></p>
         
-        <p>我怀着无比愧疚和自责的心情，为自己在课堂上背不出过秦论的不当行为向您诚恳道歉。 💝</p>
+        <p>我怀着无比愧疚和自责的心情，为自己在课堂上背不出《过秦论》的不当行为向您诚恳道歉。 💝</p>
         
         <p>这种行为不仅严重影响了自己的学习进度，也打扰了其他同学的注意力，更是对您孜孜不倦教导的极大不敬。我深感羞愧。 📚✨</p>
         
-        <p>每当想起您为备课熬夜到深夜，为我们讲解知识点时声音嘶哑，而我却沉迷于逃避背过秦论，内心就充满了懊悔与自责。 💭</p>
+        <p>每当想起您为备课熬夜到深夜，为我们讲解知识点时声音嘶哑，而我却沉迷于逃避背《过秦论》，内心就充满了懊悔与自责。 💭</p>
         
-        <p>在此，我郑重承诺：</p>
+        <p><strong>在此，我郑重承诺：</strong></p>
         <div class="promise-list">
-            <p>
-                <span class="star">⭐</span> 彻底改掉不背书的坏习惯<br>
-                <span class="star">⭐</span> 上课前主动向老师背古诗<br>
-                <span class="star">⭐</span> 全神贯注听讲每一堂课<br>
-                <span class="star">⭐</span> 认真完成每一项作业<br>
-                <span class="star">⭐</span> 以实际行动证明我的改变
+            <p style="margin: 0;">
+                <span class="star">★</span> 彻底改掉不背书的坏习惯<br>
+                <span class="star">★</span> 上课前主动向老师背古诗文<br>
+                <span class="star">★</span> 全神贯注听讲每一堂课<br>
+                <span class="star">★</span> 认真完成每一项作业<br>
+                <span class="star">★</span> 以实际行动证明我的改变
             </p>
         </div>
         
         <p>恳请您给我一次改过自新的机会，我一定会用优异的成绩和良好的表现来回报您的信任。 🌈</p>
         
-        <p>您诚挚的学生<br>王洪特<br>敬上 ❤️</p>
+        <p>您诚挚的学生<br><strong>王洪特</strong><br>敬上 ❤️</p>
         
-        <div class="emoji">🙇‍♂️</div>
-        <div class="emoji">🌟</div>
-        <div class="emoji">💪</div>
+        <div class="emoji-group">
+            <span class="emoji">🙇‍♂️</span>
+            <span class="emoji">🌟</span>
+            <span class="emoji">💪</span>
+        </div>
     </div>
 
     <script>
@@ -193,6 +249,12 @@
                     element.appendChild(span);
                 });
             });
+        }
+
+        function toggleCrazyMode() {
+            document.body.classList.toggle('crazy-mode');
+            const isCrazy = document.body.classList.contains('crazy-mode');
+            document.getElementById('modeBtn').textContent = isCrazy ? '[⚡ STABILIZE TEXT]' : '[🌪️ UNLEASH CHAOS]';
         }
 
         document.addEventListener('DOMContentLoaded', wrapChars);

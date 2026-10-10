@@ -21,208 +21,278 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="hund.ico" type="image/x-icon">
-    <title>洪特的跳转页</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>HUND'S ROOM v2.0 | 洪特的跳转页 (历史归档)</title>
+    <link rel="stylesheet" href="subwebsite/velvet-theme.css">
+    <script src="subwebsite/velvet-nav.js" data-root="./index.html"></script>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            font-family: var(--font-sans, 'Noto Sans SC'), 'Roboto', sans-serif;
+            background-color: var(--phantom-black, #101010);
+            color: var(--phantom-white, #f2f2f2);
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: flex-start;
             align-items: center;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
         }
+
+        .archive-banner {
+            width: 90%;
+            max-width: 760px;
+            margin: 25px auto 10px;
+            background: var(--phantom-red, #e60012);
+            color: #fff;
+            padding: 10px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0px #fff;
+            transform: skewX(-6deg);
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .archive-banner a {
+            color: #fff;
+            background: #000;
+            padding: 5px 14px;
+            text-decoration: none;
+            border: 1px solid #fff;
+            font-size: 0.9rem;
+            transform: skewX(6deg);
+        }
+
         .container {
-            background-color: var(--container-color);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            color: #101010;
+            padding: 2.2rem;
+            margin: 15px auto 60px;
+            border: 4px solid #000000;
+            box-shadow: 10px 10px 0px 0px var(--phantom-red, #e60012);
             text-align: center;
-            max-width: 90%;
-            transition: background-color 0.3s ease;
+            max-width: 760px;
+            width: 90%;
+            box-sizing: border-box;
         }
+
+        h2 {
+            font-family: var(--font-display, 'Anton'), var(--font-sans), sans-serif;
+            font-size: 2rem;
+            color: #101010;
+            margin-top: 0;
+        }
+
+        h4 {
+            color: var(--phantom-red, #e60012);
+            margin-bottom: 6px;
+        }
+
+        h6 {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 10px 0 20px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        audio {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
         .site-section {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ccc;
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border: 2px solid #000;
+            background: #fafafa;
+            box-shadow: 3px 3px 0px #000;
+            gap: 15px;
+            text-align: left;
         }
+
         .site-section img {
             width: 60px;
             height: 60px;
             object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
-            margin-right: 10px;
+            border: 2px solid #000;
+            flex-shrink: 0;
         }
-        .site-section img:hover {
-            transform: scale(1.1);
-        }
+
         .site-section p {
-            font-size: 16px;
+            font-size: 1rem;
+            font-weight: 700;
             margin: 0;
             flex: 1;
             word-break: break-word;
+            color: #101010;
         }
-        button {
-            padding: 6px 12px;
-            margin-left: 10px;
-            border: none;
-            background-color: var(--button-color);
+
+        button.action-btn {
+            padding: 8px 16px;
+            border: 2px solid #000;
+            background-color: var(--phantom-red, #e60012);
             color: white;
-            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            box-shadow: 3px 3px 0px #000;
+            transform: skewX(-6deg);
+            transition: all 0.15s ease;
+            white-space: nowrap;
         }
-        button:hover {
-            background-color: var(--button-hover-color);
-            transform: scale(2.5);
+
+        button.action-btn:hover {
+            background-color: #000;
+            color: #fff;
+            transform: skewX(-6deg) scale(1.05);
         }
-        .dark-mode-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+
+        .bio-card {
+            background: #fdf2f2;
+            border: 2px dashed var(--phantom-red);
+            padding: 16px;
+            margin-top: 30px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #333;
         }
-        .dark-mode-toggle:hover {
-            background-color: var(--button-hover-color);
+
+        .bio-card a {
+            color: var(--phantom-red);
+            font-weight: bold;
+            margin: 0 5px;
+            text-decoration: underline;
         }
-        :root {
-            --background-color: #f0f0f0;
-            --container-color: #ffffff;
-            --button-color: #6200ee;
-            --button-hover-color: #3700b3;
-            --text-color: #000000;
-        }
-        [data-theme="dark"] {
-            --background-color: #121212;
-            --container-color: #1e1e1e;
-            --button-color: #bb86fc;
-            --button-hover-color: #3700b3;
-            --text-color: #ffffff;
+
+        @media (max-width: 600px) {
+            .site-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .archive-banner {
+                flex-direction: column;
+                gap: 8px;
+            }
         }
     </style>
 </head>
-<body data-theme="dark">
-    <button class="dark-mode-toggle" onclick="toggleDarkMode()">
-        <span class="material-icons">brightness_4</span>
-    </button>
+<body>
+    <div class="archive-banner">
+        <span>ARCHIVE // 历史版本 v2.0 展览厅</span>
+        <a href="index.html">返回现代主站 3.0 ▶</a>
+    </div>
+
     <div class="container">
         <h2>欢迎来到洪特的天鹅绒房间。<br>今天想要干什么呢？</h2>
         <h4>天鹅绒房间背景音乐</h4>
-        <audio src="subwebsite/BGM.mp3" autoplay controls></audio>
+        <audio src="subwebsite/BGM.mp3" controls></audio>
         <h6>如果你是一个新用户，欢迎你！在界面底部找到更多信息。<br>这是一个由我（洪特）开发的个人小作品合集/工具箱。</h6>
+
         <div class="site-section">
             <img src="subwebsite/images/FlyingWHT.png" alt="博客">
             <p>洪特的个人博客</p>
-            <button onclick="smoothRedirect('http://blog.wht.icu')">欢迎参观</button>
+            <button class="action-btn" onclick="smoothRedirect('http://blog.wht.icu')">欢迎参观</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/image-demostration1/pink.jpg" alt="高考倒计时">
             <p>功能如其名的一个倒计时工具</p>
-            <button onclick="smoothRedirect('subwebsite/codes/%E9%AB%98%E8%80%83%E5%80%92%E8%AE%A1%E6%97%B6/index.html')">开始考试</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/%E9%AB%98%E8%80%83%E5%80%92%E8%AE%A1%E6%97%B6/index.html')">开始考试</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/recite.jpeg" alt="recite">
             <p>古诗背诵工具</p>
-            <button onclick="smoothRedirect('recite.html')">开始背书</button>
+            <button class="action-btn" onclick="smoothRedirect('recite.html')">开始背书</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/WordCrusher.jpeg" alt="词汇破坏者">
             <p>WHT征服英语</p>
-            <button onclick="smoothRedirect('subwebsite/codes/WordCrusher/WordCrusher.html')">开始背单词</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/WordCrusher/WordCrusher.html')">开始背单词</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/FlyingWHT.png" alt="Apology">
             <p>老师对不起</p>
-            <button onclick="smoothRedirect('subwebsite/codes/Apology/apology.html')">开始道歉</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/Apology/apology.html')">开始道歉</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/WHT.gif" alt="RollingwWHT">
             <p>洪特的滚动模拟小游戏安卓版本</p>
-            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/RollingWHt.apk')">Android 版本下载</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/RollingWHT/RollingWHt.apk')">Android 下载</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/FlyingWHT.png" alt="飞行洪特">
             <p>洪特的刷题模拟小游戏</p>
-            <button onclick="smoothRedirect('subwebsite/codes/FlyingWHT/index.html')">开始刷题之旅</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/FlyingWHT/index.html')">开始刷题之旅</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/k048.jpg" alt="K048">
             <p>显示一个随机单词</p>
-            <button onclick="smoothRedirect('subwebsite/codes/RandomWord/index.html')">随机单词</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/RandomWord/index.html')">随机单词</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/k048.jpg" alt="K048">
             <p>目标是合成出K的小游戏</p>
-            <button onclick="smoothRedirect('subwebsite/codes/K048/index.html')">开始合成K之旅</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/K048/index.html')">开始合成K之旅</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/cover.jpg" alt="唱片墙">
             <p>将所提供的图片转换为唱片墙</p>
-            <button onclick="smoothRedirect('subwebsite/codes/AlbumWall/index.html')">开始音乐之旅</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/AlbumWall/index.html')">开始音乐之旅</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/imgae-demostration2/kcoffee.png" alt="网站2图片">
             <p>将输入的任何文本的一部分随机替换为K</p>
-            <button onclick="smoothRedirect('subwebsite/codes/kkkgenerator/')">开始KK之旅</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/kkkgenerator/index.html')">开始KK之旅</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/WHT.gif" alt="网站4图片">
             <p>RollingWHT 滚动的洪特</p>
-            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/index.html')">开始翻滚之旅</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/RollingWHT/index.html')">开始翻滚之旅</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/WHTm.jpg" alt="wht图片">
             <p>RollingWHT 滚动的洪特 风格化网页版</p>
-            <button onclick="smoothRedirect('subwebsite/codes/RollingWHT/4399version.html')">开始翻滚之旅</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/codes/RollingWHT/4399version.html')">开始翻滚之旅</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/Fluttershy.jpg" alt="网站5图片">
             <p>一张福瑞图片</p>
-            <button onclick="smoothRedirect('subwebsite/images/Furry1 (1).jpg')">开始福瑞之旅</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/images/Furry1 (1).jpg')">开始福瑞之旅</button>
         </div>
         <div class="site-section">
             <img src="subwebsite/images/Furry1 (2).jpg" alt="网站5图片">
             <p>一张福瑞图片</p>
-            <button onclick="smoothRedirect('subwebsite/images/Furry1 (3).jpg')">开始福瑞之旅</button>
+            <button class="action-btn" onclick="smoothRedirect('subwebsite/images/Furry1 (3).jpg')">开始福瑞之旅</button>
         </div>
-        <p>你好，我是洪特，一个高三学生。<br>我在有限的空闲时间创建了这个网页。<br>大多数的编程都是AI完成的。<br>我本人的编程水平很有限。<br>如果有建议，欢迎发邮件（wanghongte@outlook.com）给我。<br>或者在下方找到我的其他社交媒体账号。<br><a href="https://github.com/hundsrule" style="color: blue;">Github</a><br><a href="https://space.bilibili.com/176868483" style="color: blue;">BiliBili</a>
-        <script>
-        function toggleDarkMode() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-        }
 
+        <div class="bio-card">
+            你好，我是洪特。<br>
+            我在有限的空闲时间创建了这个网页。<br>
+            大多数的编程都是AI完成的，我本人的编程水平很有限。<br>
+            如果有建议，欢迎发邮件 (<a href="mailto:wanghongte@outlook.com">wanghongte@outlook.com</a>) 给我。<br>
+            或者在下方找到我的其他社交媒体账号：<br>
+            <a href="https://github.com/hundsrule" target="_blank" rel="noopener">Github</a> | 
+            <a href="https://space.bilibili.com/176868483" target="_blank" rel="noopener">BiliBili</a>
+        </div>
+    </div>
+
+    <script>
         function smoothRedirect(url) {
             document.body.style.opacity = 0;
             setTimeout(() => {
                 window.location.href = url;
-            }, 300);
+            }, 250);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.body.style.transition = 'opacity 0.3s ease';
+            document.body.style.transition = 'opacity 0.25s ease';
             document.body.style.opacity = 1;
         });
-        </script>
+    </script>
 </body>
 </html>

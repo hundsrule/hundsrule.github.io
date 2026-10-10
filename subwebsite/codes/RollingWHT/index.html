@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="zh-CN">
   <head>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BJBDJ1J052"></script>
@@ -20,15 +20,87 @@
     </script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | RollingWHT_枣园巷大冒险</title>
+    <title>ROLLING WHT | 滚动的洪特</title>
+    <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+
+    <!-- Unified Velvet Room Theme -->
+    <link rel="stylesheet" href="../../velvet-theme.css">
+    <script src="../../velvet-nav.js" data-root="../../../index.html"></script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--phantom-black);
+        color: #ffffff;
+        font-family: var(--font-sans);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .game-wrapper {
+        position: relative;
+        z-index: 10;
+        margin: 20px auto 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 980px;
+        padding: 0 10px;
+        box-sizing: border-box;
+      }
+
+      #unity-canvas {
+        width: min(960px, 94vw);
+        height: min(600px, 58vw);
+        background: #231F20;
+        border: 4px solid #ffffff;
+        box-shadow: 8px 8px 0px 0px var(--phantom-red);
+        display: block;
+      }
+
+      .instructions {
+        margin-top: 16px;
+        background: var(--phantom-black);
+        border: 2px solid #ffffff;
+        box-shadow: 4px 4px 0px 0px var(--phantom-red);
+        padding: 10px 24px;
+        font-family: var(--font-display);
+        font-size: 16px;
+        letter-spacing: 1px;
+        color: #ffffff;
+        transform: skewX(-8deg);
+      }
+
+      .instructions span {
+        color: var(--phantom-red);
+      }
+    </style>
   </head>
-  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
-    <canvas id="unity-canvas" width=960 height=600 tabindex="-1" style="width: 960px; height: 600px; background: #231F20"></canvas>
+  <body>
+    <div class="velvet-bg-effects">
+      <div class="glow-spot"></div>
+      <div class="glow-spot-2"></div>
+      <div class="stripe-1"></div>
+      <div class="stripe-2"></div>
+      <div class="stripe-3"></div>
+      <div class="halftone" style="position:absolute; inset:0; opacity:0.18;"></div>
+    </div>
+
+    <div class="game-wrapper">
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div class="instructions">
+        <span>CONTROLS:</span> 移动：WASD 或 方向键 | 开始：K
+      </div>
+    </div>
+
     <script src="Build/WHT.loader.js"></script>
-      <h1>移动：WASD或箭号 开始：K</h1>
     <script>
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
         var meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
@@ -36,10 +108,8 @@
 
         var canvas = document.querySelector("#unity-canvas");
         canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.position = "fixed";
-
-        document.body.style.textAlign = "left";
+        canvas.style.height = "auto";
+        canvas.style.aspectRatio = "960/600";
       }
 
       createUnityInstance(document.querySelector("#unity-canvas"), {
@@ -50,8 +120,6 @@
         companyName: "DefaultCompany",
         productName: "RollingWHT_枣园巷大冒险",
         productVersion: "0.1",
-        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
       });
     </script>
   </body>

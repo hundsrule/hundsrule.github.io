@@ -1,134 +1,422 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>桌面时钟</title>
+    <title>DESK CLOCK | 桌面时钟 - 天鹅绒房间</title>
+    <link rel="icon" href="hund.ico" type="image/x-icon">
+    <link rel="stylesheet" href="subwebsite/velvet-theme.css">
+    <script src="subwebsite/velvet-nav.js" data-root="./index.html"></script>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
+            background-color: var(--phantom-black, #101010);
+            color: var(--phantom-white, #f2f2f2);
+            font-family: var(--font-sans, 'Noto Sans SC'), Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
             min-height: 100vh;
-            overflow: hidden;
-            font-weight: bold;
-            padding-top: 0px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(230, 0, 18, 0.15), transparent 60%),
+                radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 100% 100%, 20px 20px;
         }
 
         .container {
             text-align: center;
-            width: 90%;
-            max-width: 800px;
+            width: 92%;
+            max-width: 900px;
+            margin: 30px auto 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
 
-        .date {
-            font-size: 18px;
-            margin-bottom: 5px;
+        /* Top HUD Bar */
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 10px 18px;
+            background: #000;
+            border: 2px solid var(--phantom-white);
+            box-shadow: 4px 4px 0px var(--phantom-red);
+            clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
         }
 
-        .clock {
+        .date-badge {
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            color: var(--phantom-white);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-badge .p5-tag {
+            background: var(--phantom-red);
+            color: #fff;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            font-weight: 900;
+            transform: skewX(-12deg);
+        }
+
+        .fs-toggle-btn {
+            background: var(--phantom-red);
+            color: #fff;
+            border: 2px solid #000;
+            padding: 6px 14px;
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #fff;
+            transform: skewX(-10deg);
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .fs-toggle-btn:hover {
+            background: #fff;
+            color: #000;
+            transform: skewX(-10deg) scale(1.05);
+        }
+
+        /* Digital P5 Clock */
+        .clock-stage {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 10px;
+            width: 100%;
+            padding: 25px 15px;
+            background: #151515;
+            border: 3px solid #000;
+            box-shadow: 8px 8px 0px var(--phantom-red);
             position: relative;
+            overflow: hidden;
         }
 
-        .flip {
-            background: #1a1a1a;
-            border-radius: 50px;
-            padding: 0px;
-            font-size: 200px;
-            width: 290px;
+        .clock-stage::before {
+            content: "MISSION CHRONO // VELVET SYS";
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.4);
         }
 
-        .seconds {
-            font-size: 28px;
-            position: relative;
-            right: 0px;
-            bottom: 0px;
-        }
-
-        .countdown {
-            font-size: 18px;
-            margin: 10px 0;
-            background: rgba(26, 26, 26, 0.7);
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        .weather {
-            font-size: 16px;
-            margin: 10px 0;
-            background: rgba(26, 26, 26, 0.7);
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        .current-weather {
+        .clock-digits {
             display: flex;
-            justify-content: space-around;
-            margin-bottom: 10px;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0 5px;
         }
 
-        .forecast {
+        .digit-card {
+            background: #000;
+            color: #fff;
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: clamp(3.5rem, 14vw, 8.5rem);
+            line-height: 1;
+            padding: 10px 18px;
+            border: 3px solid var(--phantom-white);
+            box-shadow: 5px 5px 0px var(--phantom-red);
+            min-width: 1.25em;
+            text-align: center;
+            user-select: none;
+            position: relative;
+        }
+
+        .digit-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+        }
+
+        .clock-divider {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: clamp(3rem, 12vw, 7rem);
+            color: var(--phantom-red);
+            animation: pulseBlink 1s infinite;
+            line-height: 1;
+        }
+
+        @keyframes pulseBlink {
+            0%, 49% { opacity: 1; transform: scale(1); }
+            50%, 100% { opacity: 0.3; transform: scale(0.95); }
+        }
+
+        .seconds-strip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            background: #000;
+            padding: 4px 16px;
+            border: 2px solid var(--phantom-red);
+            box-shadow: 3px 3px 0px #fff;
+        }
+
+        .seconds-label {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.75rem;
+            color: var(--phantom-red);
+            letter-spacing: 2px;
+        }
+
+        .seconds-val {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 1.8rem;
+            color: #fff;
+            min-width: 2ch;
+            text-align: center;
+        }
+
+        /* Countdown Mission Bar */
+        .countdown-mission-card {
+            width: 100%;
+            box-sizing: border-box;
+            background: #000;
+            border: 3px solid var(--phantom-white);
+            box-shadow: 6px 6px 0px var(--phantom-red);
+            padding: 14px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+            position: relative;
+        }
+
+        .countdown-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 1rem;
+            letter-spacing: 1.5px;
+            color: #fff;
+        }
+
+        .countdown-title .bullet {
+            width: 8px;
+            height: 8px;
+            background: var(--phantom-red);
+            transform: rotate(45deg);
+        }
+
+        .countdown-val {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: clamp(1.1rem, 4vw, 1.8rem);
+            color: var(--phantom-red);
+            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 1px;
+            word-break: break-all;
+        }
+
+        /* Weather Module */
+        .weather-panel {
+            width: 100%;
+            box-sizing: border-box;
+            background: #181818;
+            border: 3px solid #000;
+            box-shadow: 6px 6px 0px var(--phantom-red);
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .weather-current-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+            padding-bottom: 12px;
+        }
+
+        .weather-current-temp {
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 1.5rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
             gap: 8px;
-            margin: 10px 0;
+        }
+
+        .weather-current-today {
+            font-size: 1rem;
+            color: #ccc;
+            font-weight: bold;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            width: 100%;
         }
 
         .forecast-item {
-            background: rgba(26, 26, 26, 0.5);
-            padding: 8px;
-            border-radius: 8px;
-            flex: 1;
-        }
-
-        .quote {
-            font-size: 16px;
-            margin: 5   px 0;
-            max-width: 90%;
-            text-align: center;
-            background: rgba(26, 26, 26, 0.7);
+            background: #000;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 3px 3px 0px var(--phantom-red);
             padding: 10px;
-            border-radius: 5px;
-            line-height: 1.4;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: center;
         }
 
+        .forecast-day-name {
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            color: var(--phantom-red);
+            letter-spacing: 1px;
+        }
+
+        /* Velvet Daily Quote Dossier */
+        .quote-dossier {
+            width: 100%;
+            box-sizing: border-box;
+            background: #fff;
+            color: #000;
+            border: 3px solid #000;
+            box-shadow: 8px 8px 0px var(--phantom-red);
+            padding: 18px 24px;
+            text-align: left;
+            position: relative;
+            transform: rotate(-0.5deg);
+        }
+
+        .quote-dossier-tag {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            font-family: var(--font-tech, 'Black Ops One'), monospace;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            transform: skewX(-10deg);
+        }
+
+        .quote-text {
+            font-size: 1.15rem;
+            font-weight: 900;
+            line-height: 1.6;
+            margin: 0;
+            color: #101010;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px auto 40px;
+                gap: 15px;
+            }
+            .hud-header {
+                justify-content: center;
+            }
+            .digit-card {
+                padding: 6px 12px;
+            }
+            .forecast-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="date" id="currentDate">2023年12月1日 星期五</div>
-        <div class="clock">
-            <span class="flip hours">00</span>
-            <span class="flip minutes">00</span>
-            <span class="seconds">00</span>
-        </div>
-        <div class="weather">
-            <div class="current-weather">
-                <div id="currentWeather">加载中...</div>
-                <div id="todayWeather"></div>
+        <!-- Top Status Bar -->
+        <div class="hud-header">
+            <div class="date-badge">
+                <span class="p5-tag">DATE</span>
+                <span id="currentDate">2026年10月10日 星期六</span>
             </div>
-            <div class="forecast" id="forecast"></div>
+            <button class="fs-toggle-btn" id="fsBtn" onclick="toggleFullscreen()">[⛶ FULLSCREEN]</button>
         </div>
-        <div class="quote" id="dailyQuote">今日寄语加载中...</div>
+
+        <!-- Clock Digital Display -->
+        <div class="clock-stage">
+            <div class="clock-digits">
+                <div class="digit-card hours">00</div>
+                <div class="clock-divider">:</div>
+                <div class="digit-card minutes">00</div>
+            </div>
+            <div class="seconds-strip">
+                <span class="seconds-label">SEC</span>
+                <span class="seconds-val seconds">00</span>
+            </div>
+        </div>
+
+        <!-- Mission Countdown Card -->
+        <div class="countdown-mission-card">
+            <div class="countdown-title">
+                <div class="bullet"></div>
+                <span>MISSION COUNTDOWN // 高考决战倒计时</span>
+            </div>
+            <div class="countdown-val" id="examCountdown">计算中...</div>
+        </div>
+
+        <!-- Weather Status Panel -->
+        <div class="weather-panel">
+            <div class="weather-current-row">
+                <div class="weather-current-temp" id="currentWeather">🌤️ 正在接收气象遥测...</div>
+                <div class="weather-current-today" id="todayWeather"></div>
+            </div>
+            <div class="forecast-grid" id="forecast">
+                <div class="forecast-item">气象雷达同步中...</div>
+            </div>
+        </div>
+
+        <!-- Daily Quote Calling Card -->
+        <div class="quote-dossier">
+            <div class="quote-dossier-tag">DAILY DOSSIER // 今日寄语</div>
+            <p class="quote-text" id="dailyQuote">相信自己，你比想象中更强大。</p>
+        </div>
     </div>
 
     <script>
-        // 自动全屏
-        document.addEventListener('DOMContentLoaded', () => {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
+        // 全屏切换函数（用户手势安全调用）
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Fullscreen request bypassed:', err.message);
+                });
+                document.getElementById('fsBtn').textContent = '[✖ EXIT FULL]';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                document.getElementById('fsBtn').textContent = '[⛶ FULLSCREEN]';
+            }
+        }
+
+        // 监听全屏变化保持按钮状态同步
+        document.addEventListener('fullscreenchange', () => {
+            const btn = document.getElementById('fsBtn');
+            if (btn) {
+                btn.textContent = document.fullscreenElement ? '[✖ EXIT FULL]' : '[⛶ FULLSCREEN]';
             }
         });
 
@@ -137,7 +425,8 @@
             const now = new Date();
             const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
             const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${weekdays[now.getDay()]}`;
-            document.getElementById('currentDate').textContent = dateStr;
+            const el = document.getElementById('currentDate');
+            if (el) el.textContent = dateStr;
         }
 
         // 时钟更新
@@ -147,30 +436,50 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
 
-            document.querySelector('.hours').textContent = hours;
-            document.querySelector('.minutes').textContent = minutes;
-            document.querySelector('.seconds').textContent = seconds;
+            const hEl = document.querySelector('.hours');
+            const mEl = document.querySelector('.minutes');
+            const sEl = document.querySelector('.seconds');
+            if (hEl) hEl.textContent = hours;
+            if (mEl) mEl.textContent = minutes;
+            if (sEl) sEl.textContent = seconds;
         }
 
-        // 高考倒计时
-        function updateCountdown() {
-            const examDate = new Date('2025-06-07T09:00:00');
+        // 动态高考倒计时计算（自动锁定最近的下一次6月7日09:00）
+        function getNextGaokaoDate() {
             const now = new Date();
-            const diff = Math.abs(examDate - now);
+            let targetYear = now.getFullYear();
+            let target = new Date(`${targetYear}-06-07T09:00:00`);
+            if (now.getTime() > target.getTime()) {
+                target = new Date(`${targetYear + 1}-06-07T09:00:00`);
+            }
+            return target;
+        }
+
+        function updateCountdown() {
+            const examTarget = getNextGaokaoDate();
+            const now = new Date();
+            const diff = examTarget - now;
+
+            const examEl = document.getElementById('examCountdown');
+            if (!examEl) return;
+
+            if (diff <= 0) {
+                examEl.textContent = "00天 00小时 00分 00秒 // 考试进行中！";
+                return;
+            }
 
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-            document.getElementById('examCountdown').textContent = 
-                `${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
+            examEl.textContent = `${days}天 ${String(hours).padStart(2, '0')}时 ${String(minutes).padStart(2, '0')}分 ${String(seconds).padStart(2, '0')}秒`;
         }
 
-        // 天气API（使用和风天气，需要替换YOUR_API_KEY）
+        // 和风天气 API
         async function getWeather() {
             const API_KEY = '9a815c87b12146fd8dd7df4ccb6a4f31';
-            const city = '101230908'; // 松溪的城市代码，需要根据实际位置修改
+            const city = '101230908'; // 松溪城市代码
 
             try {
                 const currentResponse = await fetch(`https://devapi.qweather.com/v7/weather/now?location=${city}&key=${API_KEY}`);
@@ -179,7 +488,6 @@
                 const forecastResponse = await fetch(`https://devapi.qweather.com/v7/weather/3d?location=${city}&key=${API_KEY}`);
                 const forecastData = await forecastResponse.json();
 
-                // 获取天气对应的emoji
                 function getWeatherEmoji(text) {
                     const emojiMap = {
                         '晴': '☀️',
@@ -192,31 +500,39 @@
                     for (let key in emojiMap) {
                         if (text.includes(key)) return emojiMap[key];
                     }
-                    return '☁️';
+                    return '🌤️';
                 }
 
-                // 更新当前天气
-                document.getElementById('currentWeather').innerHTML = 
-                    `当前温度: ${currentData.now.temp}°C ${getWeatherEmoji(currentData.now.text)} ${currentData.now.text}`;
+                if (currentData && currentData.now) {
+                    const curEl = document.getElementById('currentWeather');
+                    if (curEl) {
+                        curEl.innerHTML = `当前温度: ${currentData.now.temp}°C ${getWeatherEmoji(currentData.now.text)} ${currentData.now.text}`;
+                    }
+                }
 
-                // 更新今日天气
-                const todayForecast = forecastData.daily[0];
-                document.getElementById('todayWeather').innerHTML = 
-                    `今日天气: ${getWeatherEmoji(todayForecast.textDay)} ${todayForecast.textDay}`;
+                if (forecastData && forecastData.daily && forecastData.daily.length > 0) {
+                    const todayForecast = forecastData.daily[0];
+                    const todayEl = document.getElementById('todayWeather');
+                    if (todayEl) {
+                        todayEl.innerHTML = `今日气象: ${getWeatherEmoji(todayForecast.textDay)} ${todayForecast.textDay} (${todayForecast.tempMin}°C ~ ${todayForecast.tempMax}°C)`;
+                    }
 
-                // 更新三日天气预报
-                const dayNames = ['今天', '明天', '后天'];
-                const forecastHtml = forecastData.daily.map((day, index) => `
-                    <div class="forecast-item">
-                        ${dayNames[index]}: 
-                        ${getWeatherEmoji(day.textDay)} ${day.textDay}
-                        ${day.tempMax}°C/${day.tempMin}°C
-                    </div>
-                `).join('');
-                
-                document.getElementById('forecast').innerHTML = forecastHtml;
+                    const dayNames = ['今天', '明天', '后天'];
+                    const forecastHtml = forecastData.daily.map((day, index) => `
+                        <div class="forecast-item">
+                            <span class="forecast-day-name">${dayNames[index] || '预测'}</span>
+                            <span>${getWeatherEmoji(day.textDay)} ${day.textDay}</span>
+                            <span style="color: #aaa; font-size: 0.8rem;">${day.tempMax}°C / ${day.tempMin}°C</span>
+                        </div>
+                    `).join('');
+                    
+                    const fEl = document.getElementById('forecast');
+                    if (fEl) fEl.innerHTML = forecastHtml;
+                }
             } catch (error) {
-                console.error('获取天气信息失败:', error);
+                console.warn('获取气象数据异常 (降级为离线模式):', error);
+                const curEl = document.getElementById('currentWeather');
+                if (curEl) curEl.innerHTML = '🌤️ 离线气象终端正常运行中';
             }
         }
 
@@ -246,18 +562,22 @@
 
         function updateQuote() {
             const today = new Date();
-            const index = today.getDate() % quotes.length;
-            document.getElementById('dailyQuote').textContent = quotes[index];
+            const index = (today.getFullYear() + today.getMonth() + today.getDate()) % quotes.length;
+            const qEl = document.getElementById('dailyQuote');
+            if (qEl) qEl.textContent = quotes[index];
         }
 
-        // 初始化和定时更新
+        // 初始化定时器
         updateDate();
-        setInterval(updateClock, 1000);
-        setInterval(updateCountdown, 1000);
-        setInterval(updateDate, 1000);
+        updateClock();
+        updateCountdown();
         updateQuote();
         getWeather();
-        setInterval(getWeather, 1800000); // 每30分钟更新一次天气
+
+        setInterval(updateClock, 1000);
+        setInterval(updateCountdown, 1000);
+        setInterval(updateDate, 60000);
+        setInterval(getWeather, 1800000); // 30分钟轮询一次
     </script>
 </body>
 </html>

@@ -1,0 +1,255 @@
+/* Velvet Room Theme Overrides for K048 */
+
+html, body {
+  background: var(--phantom-black) !important;
+  color: var(--phantom-white) !important;
+  font-family: var(--font-sans) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0 !important;
+  padding-bottom: 60px !important;
+}
+
+.container {
+  width: 500px;
+  max-width: 95vw;
+  margin: 20px auto 40px !important;
+  position: relative;
+  z-index: 10;
+}
+
+h1.title {
+  font-family: var(--font-display) !important;
+  font-size: 64px !important;
+  color: #ffffff !important;
+  text-shadow: 4px 4px 0px var(--phantom-red) !important;
+  letter-spacing: 2px;
+}
+
+.score-container, .best-container {
+  background: var(--phantom-black) !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 4px 4px 0px 0px var(--phantom-red) !important;
+  color: #ffffff !important;
+  font-family: var(--font-display) !important;
+  transform: skewX(-8deg);
+  border-radius: 0 !important;
+}
+
+.score-container:after, .best-container:after {
+  color: var(--phantom-red) !important;
+  font-family: var(--font-display) !important;
+  font-size: 11px !important;
+  letter-spacing: 1px;
+}
+
+.restart-button, .keep-playing-button, .retry-button {
+  background: var(--phantom-red) !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 3px 3px 0px 0px #000000 !important;
+  font-family: var(--font-display) !important;
+  transform: skewX(-8deg);
+  border-radius: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+}
+
+.restart-button:hover, .keep-playing-button:hover, .retry-button:hover {
+  background: #ffffff !important;
+  color: var(--phantom-black) !important;
+  border-color: var(--phantom-black) !important;
+  box-shadow: 5px 5px 0px 0px var(--phantom-red) !important;
+  transform: skewX(-8deg) translate(-2px, -2px);
+}
+
+.game-intro {
+  color: #dddddd !important;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.game-intro strong {
+  color: var(--phantom-red);
+}
+
+.game-container {
+  background: #141414 !important;
+  border: 3px solid #ffffff !important;
+  box-shadow: 8px 8px 0px 0px var(--phantom-red) !important;
+  border-radius: 0 !important;
+  margin-top: 24px !important;
+}
+
+.grid-cell {
+  background: #222222 !important;
+  border: 1px solid #333333 !important;
+  border-radius: 0 !important;
+}
+
+.tile, .tile .tile-inner {
+  border-radius: 0 !important;
+  font-family: var(--font-display) !important;
+  font-weight: 900 !important;
+}
+
+/* Persona 5 Tile Palette */
+.tile.tile-2 .tile-inner {
+  background: #f2f2f2 !important;
+  color: #101010 !important;
+  border: 2px solid #000000;
+}
+
+.tile.tile-4 .tile-inner {
+  background: #ffffff !important;
+  color: #101010 !important;
+  border: 2px solid var(--phantom-red);
+}
+
+.tile.tile-8 .tile-inner {
+  background: #ffe5e5 !important;
+  color: var(--phantom-red) !important;
+  border: 2px solid var(--phantom-red);
+}
+
+.tile.tile-16 .tile-inner {
+  background: #ff9999 !important;
+  color: #000000 !important;
+  border: 2px solid #000000;
+}
+
+.tile.tile-32 .tile-inner {
+  background: #ff4d4d !important;
+  color: #ffffff !important;
+  border: 2px solid #000000;
+  box-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
+}
+
+.tile.tile-64 .tile-inner {
+  background: var(--phantom-red) !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 15px var(--phantom-red);
+}
+
+.tile.tile-128 .tile-inner {
+  background: #cc0000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 20px var(--phantom-red);
+}
+
+.tile.tile-256 .tile-inner {
+  background: #ffeb3b !important;
+  color: #000000 !important;
+  border: 2px solid #000000;
+}
+
+.tile.tile-512 .tile-inner {
+  background: #ff9800 !important;
+  color: #ffffff !important;
+  border: 2px solid #000000;
+}
+
+.tile.tile-1024 .tile-inner {
+  background: #e91e63 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff;
+}
+
+.tile.tile-2048 .tile-inner {
+  background: #000000 !important;
+  color: var(--phantom-red) !important;
+  border: 4px solid var(--phantom-red) !important;
+  box-shadow: 0 0 30px var(--phantom-red) !important;
+  animation: velvet-pulse 1s infinite alternate;
+}
+
+.tile.tile-super .tile-inner {
+  background: #000000 !important;
+  color: #ffeb3b !important;
+  border: 4px solid #ffeb3b !important;
+  box-shadow: 0 0 35px #ffeb3b !important;
+}
+
+.game-container .game-message {
+  background: rgba(16, 16, 16, 0.92) !important;
+}
+
+.game-container .game-message p {
+  color: var(--phantom-red) !important;
+  font-family: var(--font-display) !important;
+  text-shadow: 3px 3px 0px #000000;
+}
+
+.game-explanation {
+  color: #cccccc !important;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-top: 20px;
+}
+
+.lore-dossier {
+  background: #ffffff;
+  color: #101010;
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px 0px var(--phantom-red);
+  padding: 24px;
+  margin-top: 24px;
+  position: relative;
+}
+
+.lore-dossier::before {
+  content: 'CONFIDENTIAL // 绝密档案';
+  position: absolute;
+  top: -14px;
+  left: 20px;
+  background: var(--phantom-red);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 12px;
+  padding: 2px 10px;
+  transform: skewX(-10deg);
+}
+
+.lore-dossier h2 {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: 20px;
+  margin: 0 0 12px 0;
+  color: var(--phantom-black);
+}
+
+.lore-dossier p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #222222;
+  margin-bottom: 12px;
+}
+
+.lore-dossier .quote-highlight {
+  background: #f4f4f4;
+  border-left: 4px solid var(--phantom-red);
+  padding: 10px 14px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+@media screen and (max-width: 520px) {
+  .container {
+    width: 320px !important;
+  }
+  h1.title {
+    font-size: 44px !important;
+  }
+  .score-container, .best-container {
+    padding: 10px 15px !important;
+    font-size: 18px !important;
+  }
+}

@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>哔哩哔哩移动端评论区拟真生成器 - Bilibili Comment Simulator</title>
+  <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+
+  <!-- Tailwind CSS & html2canvas -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* Bilibili Design Token Specification */
+    :root {
+      --bili-pink: #fb7299;
+      --bili-pink-hover: #ff85ad;
+      --bili-pink-bg: #fff0f4;
+      --bili-blue: #00aeec;
+      --bili-link: #008ac5;
+      --bili-text-main: #18191c;
+      --bili-text-sub: #9499a0;
+      --bili-text-gray: #61666d;
+      --bili-bg: #ffffff;
+      --bili-card-bg: #f6f7f8;
+      --bili-border: #e3e5e7;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "HarmonyOS Sans", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      background-color: #0f1013;
+      color: #f1f2f3;
+    }
+
+    /* Editable Indicator when Edit Mode is active */
+    .edit-mode [data-editable] {
+      cursor: text;
+      outline: 1.5px dashed rgba(251, 114, 153, 0.5);
+      outline-offset: 2px;
+      border-radius: 3px;
+      transition: all 0.15s ease;
+    }
+    .edit-mode [data-editable]:hover {
+      background-color: rgba(251, 114, 153, 0.12);
+      outline: 1.5px solid #fb7299;
+    }
+    .edit-mode [data-editable]:focus {
+      background-color: rgba(251, 114, 153, 0.18);
+      outline: 2px solid #fb7299;
+    }
+
+    /* Device Containers */
+    .device-iphone {
+      width: 392px;
+      height: 844px;
+      border-radius: 50px;
+      box-shadow: 0 0 0 12px #222327, 0 0 0 14px #151619, 0 30px 70px -15px rgba(0, 0, 0, 0.85);
+      position: relative;
+    }
+    .device-android {
+      width: 390px;
+      height: 835px;
+      border-radius: 36px;
+      box-shadow: 0 0 0 10px #1c1d21, 0 0 0 12px #121316, 0 25px 60px -15px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+    .device-borderless {
+      width: 390px;
+      height: 820px;
+      border-radius: 0;
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    /* Responsive: In Mobile Screens, adapt seamlessly */
+    @media (max-width: 640px) {
+      .device-iphone, .device-android, .device-borderless {
+        width: 100vw !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      width: 108px;
+      height: 27px;
+      background: #000;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 9px;
+      z-index: 50;
+    }
+    .dynamic-island-camera {
+      width: 10px;
+      height: 10px;
+      background: #0f1626;
+      border-radius: 50%;
+      border: 1px solid #1c273d;
+    }
+
+    /* Bilibili Official LV Badges */
+    .bili-lv {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 13px;
+      padding: 0 3.5px;
+      border-radius: 2px;
+      font-size: 8.5px;
+      font-weight: 800;
+      line-height: 1;
+      font-family: Arial, Helvetica, sans-serif;
+      vertical-align: middle;
+      margin-left: 4px;
+      letter-spacing: -0.2px;
+    }
+    .bili-lv-1 { background-color: #bfbfbf; color: #fff; }
+    .bili-lv-2 { background-color: #95ddcc; color: #fff; }
+    .bili-lv-3 { background-color: #92d1e5; color: #fff; }
+    .bili-lv-4 { background-color: #ffb347; color: #fff; }
+    .bili-lv-5 { background-color: #ff7f3f; color: #fff; }
+    .bili-lv-6 { background: linear-gradient(135deg, #ff3b30 0%, #ff5277 100%); color: #fff; }
+
+    /* Fans Medal Badge */
+    .fans-medal {
+      display: inline-flex;
+      align-items: center;
+      height: 14px;
+      border-radius: 2px;
+      border: 0.5px solid #fb7299;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1;
+      margin-left: 4px;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+    .fans-medal-name {
+      padding: 0 3px;
+      background-color: #fb7299;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
+    }
+    .fans-medal-level {
+      padding: 0 3px;
+      background: #fff;
+      color: #fb7299;
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
+      font-size: 8px;
+      font-weight: 800;
+    }
+
+    /* UP Badge */
+    .up-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 14px;
+      padding: 0 4px;
+      border-radius: 2px;
+      background: #fb7299;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      margin-left: 4px;
+      line-height: 1;
+      vertical-align: middle;
+    }
+
+    /* Pinned Tag */
+    .pin-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 14px;
+      padding: 0 4px;
+      border-radius: 2px;
+      background: rgba(251, 114, 153, 0.12);
+      color: #fb7299;
+      border: 0.5px solid rgba(251, 114, 153, 0.45);
+      font-size: 9.5px;
+      font-weight: 700;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    /* Bilibili Bounce Animation on Like */
+    @keyframes bili-bounce {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.38); }
+      60% { transform: scale(0.92); }
+      100% { transform: scale(1); }
+    }
+    .animate-bili-bounce {
+      animation: bili-bounce 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Flying Danmaku Animation */
+    @keyframes danmaku-flow {
+      0% { transform: translateX(390px); }
+      100% { transform: translateX(-100%); }
+    }
+    .danmaku-item {
+      position: absolute;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.85), -1px -1px 2px rgba(0,0,0,0.85);
+      pointer-events: none;
+      animation: danmaku-flow linear infinite;
+    }
+
+    /* Custom Clean Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(148, 153, 160, 0.35);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 153, 160, 0.65);
+    }
+
+    .bili-emoji-img {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      vertical-align: -3.5px;
+      margin: 0 1.5px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-6 overflow-x-hidden">
+
+  <!-- ================= TOP DOCK / CONTROL BAR ================= -->
+  <header class="w-full max-w-6xl mb-4 flex flex-wrap items-center justify-between gap-3 bg-neutral-900/90 backdrop-blur-md border border-neutral-800 rounded-2xl px-4 py-3 shadow-2xl">
+    <!-- Left: Navigation & Branding -->
+    <div class="flex items-center gap-3">
+      <a href="../../../index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-red-600 text-white text-xs font-bold transition-all shadow-sm group">
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        <span>返回主站</span>
+      </a>
+      <div class="h-4 w-px bg-neutral-700 hidden sm:block"></div>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#fb7299] to-[#ff85ad] flex items-center justify-center text-white shadow-lg shadow-[#fb7299]/30">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.8 3.5l1.7-1.7a1 1 0 0 1 1.4 1.4l-1.6 1.6A11 11 0 0 1 22 11v6a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-6c0-2.3.7-4.4 2-6.1L2.3 3.3a1 1 0 1 1 1.4-1.4l1.7 1.7A11.9 11.9 0 0 1 12 2c2.5 0 4.9.5 6.8 1.5zM7 13a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm10 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm font-black text-white tracking-wide">哔哩哔哩移动端评论区拟真生成器</h1>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#fb7299]/20 text-[#fb7299] font-mono border border-[#fb7299]/40 font-bold">Ultra 100% Real</span>
+          </div>
+          <p class="text-[11px] text-neutral-400 hidden sm:block">全真移动端界面 · 点击文本实时编辑 · 逼真点赞动效 · 高清无水印长图导出</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Action Controls -->
+    <div class="flex items-center gap-2 flex-wrap ml-auto">
+      <!-- Edit Mode Toggle -->
+      <button id="toggle-edit-mode-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-bold transition-all shadow-sm">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span id="edit-mode-text">编辑模式: 开启</span>
+      </button>
+
+      <!-- Theme Toggle (Day / Night) -->
+      <button id="toggle-theme-btn" class="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs transition-all border border-neutral-700" title="切换B站日间亮白 / 深夜暗黑模式">
+        <svg id="theme-icon-sun" class="w-4 h-4 hidden text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="theme-icon-moon" class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+
+      <!-- Device Shell Switcher -->
+      <button id="toggle-shell-btn" class="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold transition-all border border-neutral-700 flex items-center gap-1" title="切换真机外壳">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <span id="shell-text">iPhone 15</span>
+      </button>
+
+      <!-- Add New Comment -->
+      <button id="add-comment-btn" class="px-3 py-1.5 rounded-xl bg-[#fb7299] hover:bg-[#ff85ad] text-white text-xs font-bold transition-all shadow-md shadow-[#fb7299]/30 flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>新增评论</span>
+      </button>
+
+      <!-- Export Screenshot -->
+      <button id="export-image-btn" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-md shadow-emerald-500/25 flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>导出高清长图</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN WORKSPACE ================= -->
+  <main class="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 relative pb-16">
+
+    <!-- ========== PHONE DEVICE SIMULATOR ========== -->
+    <div class="flex flex-col items-center flex-shrink-0">
+      
+      <!-- Phone Shell Wrapper -->
+      <div id="phone-shell" class="device-iphone bg-[#101012] overflow-hidden flex flex-col transition-all duration-300 edit-mode">
+        
+        <!-- Screen Canvas (Captured for export) -->
+        <div id="bili-app-screen" class="w-full h-full flex flex-col bg-white text-[#18191c] relative overflow-hidden select-none">
+          
+          <!-- 1. Phone Status Bar (iOS Style) -->
+          <div id="phone-status-bar" class="w-full h-11 flex-shrink-0 flex items-center justify-between px-6 pt-1 text-black font-semibold text-xs z-40 select-none">
+            <!-- Time (Click to edit) -->
+            <div id="status-time" data-editable="status-time" class="tracking-tight text-[13px] font-bold" title="点击可修改手机时间">12:30</div>
+            
+            <!-- Dynamic Island Notch -->
+            <div id="status-notch" class="dynamic-island">
+              <div class="dynamic-island-camera"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-[#0a101a] border border-[#1b253b]"></div>
+            </div>
+
+            <!-- Signal, Wifi, Battery -->
+            <div class="flex items-center gap-1.5 text-black">
+              <!-- 5G Signal -->
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2 17h3v4H2v-4zm6-5h3v9H8v-9zm6-5h3v14h-3V7zm6-5h3v19h-3V2z"/>
+              </svg>
+              <!-- WiFi -->
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.78 0 7.21 1.5 9.74 3.93L12 19.34 2.26 11.43C4.79 9 8.22 7.5 12 7.5z"/>
+              </svg>
+              <!-- Battery (Click to toggle level) -->
+              <div id="status-battery-toggle" class="flex items-center gap-0.5 cursor-pointer" title="点击切换电量">
+                <div class="w-5 h-2.5 border border-black rounded-[3px] p-[1px] flex items-center">
+                  <div id="status-battery-level" class="h-full bg-black rounded-[1.5px]" style="width: 85%;"></div>
+                </div>
+                <div class="w-[1.5px] h-1 bg-black rounded-r-[1px]"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Video Player Header Area (Collapsible) -->
+          <div id="video-player-section" class="w-full bg-black relative flex-shrink-0 aspect-video overflow-hidden group">
+            <!-- Video Cover Image -->
+            <img id="video-cover-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80" alt="Video Cover" class="w-full h-full object-cover opacity-85">
+            
+            <!-- Danmaku Container -->
+            <div id="danmaku-container" class="absolute inset-0 pointer-events-none overflow-hidden">
+              <span class="danmaku-item" style="top: 15%; animation-duration: 7s; animation-delay: 0s;">前方高能！！！这也太逼真了吧！</span>
+              <span class="danmaku-item" style="top: 38%; animation-duration: 9s; animation-delay: 2s; color: #ffeb3b;">233333333333333333</span>
+              <span class="danmaku-item" style="top: 62%; animation-duration: 8s; animation-delay: 1.2s; color: #fb7299;">来了来了！第一名到此一游！</span>
+              <span class="danmaku-item" style="top: 25%; animation-duration: 10s; animation-delay: 4s;">泪目，这就是热爱的力量吗</span>
+            </div>
+
+            <!-- Player Overlays (Top bar) -->
+            <div class="absolute top-0 left-0 right-0 p-2.5 flex items-center justify-between bg-gradient-to-b from-black/75 to-transparent text-white text-xs z-10">
+              <div class="flex items-center gap-2">
+                <button class="p-1 hover:opacity-80">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <span id="player-title" data-editable="video-title" class="font-bold text-[13px] truncate max-w-[210px] drop-shadow" title="点击修改视频标题">【全网首发】这居然是用代码做出来的B站移动端？！</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <svg class="w-4 h-4 cursor-pointer hover:text-[#fb7299]" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7zm0-4v2c4.97 0 9 4.03 9 9h2c0-6.08-4.93-11-11-11z"/></svg>
+                <svg class="w-4 h-4 cursor-pointer" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              </div>
+            </div>
+
+            <!-- Center Play Button -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+              <div class="w-12 h-12 rounded-full bg-black/55 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white">
+                <svg class="w-6 h-6 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+
+            <!-- Player Bottom Bar -->
+            <div class="absolute bottom-0 left-0 right-0 px-3 py-1.5 flex items-center justify-between bg-gradient-to-t from-black/85 to-transparent text-white text-[11px] z-10">
+              <div class="flex items-center gap-2">
+                <span>02:14 / 08:36</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="px-1.5 py-0.5 rounded bg-white/20 text-[10px]">1080P 高码率</span>
+                <svg class="w-4 h-4 cursor-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+              </div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-white/30">
+              <div class="h-full bg-[#fb7299]" style="width: 26%;"></div>
+            </div>
+          </div>
+
+          <!-- 3. Bilibili App Tab Bar (简介 / 评论) -->
+          <div id="bili-tabs-bar" class="w-full h-11 border-b border-[#e3e5e7] flex items-center justify-between px-4 bg-white flex-shrink-0 z-20">
+            <!-- Tabs -->
+            <div class="flex items-center gap-6 h-full text-sm font-bold">
+              <button class="text-[#9499a0] hover:text-[#18191c] transition-colors relative py-2">
+                <span>简介</span>
+                <span class="text-[11px] font-normal text-[#9499a0] ml-0.5">52.8万</span>
+              </button>
+              <button class="text-[#18191c] font-black relative py-2 flex items-center gap-1">
+                <span>评论</span>
+                <span id="tab-comment-count" data-editable="total-comments" class="text-[11px] font-bold text-[#9499a0]" title="点击修改总评论数">4298</span>
+                <!-- Active Pink Indicator Line -->
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[2.5px] bg-[#fb7299] rounded-full"></span>
+              </button>
+            </div>
+
+            <!-- Right UP Follow Button -->
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1 bg-[#fb7299] text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm hover:opacity-90 cursor-pointer">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>关注</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Sub-Header: Filter Bar (最热 / 最新) -->
+          <div id="bili-filter-bar" class="w-full h-8 px-4 flex items-center justify-between text-xs text-[#9499a0] bg-white border-b border-[#f1f2f3] flex-shrink-0 z-10">
+            <div class="flex items-center gap-1.5 font-bold">
+              <span id="sort-hot" class="cursor-pointer text-[#18191c] font-bold transition-colors">最热</span>
+              <span class="text-[#e3e5e7] font-normal">|</span>
+              <span id="sort-new" class="cursor-pointer hover:text-[#18191c] transition-colors">最新</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="text-[#9499a0]">UP主觉得很赞的优先</span>
+            </div>
+          </div>
+
+          <!-- 5. MAIN SCROLLABLE COMMENT FEED -->
+          <div id="comment-scroll-area" class="w-full flex-1 overflow-y-auto custom-scrollbar px-3.5 py-3 space-y-4 bg-white relative">
+            <!-- Dynamic Comments -->
+          </div>
+
+          <!-- 6. Bottom Sticky Input Bar -->
+          <div id="bili-bottom-bar" class="w-full h-12 bg-white border-t border-[#e3e5e7] px-3.5 flex items-center justify-between gap-3 flex-shrink-0 z-30 shadow-sm">
+            <!-- Simulated Input Box -->
+            <div id="open-comment-input-btn" class="flex-1 h-8 rounded-full bg-[#f1f2f3] hover:bg-[#e9ebed] text-[#9499a0] px-3.5 flex items-center gap-2 text-xs cursor-pointer transition-colors">
+              <svg class="w-3.5 h-3.5 text-[#9499a0]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <span>发一条友善的评论吧</span>
+            </div>
+
+            <!-- Action Icons (Emoji, @) -->
+            <div class="flex items-center gap-3 text-[#61666d]">
+              <!-- Emoji Picker -->
+              <button id="quick-emoji-trigger" class="hover:text-[#fb7299] transition-colors" title="表情">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                </svg>
+              </button>
+              <!-- @ User -->
+              <button class="hover:text-[#fb7299] transition-colors" title="@用户">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10h5v-2h-5c-4.34 0-8-3.66-8-8s3.66-8 8-8 8 3.66 8 8v1.43c0 .79-.71 1.57-1.5 1.57s-1.5-.78-1.5-1.57V12c0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5c1.38 0 2.63-.56 3.54-1.46.65.89 1.7 1.46 2.96 1.46 1.93 0 3.5-1.57 3.5-3.57V12c0-5.52-4.48-10-10-10zm0 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 7. Interactive Bottom Comment Input Sheet -->
+          <div id="input-modal-sheet" class="absolute inset-0 bg-black/60 z-50 flex flex-col justify-end transition-opacity opacity-0 pointer-events-none duration-200">
+            <div id="input-modal-content" class="w-full bg-white rounded-t-2xl p-4 flex flex-col gap-3 transform translate-y-full transition-transform duration-200 shadow-2xl">
+              <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+                <span class="text-xs font-bold text-gray-800">发表评论</span>
+                <button id="close-input-modal" class="text-gray-400 hover:text-gray-700">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+
+              <!-- Textarea -->
+              <div class="relative">
+                <textarea id="real-comment-input" rows="3" placeholder="发一条友善的评论吧..." class="w-full text-xs p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-[#fb7299] focus:bg-white resize-none text-gray-800"></textarea>
+              </div>
+
+              <!-- Quick Emoji Select Row -->
+              <div class="flex items-center gap-2 overflow-x-auto py-1 custom-scrollbar">
+                <button class="sheet-emoji-btn p-1 hover:bg-gray-100 rounded text-base" data-emoji="[doge]">🐶 doge</button>
+                <button class="sheet-emoji-btn p-1 hover:bg-gray-100 rounded text-base" data-emoji="[妙赞]">👍 妙赞</button>
+                <button class="sheet-emoji-btn p-1 hover:bg-gray-100 rounded text-base" data-emoji="[笑哭]">😂 笑哭</button>
+                <button class="sheet-emoji-btn p-1 hover:bg-gray-100 rounded text-base" data-emoji="[吃瓜]">🍉 吃瓜</button>
+                <button class="sheet-emoji-btn p-1 hover:bg-gray-100 rounded text-base" data-emoji="[保佑]">🙏 保佑</button>
+                <button class="sheet-emoji-btn p-1 hover:bg-gray-100 rounded text-base" data-emoji="[打call]">🔥 打call</button>
+                <button class="sheet-emoji-btn p-1 hover:bg-gray-100 rounded text-base" data-emoji="[给心心]">❤️ 比心</button>
+                <button class="sheet-emoji-btn p-1 hover:bg-gray-100 rounded text-base" data-emoji="[滑稽]">😏 滑稽</button>
+              </div>
+
+              <!-- Submit Row -->
+              <div class="flex items-center justify-between pt-1">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                  <span>发布身份: </span>
+                  <input id="input-sender-name" type="text" value="热心哔哩哔哩网友" class="w-32 px-2 py-1 bg-gray-100 rounded border border-gray-200 text-xs font-bold text-gray-800">
+                </div>
+                <button id="submit-new-comment-btn" class="px-5 py-1.5 rounded-full bg-[#fb7299] hover:bg-[#ff85ad] text-white text-xs font-bold shadow-md shadow-[#fb7299]/30">
+                  发送
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. Interactive Action Menu Sheet (Triggered by '...') -->
+          <div id="action-menu-sheet" class="absolute inset-0 bg-black/50 z-50 flex flex-col justify-end transition-opacity opacity-0 pointer-events-none duration-150">
+            <div id="action-menu-content" class="w-full bg-white rounded-t-2xl p-3 flex flex-col gap-1 transform translate-y-full transition-transform duration-150 shadow-2xl text-xs font-medium text-gray-800">
+              <button id="menu-btn-copy" class="w-full py-3 text-center hover:bg-gray-50 rounded-xl">复制评论内容</button>
+              <button id="menu-btn-pin" class="w-full py-3 text-center hover:bg-gray-50 rounded-xl text-[#fb7299]">设为/取消置顶</button>
+              <button id="menu-btn-uplike" class="w-full py-3 text-center hover:bg-gray-50 rounded-xl text-[#fb7299]">UP主点赞 / 取消</button>
+              <button id="menu-btn-del" class="w-full py-3 text-center hover:bg-gray-50 rounded-xl text-red-500">删除该评论</button>
+              <div class="h-1 bg-gray-100 rounded-full my-1"></div>
+              <button id="menu-btn-cancel" class="w-full py-3 text-center text-gray-400 font-bold hover:bg-gray-50 rounded-xl">取消</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== SIDEBAR / CONTROL PANEL ========== -->
+    <div class="w-full lg:w-80 flex flex-col gap-4">
+
+      <!-- Card 1: Interactive Instructions -->
+      <div class="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 shadow-xl">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-400 mb-2 flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>超拟真使用秘籍</span>
+        </h3>
+        <ul class="text-xs text-neutral-300 space-y-2 leading-relaxed">
+          <li class="flex items-start gap-1.5">
+            <span class="text-amber-400 font-bold">•</span>
+            <span><strong class="text-white">可视化直接编辑：</strong>开启编辑模式后，直接点击手机中的<strong>昵称、内容、点赞数、时间、IP属地、手机时间</strong>即可实时打字修改！</span>
+          </li>
+          <li class="flex items-start gap-1.5">
+            <span class="text-amber-400 font-bold">•</span>
+            <span><strong class="text-white">点击头像改属性：</strong>点击头像弹出弹窗，可上传本地图片、选内置头像、设置 Lv1-Lv6 等级、大会员、粉丝勋章。</span>
+          </li>
+          <li class="flex items-start gap-1.5">
+            <span class="text-amber-400 font-bold">•</span>
+            <span><strong class="text-white">真实APP点赞：</strong>点击点赞大拇指，有正宗 B站 粉红微动弹跳和轻快水滴音效！</span>
+          </li>
+          <li class="flex items-start gap-1.5">
+            <span class="text-amber-400 font-bold">•</span>
+            <span><strong class="text-white">纯真APP模式：</strong>点击顶部“编辑模式”切换为“关闭”，所有边框隐藏，体验100%纯正APP！</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Card 2: Preset Scenarios -->
+      <div class="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 shadow-xl">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#fb7299] mb-3 flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>经典名场面预设一键加载</span>
+        </h3>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button class="preset-btn px-2.5 py-2 rounded-xl bg-neutral-800 hover:bg-[#fb7299] hover:text-white transition-all text-neutral-200 font-bold text-left border border-neutral-700" data-preset="hot-masterpiece">
+            🔥 搞笑破防神评
+          </button>
+          <button class="preset-btn px-2.5 py-2 rounded-xl bg-neutral-800 hover:bg-[#fb7299] hover:text-white transition-all text-neutral-200 font-bold text-left border border-neutral-700" data-preset="tech-review">
+            💻 极客课代表总结
+          </button>
+          <button class="preset-btn px-2.5 py-2 rounded-xl bg-neutral-800 hover:bg-[#fb7299] hover:text-white transition-all text-neutral-200 font-bold text-left border border-neutral-700" data-preset="acg-party">
+            ✨ 二次元应援团
+          </button>
+          <button class="preset-btn px-2.5 py-2 rounded-xl bg-neutral-800 hover:bg-red-500 hover:text-white transition-all text-neutral-200 font-bold text-left border border-neutral-700" data-preset="empty">
+            🧹 清空自由创作
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 3: Screen & Video Options -->
+      <div class="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 shadow-xl space-y-3">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>界面与媒体配置</span>
+        </h3>
+
+        <!-- Toggle Video Player -->
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-neutral-300">显示上方视频播放器</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="checkbox-show-video" type="checkbox" checked class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#fb7299]"></div>
+          </label>
+        </div>
+
+        <!-- Toggle Danmaku -->
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-neutral-300">视频悬浮飘动弹幕</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="checkbox-show-danmaku" type="checkbox" checked class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#fb7299]"></div>
+          </label>
+        </div>
+
+        <!-- Audio Effect Switch -->
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-neutral-300">哔哩点赞清脆音效</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="checkbox-enable-audio" type="checkbox" checked class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#fb7299]"></div>
+          </label>
+        </div>
+
+        <!-- Video Cover Upload -->
+        <div class="pt-2 border-t border-neutral-800 flex items-center justify-between text-xs">
+          <span class="text-neutral-300">更换视频封面</span>
+          <label class="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 rounded-lg cursor-pointer text-[11px] text-neutral-200 border border-neutral-700 font-bold">
+            <span>选择本地图</span>
+            <input id="video-cover-file-input" type="file" accept="image/*" class="hidden">
+          </label>
+        </div>
+
+        <!-- Data Import / Export -->
+        <div class="pt-2 border-t border-neutral-800 grid grid-cols-2 gap-2 text-xs">
+          <button id="copy-json-btn" class="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 text-center font-bold">
+            复制JSON配置
+          </button>
+          <button id="import-json-btn" class="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 text-center font-bold">
+            导入JSON配置
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= AVATAR & USER EDIT MODAL ================= -->
+  <div id="avatar-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-md w-full p-5 shadow-2xl text-neutral-100 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div class="flex items-center justify-between pb-2 border-b border-neutral-800">
+        <h3 class="text-sm font-extrabold text-white flex items-center gap-1.5">
+          <span>用户信息与头像配置</span>
+        </h3>
+        <button id="close-avatar-modal" class="text-neutral-400 hover:text-white">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Current Preview -->
+      <div class="flex items-center gap-3 bg-neutral-950 p-3 rounded-xl border border-neutral-800">
+        <div class="relative flex-shrink-0">
+          <img id="modal-preview-avatar" src="" alt="Avatar" class="w-12 h-12 rounded-full object-cover border-2 border-[#fb7299]">
+          <div id="modal-preview-vip" class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-[#fb7299] rounded-full flex items-center justify-center text-white text-[9px] font-bold border border-white">
+            ★
+          </div>
+        </div>
+        <div class="text-xs space-y-1">
+          <div class="flex items-center gap-1.5 font-bold">
+            <span id="modal-preview-name" class="text-white">用户名</span>
+            <span id="modal-preview-lv" class="bili-lv bili-lv-6">LV6</span>
+          </div>
+          <p class="text-[11px] text-neutral-400">点击下方快速设置身份属性与头像图片</p>
+        </div>
+      </div>
+
+      <!-- Upload Local Image -->
+      <div>
+        <label class="block text-xs font-bold text-neutral-300 mb-1.5">本地上传新头像：</label>
+        <input id="avatar-file-input" type="file" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#fb7299] file:text-white hover:file:bg-[#ff85ad] file:cursor-pointer">
+      </div>
+
+      <!-- Preset Avatars Grid -->
+      <div>
+        <label class="block text-xs font-bold text-neutral-300 mb-2">精选内置二次元 / B站头像：</label>
+        <div id="preset-avatars-grid" class="grid grid-cols-6 gap-2"></div>
+      </div>
+
+      <!-- User Attributes: VIP, Level, UP Tag, Fans Medal -->
+      <div class="grid grid-cols-2 gap-3 text-xs pt-2 border-t border-neutral-800">
+        <!-- Level -->
+        <div>
+          <label class="block text-neutral-300 font-bold mb-1">账号等级：</label>
+          <select id="modal-select-level" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white">
+            <option value="1">LV1 灰色</option>
+            <option value="2">LV2 青绿</option>
+            <option value="3">LV3 浅蓝</option>
+            <option value="4">LV4 亮黄</option>
+            <option value="5">LV5 鲜橙</option>
+            <option value="6" selected>LV6 珊瑚红 (高玩)</option>
+          </select>
+        </div>
+
+        <!-- VIP Status -->
+        <div>
+          <label class="block text-neutral-300 font-bold mb-1">大会员粉色昵称：</label>
+          <select id="modal-select-vip" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white">
+            <option value="false">普通用户</option>
+            <option value="true" selected>年度大会员 (粉红高亮)</option>
+          </select>
+        </div>
+
+        <!-- Is UP -->
+        <div>
+          <label class="block text-neutral-300 font-bold mb-1">是否UP主本人：</label>
+          <select id="modal-select-is-up" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white">
+            <option value="false" selected>否</option>
+            <option value="true">是 (带UP主粉红小标)</option>
+          </select>
+        </div>
+
+        <!-- Is Pinned -->
+        <div>
+          <label class="block text-neutral-300 font-bold mb-1">是否置顶：</label>
+          <select id="modal-select-pinned" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white">
+            <option value="false" selected>普通评论</option>
+            <option value="true">置顶该评论</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Fans Medal Config -->
+      <div class="pt-2 border-t border-neutral-800 space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-neutral-300 font-bold">佩戴粉丝勋章</span>
+          <input id="modal-checkbox-medal" type="checkbox" class="accent-[#fb7299] w-4 h-4 cursor-pointer">
+        </div>
+        <div id="modal-medal-inputs" class="grid grid-cols-2 gap-2">
+          <input id="modal-input-medal-name" type="text" placeholder="勋章名 (如 嘉心糖)" class="bg-neutral-950 border border-neutral-800 rounded-lg p-1.5 text-xs text-white">
+          <input id="modal-input-medal-level" type="number" min="1" max="50" placeholder="等级 (如 16)" class="bg-neutral-950 border border-neutral-800 rounded-lg p-1.5 text-xs text-white">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-neutral-800">
+        <button id="save-avatar-modal-btn" class="px-5 py-2 rounded-xl bg-[#fb7299] hover:bg-[#ff85ad] text-white text-xs font-bold shadow-md shadow-[#fb7299]/30">
+          保存修改
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-msg" class="fixed bottom-6 px-4 py-2.5 rounded-xl bg-neutral-800 text-white border border-neutral-700 shadow-2xl text-xs font-bold flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <svg class="w-4 h-4 text-[#fb7299]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    <span id="toast-text">通知内容</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // --- 1. PURE LOCAL SVG PRESET AVATARS (Guaranteed 100% Offline & Sharp) ---
+    function createSvgAvatar(bg, innerSvg) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="${bg}"/>${innerSvg}</svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    const PRESET_AVATARS = [
+      // 1. Classic Bilibili TV Mascot
+      createSvgAvatar('#fb7299', `<rect x="22" y="32" width="56" height="42" rx="10" fill="#ffffff"/><circle cx="38" cy="50" r="4.5" fill="#18191c"/><circle cx="62" cy="50" r="4.5" fill="#18191c"/><path d="M44 60 Q50 65 56 60" stroke="#18191c" stroke-width="2.5" fill="none" stroke-linecap="round"/><line x1="35" y1="32" x2="25" y2="20" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/><line x1="65" y1="32" x2="75" y2="20" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>`),
+      // 2. 22 Musume Blue
+      createSvgAvatar('#00aeec', `<circle cx="50" cy="42" r="22" fill="#ffe0bd"/><path d="M28 40 Q50 20 72 40 Q76 65 72 75 Q50 78 28 75 Z" fill="#0077b6" opacity="0.6"/><circle cx="42" cy="42" r="3.5" fill="#005f73"/><circle cx="58" cy="42" r="3.5" fill="#005f73"/><path d="M48 52 Q50 55 52 52" stroke="#d90429" stroke-width="2" fill="none"/><path d="M26 80 Q50 68 74 80 L76 100 L24 100 Z" fill="#0096c7"/>`),
+      // 3. 33 Musume Pink
+      createSvgAvatar('#ff4d6d', `<circle cx="50" cy="42" r="22" fill="#ffe0bd"/><circle cx="42" cy="42" r="3.5" fill="#590d22"/><circle cx="58" cy="42" r="3.5" fill="#590d22"/><path d="M47 52 Q50 54 53 52" stroke="#590d22" stroke-width="2" fill="none"/><path d="M26 80 Q50 68 74 80 L76 100 L24 100 Z" fill="#ff758f"/>`),
+      // 4. Cool Shiba Inu (Doge)
+      createSvgAvatar('#ffb703', `<circle cx="50" cy="48" r="26" fill="#fb8500"/><polygon points="28,26 38,42 22,44" fill="#fb8500"/><polygon points="72,26 62,42 78,44" fill="#fb8500"/><ellipse cx="50" cy="56" rx="14" ry="11" fill="#fff"/><circle cx="40" cy="46" r="3" fill="#000"/><circle cx="60" cy="46" r="3" fill="#000"/><ellipse cx="50" cy="52" rx="4" ry="3" fill="#000"/>`),
+      // 5. Cyberpunk Cat
+      createSvgAvatar('#7209b7', `<circle cx="50" cy="52" r="24" fill="#240046"/><polygon points="30,30 42,46 26,48" fill="#240046"/><polygon points="70,30 58,46 74,48" fill="#240046"/><ellipse cx="42" cy="50" rx="3.5" ry="5" fill="#4cc9f0"/><ellipse cx="58" cy="50" rx="3.5" ry="5" fill="#4cc9f0"/><polygon points="50,56 47,59 53,59" fill="#f72585"/>`),
+      // 6. Gamer Boy Headset
+      createSvgAvatar('#3a86ff', `<circle cx="50" cy="48" r="22" fill="#ffe0bd"/><path d="M28 44 Q50 22 72 44" fill="#1d3557"/><rect x="22" y="40" width="8" height="18" rx="4" fill="#e63946"/><rect x="70" y="40" width="8" height="18" rx="4" fill="#e63946"/><path d="M26 40 Q50 20 74 40" stroke="#e63946" stroke-width="4" fill="none"/><circle cx="42" cy="48" r="3" fill="#1d3557"/><circle cx="58" cy="48" r="3" fill="#1d3557"/>`),
+      // 7. Tech Geek Glasses
+      createSvgAvatar('#2ec4b6', `<circle cx="50" cy="48" r="22" fill="#ffe0bd"/><rect x="34" y="42" width="12" height="10" rx="2" fill="none" stroke="#011627" stroke-width="2.5"/><rect x="54" y="42" width="12" height="10" rx="2" fill="none" stroke="#011627" stroke-width="2.5"/><line x1="46" y1="47" x2="54" y2="47" stroke="#011627" stroke-width="2.5"/><circle cx="40" cy="47" r="2.5" fill="#011627"/><circle cx="60" cy="47" r="2.5" fill="#011627"/>`),
+      // 8. Anime Maid Ribbon
+      createSvgAvatar('#ff9ebb', `<circle cx="50" cy="48" r="22" fill="#ffe0bd"/><circle cx="42" cy="48" r="3.5" fill="#8338ec"/><circle cx="58" cy="48" r="3.5" fill="#8338ec"/><ellipse cx="36" cy="53" rx="4" ry="2" fill="#ff70a6"/><ellipse cx="64" cy="53" rx="4" ry="2" fill="#ff70a6"/><path d="M30 26 Q50 32 70 26 Q74 20 50 18 Q26 20 30 26 Z" fill="#ffffff" stroke="#ff70a6" stroke-width="1.5"/>`),
+      // 9. Retro Pixel Avatar
+      createSvgAvatar('#4361ee', `<rect x="30" y="30" width="40" height="40" fill="#ffe0bd"/><rect x="36" y="40" width="8" height="8" fill="#101010"/><rect x="56" y="40" width="8" height="8" fill="#101010"/><rect x="42" y="56" width="16" height="4" fill="#e63946"/><rect x="26" y="24" width="48" height="10" fill="#101010"/>`),
+      // 10. Starry Night Galaxy
+      createSvgAvatar('#03071e', `<circle cx="50" cy="50" r="48" fill="#03071e"/><circle cx="30" cy="30" r="2" fill="#fff"/><circle cx="70" cy="25" r="3" fill="#ffb703"/><circle cx="80" cy="65" r="1.5" fill="#fff"/><circle cx="20" cy="70" r="2" fill="#4cc9f0"/><circle cx="50" cy="50" r="16" fill="#f72585" opacity="0.6"/>`),
+      // 11. Panda Mascot
+      createSvgAvatar('#8ecae6', `<circle cx="50" cy="52" r="26" fill="#ffffff"/><circle cx="30" cy="34" r="8" fill="#18191c"/><circle cx="70" cy="34" r="8" fill="#18191c"/><ellipse cx="40" cy="48" rx="6" ry="8" fill="#18191c"/><ellipse cx="60" cy="48" rx="6" ry="8" fill="#18191c"/><circle cx="41" cy="47" r="2.5" fill="#ffffff"/><circle cx="59" cy="47" r="2.5" fill="#ffffff"/><ellipse cx="50" cy="57" rx="4" ry="3" fill="#18191c"/>`),
+      // 12. Golden Crown VIP
+      createSvgAvatar('#ffd166', `<circle cx="50" cy="52" r="24" fill="#ffffff"/><polygon points="32,32 38,20 50,28 62,20 68,32" fill="#f39c12" stroke="#d35400" stroke-width="1"/><circle cx="42" cy="50" r="3" fill="#18191c"/><circle cx="58" cy="50" r="3" fill="#18191c"/><path d="M46 58 Q50 62 54 58" stroke="#e74c3c" stroke-width="2" fill="none"/>`)
+    ];
+
+    // --- 2. PURE LOCAL SVG BILIBILI YELLOW EMOJIS (100% Reliable Offline) ---
+    function createSvgEmoji(innerContent) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#ffcb3d" stroke="#f29f05" stroke-width="1"/>${innerContent}</svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    const EMOJI_MAP = {
+      '[doge]': createSvgEmoji(`<ellipse cx="14" cy="18" rx="3.5" ry="4.5" fill="#fff"/><ellipse cx="26" cy="18" rx="3.5" ry="4.5" fill="#fff"/><circle cx="15.5" cy="18" r="2" fill="#000"/><circle cx="27.5" cy="18" r="2" fill="#000"/><ellipse cx="20" cy="24" rx="3.5" ry="2.5" fill="#000"/><path d="M14 27 Q20 32 26 27" stroke="#945305" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="8" cy="22" rx="3" ry="1.5" fill="#ff7f7f" opacity="0.6"/>`),
+      '[妙赞]': createSvgEmoji(`<circle cx="14" cy="16" r="2.5" fill="#5c2e00"/><circle cx="26" cy="16" r="2.5" fill="#5c2e00"/><path d="M14 24 Q20 30 26 24" stroke="#5c2e00" stroke-width="2.5" fill="none" stroke-linecap="round"/><g transform="translate(25, 12)"><path d="M4 10 V6 A3 3 0 0 1 7 3 A1 1 0 0 1 8 4 V8 H12 A2 2 0 0 1 14 10 L12 16 H4 Z" fill="#ff5252"/></g>`),
+      '[点赞]': createSvgEmoji(`<circle cx="14" cy="16" r="2" fill="#5c2e00"/><circle cx="26" cy="16" r="2" fill="#5c2e00"/><path d="M15 24 Q20 28 25 24" stroke="#5c2e00" stroke-width="2" fill="none"/><g transform="translate(14, 18)"><path d="M2 8 V5 A2 2 0 0 1 4 3 A1 1 0 0 1 5 4 V7 H8 A1.5 1.5 0 0 1 9.5 8.5 L8 13 H2 Z" fill="#ff4081"/></g>`),
+      '[笑哭]': createSvgEmoji(`<path d="M10 18 Q14 14 18 18" stroke="#5c2e00" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M22 18 Q26 14 30 18" stroke="#5c2e00" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M14 24 Q20 33 26 24 Z" fill="#5c2e00"/><path d="M6 18 Q3 23 5 26 Q8 26 8 20 Z" fill="#29b6f6"/><path d="M34 18 Q37 23 35 26 Q32 26 32 20 Z" fill="#29b6f6"/>`),
+      '[吃瓜]': createSvgEmoji(`<circle cx="14" cy="15" r="2.5" fill="#5c2e00"/><circle cx="26" cy="15" r="2.5" fill="#5c2e00"/><ellipse cx="20" cy="27" rx="10" ry="7" fill="#2e7d32"/><ellipse cx="20" cy="26" rx="9" ry="6" fill="#d32f2f"/><circle cx="16" cy="25" r="1" fill="#000"/><circle cx="20" cy="24" r="1" fill="#000"/><circle cx="24" cy="25" r="1" fill="#000"/>`),
+      '[保佑]': createSvgEmoji(`<path d="M12 17 Q15 15 18 17" stroke="#5c2e00" stroke-width="2" fill="none"/><path d="M22 17 Q25 15 28 17" stroke="#5c2e00" stroke-width="2" fill="none"/><path d="M16 23 Q20 26 24 23" stroke="#5c2e00" stroke-width="2" fill="none"/><g transform="translate(13, 20)"><path d="M5 14 L7 5 L9 14 Z" fill="#ff9800"/><path d="M9 14 L11 5 L13 14 Z" fill="#ffb74d"/></g>`),
+      '[打call]': createSvgEmoji(`<circle cx="14" cy="16" r="2.5" fill="#5c2e00"/><circle cx="26" cy="16" r="2.5" fill="#5c2e00"/><path d="M15 24 Q20 29 25 24" stroke="#5c2e00" stroke-width="2" fill="none"/><line x1="6" y1="28" x2="10" y2="12" stroke="#ff4081" stroke-width="3" stroke-linecap="round"/><line x1="34" y1="28" x2="30" y2="12" stroke="#00e5ff" stroke-width="3" stroke-linecap="round"/>`),
+      '[给心心]': createSvgEmoji(`<ellipse cx="14" cy="16" rx="3" ry="1.5" fill="#5c2e00"/><ellipse cx="26" cy="16" rx="3" ry="1.5" fill="#5c2e00"/><path d="M16 24 Q20 28 24 24" stroke="#5c2e00" stroke-width="2" fill="none"/><path d="M20 18 Q16 12 20 9 Q24 12 20 18 Z" fill="#ff1744" transform="scale(1.3) translate(-4, -2)"/>`),
+      '[滑稽]': createSvgEmoji(`<ellipse cx="12" cy="15" rx="4" ry="2" fill="#5c2e00"/><circle cx="14" cy="14" r="1.5" fill="#000"/><ellipse cx="28" cy="15" rx="4" ry="2" fill="#5c2e00"/><circle cx="26" cy="14" r="1.5" fill="#000"/><path d="M10 24 Q20 33 30 24" stroke="#5c2e00" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="7" cy="20" rx="3.5" ry="2" fill="#ff5252" opacity="0.6"/><ellipse cx="33" cy="20" rx="3.5" ry="2" fill="#ff5252" opacity="0.6"/>`),
+      '[傲娇]': createSvgEmoji(`<line x1="12" y1="16" x2="18" y2="18" stroke="#5c2e00" stroke-width="2.5" stroke-linecap="round"/><line x1="28" y1="18" x2="22" y2="16" stroke="#5c2e00" stroke-width="2.5" stroke-linecap="round"/><path d="M17 26 Q20 23 23 26" stroke="#5c2e00" stroke-width="2" fill="none"/><ellipse cx="9" cy="21" rx="3" ry="1.5" fill="#ff5252" opacity="0.6"/><ellipse cx="31" cy="21" rx="3" ry="1.5" fill="#ff5252" opacity="0.6"/>`)
+    };
+
+    // Text parser: replaces [doge] with inline SVG images, handles timestamps and @usernames
+    function formatCommentContent(text) {
+      if (!text) return '';
+      let escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Replace timestamps (e.g. 02:14 or 12:45)
+      escaped = escaped.replace(/(\b\d{2}:\d{2}\b)/g, '<span class="text-[#008ac5] cursor-pointer hover:underline font-semibold">$1</span>');
+
+      // Replace @Username
+      escaped = escaped.replace(/(@[a-zA-Z0-9_\u4e00-\u9fa5]+)/g, '<span class="text-[#008ac5] cursor-pointer hover:underline font-semibold">$1</span>');
+
+      // Replace with crisp SVG emojis
+      for (const [key, dataUrl] of Object.entries(EMOJI_MAP)) {
+        const regex = new RegExp(key.replace(/\[/g, '\\[').replace(/\]/g, '\\]'), 'g');
+        escaped = escaped.replace(regex, `<img src="${dataUrl}" alt="${key}" class="bili-emoji-img" title="${key}">`);
+      }
+
+      return escaped;
+    }
+
+    // --- 3. AUDIO ENGINE (Web Audio API Synthesizer) ---
+    class BiliSoundEffects {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioCtx();
+          } catch(e) {}
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playLike() {
+        if (!document.getElementById('checkbox-enable-audio').checked) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.12);
+        } catch(e) {}
+      }
+    }
+    const sound = new BiliSoundEffects();
+
+    // --- 4. PRESETS DATA ---
+    const PRESETS = {
+      'hot-masterpiece': [
+        {
+          id: 'c1',
+          name: '野生官方君',
+          avatar: PRESET_AVATARS[0],
+          level: 6,
+          isVip: true,
+          isUp: true,
+          isPinned: true,
+          upLiked: true,
+          medal: { has: true, name: '小柴', level: 20 },
+          content: '【置顶公告】感谢大家对本期视频的喜爱！评论区点赞最高的前三位小伙伴将获得我们准备的神秘周边大礼包一份！[打call][给心心] 03:15 那段大家看懂了吗？哈哈哈哈！',
+          time: '3小时前',
+          location: '上海',
+          likes: 24890,
+          liked: true,
+          replies: [
+            {
+              id: 'r1',
+              name: '课代表小王',
+              content: '报告UP主！03:15 就是传说中的薛定谔评论区现象，直接封神！',
+              time: '2小时前',
+              likes: 1240,
+              liked: false
+            },
+            {
+              id: 'r2',
+              name: '吃瓜群众1号',
+              content: '回复 @课代表小王 : 懂了，这就去反复观看50遍！[吃瓜]',
+              time: '1小时前',
+              likes: 456,
+              liked: false
+            }
+          ]
+        },
+        {
+          id: 'c2',
+          name: '狂暴小土豆',
+          avatar: PRESET_AVATARS[3],
+          level: 5,
+          isVip: true,
+          isUp: false,
+          isPinned: false,
+          upLiked: true,
+          medal: { has: false },
+          content: '兄弟们，我本来只是点进来随便看看，结果一口气看了三遍！这也太拟真了吧，我差点以为自己就在刷哔哩哔哩APP呢！[doge][妙赞]',
+          time: '5小时前',
+          location: '广东',
+          likes: 8932,
+          liked: false,
+          replies: [
+            {
+              id: 'r3',
+              name: '野生官方君',
+              content: '回复 @狂暴小土豆 : 喜欢就好，这就是技术宅的力量！',
+              time: '4小时前',
+              likes: 812,
+              liked: false
+            }
+          ]
+        },
+        {
+          id: 'c3',
+          name: '哲学家的猫',
+          avatar: PRESET_AVATARS[4],
+          level: 6,
+          isVip: false,
+          isUp: false,
+          isPinned: false,
+          upLiked: false,
+          medal: { has: true, name: '猫猫', level: 14 },
+          content: '纯路人，请问这个界面可以截图直接拿去做短视频素材吗？连等级徽章和大会员粉色昵称都一模一样，简直是神器啊！',
+          time: '昨天 19:42',
+          location: '北京',
+          likes: 3120,
+          liked: false,
+          replies: []
+        }
+      ],
+      'tech-review': [
+        {
+          id: 'c1',
+          name: '硬核评测室',
+          avatar: PRESET_AVATARS[6],
+          level: 6,
+          isVip: true,
+          isUp: true,
+          isPinned: true,
+          upLiked: true,
+          medal: { has: true, name: '极客', level: 25 },
+          content: '【置顶数据汇总】\n1. 渲染帧率稳定60fps\n2. 交互触控无任何延迟\n3. 纯本地矢量无网络依赖\n大家如果遇到问题欢迎在楼中楼留言！',
+          time: '1小时前',
+          location: '深圳',
+          likes: 15420,
+          liked: false,
+          replies: []
+        },
+        {
+          id: 'c2',
+          name: '代码搬运工',
+          avatar: PRESET_AVATARS[1],
+          level: 5,
+          isVip: true,
+          isUp: false,
+          isPinned: false,
+          upLiked: false,
+          medal: { has: false },
+          content: '看了一眼架构，完全是原生CSS与DOM极致优化，太舒适了！点赞[妙赞]',
+          time: '3小时前',
+          location: '浙江',
+          likes: 672,
+          liked: false,
+          replies: []
+        }
+      ],
+      'acg-party': [
+        {
+          id: 'c1',
+          name: '二次元最高',
+          avatar: PRESET_AVATARS[7],
+          level: 6,
+          isVip: true,
+          isUp: true,
+          isPinned: true,
+          upLiked: true,
+          medal: { has: true, name: '萌新', level: 18 },
+          content: '这就是命运的石之门的选择吗？！为喜欢的角色献上心脏！[打call][打call][打call]',
+          time: '10分钟前',
+          location: '日本',
+          likes: 9999,
+          liked: true,
+          replies: []
+        }
+      ],
+      'empty': []
+    };
+
+    // State Variables
+    let comments = JSON.parse(JSON.stringify(PRESETS['hot-masterpiece']));
+    let editMode = true;
+    let isDarkMode = false;
+    let currentShell = 'iphone';
+    let currentActiveCommentId = null;
+    let currentMenuCommentId = null;
+
+    // --- DOM REFERENCES ---
+    const phoneShell = document.getElementById('phone-shell');
+    const appScreen = document.getElementById('bili-app-screen');
+    const commentScrollArea = document.getElementById('comment-scroll-area');
+    const toggleEditModeBtn = document.getElementById('toggle-edit-mode-btn');
+    const editModeText = document.getElementById('edit-mode-text');
+    const toggleThemeBtn = document.getElementById('toggle-theme-btn');
+    const themeIconSun = document.getElementById('theme-icon-sun');
+    const themeIconMoon = document.getElementById('theme-icon-moon');
+    const toggleShellBtn = document.getElementById('toggle-shell-btn');
+    const shellText = document.getElementById('shell-text');
+    const addCommentBtn = document.getElementById('add-comment-btn');
+    const exportImageBtn = document.getElementById('export-image-btn');
+    const checkboxShowVideo = document.getElementById('checkbox-show-video');
+    const checkboxShowDanmaku = document.getElementById('checkbox-show-danmaku');
+    const videoPlayerSection = document.getElementById('video-player-section');
+    const danmakuContainer = document.getElementById('danmaku-container');
+
+    // Input Modal references
+    const openCommentInputBtn = document.getElementById('open-comment-input-btn');
+    const inputModalSheet = document.getElementById('input-modal-sheet');
+    const inputModalContent = document.getElementById('input-modal-content');
+    const closeInputModal = document.getElementById('close-input-modal');
+    const realCommentInput = document.getElementById('real-comment-input');
+    const submitNewCommentBtn = document.getElementById('submit-new-comment-btn');
+    const inputSenderName = document.getElementById('input-sender-name');
+
+    // Action Menu Modal
+    const actionMenuSheet = document.getElementById('action-menu-sheet');
+    const actionMenuContent = document.getElementById('action-menu-content');
+    const menuBtnCopy = document.getElementById('menu-btn-copy');
+    const menuBtnPin = document.getElementById('menu-btn-pin');
+    const menuBtnUpLike = document.getElementById('menu-btn-uplike');
+    const menuBtnDel = document.getElementById('menu-btn-del');
+    const menuBtnCancel = document.getElementById('menu-btn-cancel');
+
+    // Avatar Modal references
+    const avatarModal = document.getElementById('avatar-modal');
+    const closeAvatarModal = document.getElementById('close-avatar-modal');
+    const saveAvatarModalBtn = document.getElementById('save-avatar-modal-btn');
+    const modalPreviewAvatar = document.getElementById('modal-preview-avatar');
+    const modalPreviewVip = document.getElementById('modal-preview-vip');
+    const modalPreviewName = document.getElementById('modal-preview-name');
+    const modalPreviewLv = document.getElementById('modal-preview-lv');
+    const modalSelectLevel = document.getElementById('modal-select-level');
+    const modalSelectVip = document.getElementById('modal-select-vip');
+    const modalSelectIsUp = document.getElementById('modal-select-is-up');
+    const modalSelectPinned = document.getElementById('modal-select-pinned');
+    const modalCheckboxMedal = document.getElementById('modal-checkbox-medal');
+    const modalInputMedalName = document.getElementById('modal-input-medal-name');
+    const modalInputMedalLevel = document.getElementById('modal-input-medal-level');
+    const avatarFileInput = document.getElementById('avatar-file-input');
+    const presetAvatarsGrid = document.getElementById('preset-avatars-grid');
+
+    // Toast
+    function showToast(text) {
+      const toast = document.getElementById('toast-msg');
+      const toastText = document.getElementById('toast-text');
+      toastText.textContent = text;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2300);
+    }
+
+    // --- RENDER COMMENTS ---
+    function renderComments() {
+      commentScrollArea.innerHTML = '';
+
+      if (comments.length === 0) {
+        commentScrollArea.innerHTML = `
+          <div class="w-full py-16 flex flex-col items-center justify-center text-center text-[#9499a0] space-y-2 select-none">
+            <div class="text-3xl">╮(￣▽￣)╭</div>
+            <p class="text-xs">还没有评论呢，快发一条友善的评论吧~</p>
+          </div>
+        `;
+        return;
+      }
+
+      comments.forEach((c) => {
+        const commentEl = document.createElement('div');
+        commentEl.className = 'w-full flex gap-3 relative group/comment transition-colors duration-150 py-1';
+        commentEl.dataset.id = c.id;
+
+        // Level Class
+        const lvClass = `bili-lv-${c.level}`;
+
+        // Medal markup
+        let medalMarkup = '';
+        if (c.medal && c.medal.has) {
+          medalMarkup = `
+            <span class="fans-medal">
+              <span class="fans-medal-name">${c.medal.name || '粉丝'}</span>
+              <span class="fans-medal-level">${c.medal.level || 1}</span>
+            </span>
+          `;
+        }
+
+        // UP Tag markup
+        let upMarkup = c.isUp ? `<span class="up-badge">UP主</span>` : '';
+
+        // Pin Tag markup
+        let pinMarkup = c.isPinned ? `<span class="pin-badge">置顶</span>` : '';
+
+        // Name color
+        const nameColor = c.isVip ? 'text-[#fb7299]' : (isDarkMode ? 'text-[#a0a5ad]' : 'text-[#61666d]');
+
+        // Like button active state
+        const likeActive = c.liked;
+        const likeColor = likeActive ? 'text-[#fb7299]' : 'text-[#9499a0]';
+        const likeSvgFill = likeActive ? '#fb7299' : 'none';
+
+        // Secondary replies markup
+        let repliesMarkup = '';
+        if (c.replies && c.replies.length > 0) {
+          const replyItems = c.replies.map(r => `
+            <div class="text-xs leading-relaxed py-0.5" data-reply-id="${r.id}">
+              <span class="font-bold ${isDarkMode ? 'text-[#a0a5ad]' : 'text-[#61666d]'}" data-editable="reply-author">${r.name}</span>: 
+              <span class="${isDarkMode ? 'text-[#e3e5e7]' : 'text-[#18191c]'}" data-editable="reply-content">${formatCommentContent(r.content)}</span>
+            </div>
+          `).join('');
+
+          repliesMarkup = `
+            <div class="mt-2 p-2.5 rounded-lg ${isDarkMode ? 'bg-[#222427]' : 'bg-[#f6f7f8]'} space-y-1">
+              ${replyItems}
+              <div class="text-[11px] text-[#008ac5] pt-1 flex items-center gap-0.5 cursor-pointer hover:underline font-semibold toggle-replies-btn">
+                <span>共 ${c.replies.length} 条回复</span>
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+            </div>
+          `;
+        }
+
+        // Up liked tag
+        let upLikedMarkup = c.upLiked ? `
+          <span class="text-[10px] text-[#fb7299] flex items-center gap-1 font-normal bg-[#fff0f4] px-1.5 py-0.5 rounded">
+            <svg class="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <span>UP主觉得很赞</span>
+          </span>
+        ` : '';
+
+        // Edit control buttons floating over comment when in edit mode
+        const editActionsMarkup = editMode ? `
+          <div class="absolute -top-2 right-0 hidden group-hover/comment:flex items-center gap-1 bg-neutral-800 text-white text-[10px] px-2 py-0.5 rounded-full shadow-lg border border-neutral-700 z-30">
+            <button class="action-btn-up-like hover:text-[#fb7299]" title="切换UP主觉得很赞">❤️UP赞</button>
+            <span class="text-neutral-500">|</span>
+            <button class="action-btn-add-reply hover:text-emerald-400" title="添加楼中楼回复">➕回复</button>
+            <span class="text-neutral-500">|</span>
+            <button class="action-btn-del hover:text-red-400" title="删除评论">🗑️删</button>
+          </div>
+        ` : '';
+
+        commentEl.innerHTML = `
+          ${editActionsMarkup}
+          <!-- Avatar Area -->
+          <div class="flex-shrink-0 cursor-pointer avatar-trigger" title="点击编辑头像和身份">
+            <div class="relative w-9 h-9">
+              <img src="${c.avatar}" alt="${c.name}" class="w-9 h-9 rounded-full object-cover shadow-sm">
+              ${c.isVip ? `
+                <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#fb7299] rounded-full flex items-center justify-center text-white text-[8px] font-bold border border-white">
+                  ★
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Main Content Body -->
+          <div class="flex-1 min-w-0">
+            <!-- User Header Row -->
+            <div class="flex items-center justify-between leading-none mb-1.5">
+              <div class="flex items-center flex-wrap gap-1">
+                <span class="text-xs font-bold ${nameColor} cursor-pointer" data-editable="user-name">${c.name}</span>
+                <span class="bili-lv ${lvClass}">LV${c.level}</span>
+                ${upMarkup}
+                ${medalMarkup}
+              </div>
+
+              <!-- More Action (3 dots) -->
+              <button class="menu-trigger text-[#9499a0] hover:text-[#18191c] p-0.5" title="操作菜单">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              </button>
+            </div>
+
+            <!-- Comment Content Text -->
+            <div class="text-[13px] leading-relaxed break-words ${isDarkMode ? 'text-[#e3e5e7]' : 'text-[#18191c]'}" data-editable="comment-content">
+              ${pinMarkup}${formatCommentContent(c.content)}
+            </div>
+
+            <!-- Metadata & Interactive Bar -->
+            <div class="mt-2 flex items-center justify-between text-xs text-[#9499a0]">
+              <!-- Time & IP Location -->
+              <div class="flex items-center gap-1.5 text-[11px]">
+                <span data-editable="comment-time">${c.time}</span>
+                <span>·</span>
+                <span data-editable="comment-location">${c.location}</span>
+                ${upLikedMarkup}
+              </div>
+
+              <!-- Like, Dislike, Share -->
+              <div class="flex items-center gap-4">
+                <!-- Like Button -->
+                <button class="like-btn flex items-center gap-1 text-[11px] ${likeColor} hover:opacity-85 transition-transform active:scale-125">
+                  <svg class="w-4 h-4 like-icon-svg" viewBox="0 0 24 24" fill="${likeSvgFill}" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                  </svg>
+                  <span data-editable="likes-count">${formatLikes(c.likes)}</span>
+                </button>
+
+                <!-- Dislike Button -->
+                <button class="dislike-btn hover:text-[#61666d] transition-colors">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/>
+                  </svg>
+                </button>
+
+                <!-- Reply Bubble Trigger -->
+                <button class="reply-trigger-btn hover:text-[#61666d] transition-colors" title="回复">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Replies Box -->
+            ${repliesMarkup}
+          </div>
+        `;
+
+        // Event: Avatar Click -> Open Modal
+        commentEl.querySelector('.avatar-trigger').addEventListener('click', () => {
+          openAvatarEditModal(c.id);
+        });
+
+        // Event: Like Click with Bounce & Sound
+        const likeBtn = commentEl.querySelector('.like-btn');
+        likeBtn.addEventListener('click', (e) => {
+          if (editMode && e.target.closest('[data-editable="likes-count"]')) return;
+          c.liked = !c.liked;
+          c.likes += c.liked ? 1 : -1;
+          if (c.liked) {
+            sound.playLike();
+          }
+          renderComments();
+        });
+
+        // Event: Menu Trigger (3 dots)
+        commentEl.querySelector('.menu-trigger').addEventListener('click', () => {
+          openActionMenu(c.id);
+        });
+
+        // Event: Reply Bubble trigger opens bottom sheet
+        commentEl.querySelector('.reply-trigger-btn').addEventListener('click', () => {
+          openCommentInputBtn.click();
+          realCommentInput.value = `@${c.name} `;
+        });
+
+        // Event: Quick Actions in Edit Mode
+        if (editMode) {
+          const btnUpLike = commentEl.querySelector('.action-btn-up-like');
+          if (btnUpLike) {
+            btnUpLike.addEventListener('click', () => {
+              c.upLiked = !c.upLiked;
+              renderComments();
+              showToast(c.upLiked ? '已添加 UP主觉得很赞' : '已移除 UP赞');
+            });
+          }
+
+          const btnAddReply = commentEl.querySelector('.action-btn-add-reply');
+          if (btnAddReply) {
+            btnAddReply.addEventListener('click', () => {
+              c.replies = c.replies || [];
+              c.replies.push({
+                id: 'r_' + Date.now(),
+                name: '热心网友',
+                content: '说得太对了！[妙赞]',
+                time: '刚刚',
+                likes: 0,
+                liked: false
+              });
+              renderComments();
+              showToast('已添加楼中楼回复');
+            });
+          }
+
+          const btnDel = commentEl.querySelector('.action-btn-del');
+          if (btnDel) {
+            btnDel.addEventListener('click', () => {
+              comments = comments.filter(item => item.id !== c.id);
+              renderComments();
+              showToast('已删除评论');
+            });
+          }
+        }
+
+        commentScrollArea.appendChild(commentEl);
+      });
+
+      // Bottom Ending Emoji
+      const endEl = document.createElement('div');
+      endEl.className = 'w-full py-5 text-center text-xs text-[#9499a0] select-none';
+      endEl.textContent = '没有更多评论了( ´_ゝ｀)';
+      commentScrollArea.appendChild(endEl);
+
+      bindEditableEvents();
+    }
+
+    function formatLikes(num) {
+      if (num >= 10000) {
+        return (num / 10000).toFixed(1) + '万';
+      }
+      return num;
+    }
+
+    // --- 5. DIRECT INLINE EDITING LOGIC ---
+    function bindEditableEvents() {
+      const editables = document.querySelectorAll('[data-editable]');
+      editables.forEach(el => {
+        if (editMode) {
+          el.setAttribute('contenteditable', 'true');
+          el.addEventListener('blur', () => {
+            saveDirectEdit(el);
+          });
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !el.dataset.editable.includes('content')) {
+              e.preventDefault();
+              el.blur();
+            }
+          });
+        } else {
+          el.removeAttribute('contenteditable');
+        }
+      });
+    }
+
+    function saveDirectEdit(el) {
+      const type = el.dataset.editable;
+      const text = el.innerText.trim();
+      const commentCard = el.closest('[data-id]');
+      if (!commentCard) return;
+
+      const commentId = commentCard.dataset.id;
+      const target = comments.find(c => c.id === commentId);
+      if (!target) return;
+
+      if (type === 'user-name') target.name = text;
+      else if (type === 'comment-content') target.content = text;
+      else if (type === 'comment-time') target.time = text;
+      else if (type === 'comment-location') target.location = text;
+      else if (type === 'likes-count') {
+        const parsed = parseInt(text.replace(/万/g, '0000').replace(/[^0-9]/g, '')) || 0;
+        target.likes = parsed;
+      }
+    }
+
+    // --- 6. ACTION MENU SHEET (3 Dots) ---
+    function openActionMenu(commentId) {
+      currentMenuCommentId = commentId;
+      actionMenuSheet.classList.remove('opacity-0', 'pointer-events-none');
+      actionMenuContent.classList.remove('translate-y-full');
+    }
+
+    function closeActionMenu() {
+      actionMenuSheet.classList.add('opacity-0', 'pointer-events-none');
+      actionMenuContent.classList.add('translate-y-full');
+    }
+
+    menuBtnCancel.addEventListener('click', closeActionMenu);
+    actionMenuSheet.addEventListener('click', (e) => {
+      if (e.target === actionMenuSheet) closeActionMenu();
+    });
+
+    menuBtnCopy.addEventListener('click', () => {
+      const c = comments.find(item => item.id === currentMenuCommentId);
+      if (c) {
+        navigator.clipboard.writeText(c.content).then(() => {
+          showToast('评论内容已复制');
+        });
+      }
+      closeActionMenu();
+    });
+
+    menuBtnPin.addEventListener('click', () => {
+      const c = comments.find(item => item.id === currentMenuCommentId);
+      if (c) {
+        c.isPinned = !c.isPinned;
+        renderComments();
+        showToast(c.isPinned ? '已置顶评论' : '已取消置顶');
+      }
+      closeActionMenu();
+    });
+
+    menuBtnUpLike.addEventListener('click', () => {
+      const c = comments.find(item => item.id === currentMenuCommentId);
+      if (c) {
+        c.upLiked = !c.upLiked;
+        renderComments();
+        showToast(c.upLiked ? '已设为 UP主觉得很赞' : '已取消 UP赞');
+      }
+      closeActionMenu();
+    });
+
+    menuBtnDel.addEventListener('click', () => {
+      comments = comments.filter(item => item.id !== currentMenuCommentId);
+      renderComments();
+      showToast('已删除评论');
+      closeActionMenu();
+    });
+
+    // --- 7. AVATAR & USER ATTRIBUTES MODAL ---
+    function openAvatarEditModal(commentId) {
+      currentActiveCommentId = commentId;
+      const c = comments.find(item => item.id === commentId);
+      if (!c) return;
+
+      modalPreviewAvatar.src = c.avatar;
+      modalPreviewName.textContent = c.name;
+      modalPreviewLv.textContent = `LV${c.level}`;
+      modalPreviewLv.className = `bili-lv bili-lv-${c.level}`;
+      modalSelectLevel.value = c.level;
+      modalSelectVip.value = c.isVip ? 'true' : 'false';
+      modalSelectIsUp.value = c.isUp ? 'true' : 'false';
+      modalSelectPinned.value = c.isPinned ? 'true' : 'false';
+
+      if (c.medal && c.medal.has) {
+        modalCheckboxMedal.checked = true;
+        modalInputMedalName.value = c.medal.name;
+        modalInputMedalLevel.value = c.medal.level;
+      } else {
+        modalCheckboxMedal.checked = false;
+        modalInputMedalName.value = '';
+        modalInputMedalLevel.value = '';
+      }
+
+      avatarModal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeAvatarEditModal() {
+      avatarModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    closeAvatarModal.addEventListener('click', closeAvatarEditModal);
+
+    saveAvatarModalBtn.addEventListener('click', () => {
+      if (!currentActiveCommentId) return;
+      const c = comments.find(item => item.id === currentActiveCommentId);
+      if (!c) return;
+
+      c.avatar = modalPreviewAvatar.src;
+      c.level = parseInt(modalSelectLevel.value);
+      c.isVip = modalSelectVip.value === 'true';
+      c.isUp = modalSelectIsUp.value === 'true';
+      c.isPinned = modalSelectPinned.value === 'true';
+
+      if (modalCheckboxMedal.checked) {
+        c.medal = {
+          has: true,
+          name: modalInputMedalName.value || '粉丝',
+          level: parseInt(modalInputMedalLevel.value) || 1
+        };
+      } else {
+        c.medal = { has: false };
+      }
+
+      closeAvatarEditModal();
+      renderComments();
+      showToast('用户信息已更新');
+    });
+
+    // Populate preset avatars
+    PRESET_AVATARS.forEach((dataUrl) => {
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      img.className = 'w-10 h-10 rounded-full object-cover cursor-pointer border-2 border-transparent hover:border-[#fb7299] transition-all hover:scale-110 shadow-sm';
+      img.addEventListener('click', () => {
+        modalPreviewAvatar.src = dataUrl;
+      });
+      presetAvatarsGrid.appendChild(img);
+    });
+
+    // Local Avatar File Upload
+    avatarFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          modalPreviewAvatar.src = evt.target.result;
+          showToast('头像已载入');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // --- 8. TOGGLE EDIT MODE ---
+    toggleEditModeBtn.addEventListener('click', () => {
+      editMode = !editMode;
+      if (editMode) {
+        phoneShell.classList.add('edit-mode');
+        editModeText.textContent = '编辑模式: 开启';
+        toggleEditModeBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-bold transition-all shadow-sm';
+        showToast('已开启可视化编辑模式：直接点击文字修改');
+      } else {
+        phoneShell.classList.remove('edit-mode');
+        editModeText.textContent = '编辑模式: 关闭 (纯真预览)';
+        toggleEditModeBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700 text-xs font-bold transition-all shadow-sm';
+        showToast('已进入逼真APP预览模式');
+      }
+      renderComments();
+    });
+
+    // --- 9. TOGGLE THEME (DAY / NIGHT) ---
+    toggleThemeBtn.addEventListener('click', () => {
+      isDarkMode = !isDarkMode;
+      if (isDarkMode) {
+        themeIconSun.classList.remove('hidden');
+        themeIconMoon.classList.add('hidden');
+        appScreen.classList.remove('bg-white', 'text-[#18191c]');
+        appScreen.classList.add('bg-[#17181a]', 'text-[#e3e5e7]');
+        document.getElementById('bili-tabs-bar').classList.remove('bg-white', 'border-[#e3e5e7]');
+        document.getElementById('bili-tabs-bar').classList.add('bg-[#17181a]', 'border-[#2b2d30]');
+        document.getElementById('bili-filter-bar').classList.remove('bg-white', 'border-[#f1f2f3]');
+        document.getElementById('bili-filter-bar').classList.add('bg-[#17181a]', 'border-[#2b2d30]');
+        document.getElementById('comment-scroll-area').classList.remove('bg-white');
+        document.getElementById('comment-scroll-area').classList.add('bg-[#17181a]');
+        document.getElementById('bili-bottom-bar').classList.remove('bg-white', 'border-[#e3e5e7]');
+        document.getElementById('bili-bottom-bar').classList.add('bg-[#17181a]', 'border-[#2b2d30]');
+        document.getElementById('phone-status-bar').classList.add('text-white');
+        document.getElementById('phone-status-bar').classList.remove('text-black');
+        showToast('已切换至 B站 深夜暗黑模式');
+      } else {
+        themeIconSun.classList.add('hidden');
+        themeIconMoon.classList.remove('hidden');
+        appScreen.classList.add('bg-white', 'text-[#18191c]');
+        appScreen.classList.remove('bg-[#17181a]', 'text-[#e3e5e7]');
+        document.getElementById('bili-tabs-bar').classList.add('bg-white', 'border-[#e3e5e7]');
+        document.getElementById('bili-tabs-bar').classList.remove('bg-[#17181a]', 'border-[#2b2d30]');
+        document.getElementById('bili-filter-bar').classList.add('bg-white', 'border-[#f1f2f3]');
+        document.getElementById('bili-filter-bar').classList.remove('bg-[#17181a]', 'border-[#2b2d30]');
+        document.getElementById('comment-scroll-area').classList.add('bg-white');
+        document.getElementById('comment-scroll-area').classList.remove('bg-[#17181a]');
+        document.getElementById('bili-bottom-bar').classList.add('bg-white', 'border-[#e3e5e7]');
+        document.getElementById('bili-bottom-bar').classList.remove('bg-[#17181a]', 'border-[#2b2d30]');
+        document.getElementById('phone-status-bar').classList.remove('text-white');
+        document.getElementById('phone-status-bar').classList.add('text-black');
+        showToast('已切换至 B站 经典日间模式');
+      }
+      renderComments();
+    });
+
+    // --- 10. TOGGLE DEVICE SHELL ---
+    toggleShellBtn.addEventListener('click', () => {
+      if (currentShell === 'iphone') {
+        currentShell = 'android';
+        phoneShell.className = 'device-android bg-[#1c1d21] overflow-hidden flex flex-col transition-all duration-300 ' + (editMode ? 'edit-mode' : '');
+        shellText.textContent = 'Android';
+        document.getElementById('status-notch').classList.add('hidden');
+      } else if (currentShell === 'android') {
+        currentShell = 'borderless';
+        phoneShell.className = 'device-borderless bg-transparent overflow-hidden flex flex-col transition-all duration-300 ' + (editMode ? 'edit-mode' : '');
+        shellText.textContent = '无边框';
+        document.getElementById('status-notch').classList.add('hidden');
+      } else {
+        currentShell = 'iphone';
+        phoneShell.className = 'device-iphone bg-[#101012] overflow-hidden flex flex-col transition-all duration-300 ' + (editMode ? 'edit-mode' : '');
+        shellText.textContent = 'iPhone 15';
+        document.getElementById('status-notch').classList.remove('hidden');
+      }
+      showToast(`已切换设备机型: ${shellText.textContent}`);
+    });
+
+    // Battery toggle
+    let batteryIndex = 0;
+    const batteryLevels = ['85%', '50%', '20%', '100%'];
+    document.getElementById('status-battery-toggle').addEventListener('click', () => {
+      batteryIndex = (batteryIndex + 1) % batteryLevels.length;
+      document.getElementById('status-battery-level').style.width = batteryLevels[batteryIndex];
+      showToast(`电量已调整为 ${batteryLevels[batteryIndex]}`);
+    });
+
+    // --- 11. ADD COMMENT BUTTON ---
+    addCommentBtn.addEventListener('click', () => {
+      const newComment = {
+        id: 'c_' + Date.now(),
+        name: '新人哔哩探员',
+        avatar: PRESET_AVATARS[Math.floor(Math.random() * PRESET_AVATARS.length)],
+        level: Math.floor(Math.random() * 4) + 3,
+        isVip: true,
+        isUp: false,
+        isPinned: false,
+        upLiked: false,
+        medal: { has: false },
+        content: '新添加的评论，直接点击这里就可以打字修改哦！[doge][妙赞]',
+        time: '刚刚',
+        location: '火星',
+        likes: 0,
+        liked: false,
+        replies: []
+      };
+      comments.unshift(newComment);
+      renderComments();
+      commentScrollArea.scrollTop = 0;
+      showToast('已新增评论至顶部');
+    });
+
+    // --- 12. PRESET SCENARIOS ---
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.preset;
+        if (PRESETS[key]) {
+          comments = JSON.parse(JSON.stringify(PRESETS[key]));
+          renderComments();
+          showToast(`已加载预设: ${btn.textContent.trim()}`);
+        }
+      });
+    });
+
+    // --- 13. TOGGLE VIDEO & DANMAKU ---
+    checkboxShowVideo.addEventListener('change', () => {
+      videoPlayerSection.style.display = checkboxShowVideo.checked ? 'block' : 'none';
+    });
+    checkboxShowDanmaku.addEventListener('change', () => {
+      danmakuContainer.style.display = checkboxShowDanmaku.checked ? 'block' : 'none';
+    });
+
+    // Video Cover Upload
+    document.getElementById('video-cover-file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          document.getElementById('video-cover-img').src = evt.target.result;
+          showToast('视频封面已更换');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // --- 14. BOTTOM INPUT MODAL ---
+    openCommentInputBtn.addEventListener('click', () => {
+      inputModalSheet.classList.remove('opacity-0', 'pointer-events-none');
+      inputModalContent.classList.remove('translate-y-full');
+      realCommentInput.focus();
+    });
+
+    closeInputModal.addEventListener('click', () => {
+      inputModalSheet.classList.add('opacity-0', 'pointer-events-none');
+      inputModalContent.classList.add('translate-y-full');
+    });
+
+    document.querySelectorAll('.sheet-emoji-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        realCommentInput.value += btn.dataset.emoji;
+      });
+    });
+
+    submitNewCommentBtn.addEventListener('click', () => {
+      const text = realCommentInput.value.trim();
+      if (!text) {
+        showToast('请输入评论内容');
+        return;
+      }
+
+      const sender = inputSenderName.value.trim() || '热心网友';
+      const c = {
+        id: 'c_' + Date.now(),
+        name: sender,
+        avatar: PRESET_AVATARS[Math.floor(Math.random() * PRESET_AVATARS.length)],
+        level: 5,
+        isVip: true,
+        isUp: false,
+        isPinned: false,
+        upLiked: false,
+        medal: { has: true, name: '铁粉', level: 12 },
+        content: text,
+        time: '刚刚',
+        location: '本地',
+        likes: 1,
+        liked: true,
+        replies: []
+      };
+
+      comments.unshift(c);
+      renderComments();
+      sound.playLike();
+      realCommentInput.value = '';
+      closeInputModal.click();
+      commentScrollArea.scrollTop = 0;
+      showToast('评论发送成功！');
+    });
+
+    document.getElementById('quick-emoji-trigger').addEventListener('click', () => {
+      openCommentInputBtn.click();
+    });
+
+    // --- 15. EXPORT SCREENSHOT ---
+    exportImageBtn.addEventListener('click', () => {
+      showToast('正在生成超清截图，请稍候...');
+
+      const wasEdit = editMode;
+      if (wasEdit) {
+        phoneShell.classList.remove('edit-mode');
+        renderComments();
+      }
+
+      const captureTarget = document.getElementById('bili-app-screen');
+
+      setTimeout(() => {
+        html2canvas(captureTarget, {
+          scale: 2.5,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: isDarkMode ? '#17181a' : '#ffffff'
+        }).then(canvas => {
+          if (wasEdit) {
+            phoneShell.classList.add('edit-mode');
+            renderComments();
+          }
+
+          const link = document.createElement('a');
+          link.download = `Bilibili_Comment_${Date.now()}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          showToast('长截图已导出并自动下载！');
+        }).catch(err => {
+          if (wasEdit) {
+            phoneShell.classList.add('edit-mode');
+            renderComments();
+          }
+          console.error(err);
+          showToast('导出失败，请重试');
+        });
+      }, 200);
+    });
+
+    // --- 16. JSON BACKUP & RESTORE ---
+    document.getElementById('copy-json-btn').addEventListener('click', () => {
+      const dataStr = JSON.stringify(comments, null, 2);
+      navigator.clipboard.writeText(dataStr).then(() => {
+        showToast('配置 JSON 已复制到剪贴板！');
+      }).catch(() => {
+        prompt('请手动复制以下 JSON：', dataStr);
+      });
+    });
+
+    document.getElementById('import-json-btn').addEventListener('click', () => {
+      const input = prompt('请粘贴之前导出的 JSON 数据：');
+      if (input) {
+        try {
+          const parsed = JSON.parse(input);
+          if (Array.isArray(parsed)) {
+            comments = parsed;
+            renderComments();
+            showToast('JSON 配置导入成功！');
+          } else {
+            alert('数据格式不正确，需为评论数组');
+          }
+        } catch (e) {
+          alert('JSON 解析失败，请检查格式');
+        }
+      }
+    });
+
+    // Sorting tabs
+    const sortHot = document.getElementById('sort-hot');
+    const sortNew = document.getElementById('sort-new');
+    sortHot.addEventListener('click', () => {
+      sortHot.className = 'cursor-pointer text-[#18191c] font-black transition-colors';
+      sortNew.className = 'cursor-pointer text-[#9499a0] font-normal hover:text-[#18191c] transition-colors';
+      showToast('已切换至最热排序');
+    });
+    sortNew.addEventListener('click', () => {
+      sortNew.className = 'cursor-pointer text-[#18191c] font-black transition-colors';
+      sortHot.className = 'cursor-pointer text-[#9499a0] font-normal hover:text-[#18191c] transition-colors';
+      showToast('已切换至最新排序');
+    });
+
+    // Initial render
+    renderComments();
+  </script>
+</body>
+</html>

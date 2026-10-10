@@ -1,106 +1,136 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | RollingWHT_枣园巷大冒险</title>
+    <title>ROLLING WHT 4399 | 滚动的洪特 风格化版</title>
+    <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+
+    <!-- Unified Velvet Room Theme -->
+    <link rel="stylesheet" href="../../velvet-theme.css">
+    <script src="../../velvet-nav.js" data-root="../../../index.html"></script>
+
     <style>
         body {
             text-align: center;
             padding: 0;
             margin: 0;
-            background: url('subwebsite/codes/RollingWHT/BG.png') no-repeat center center fixed;
+            background: url('BG.png') no-repeat center center fixed;
             background-size: cover;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Comic Sans MS', var(--font-sans), sans-serif;
             color: #FFFFFF;
-            overflow: hidden;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-      h1 {
-        font-size: 24px;
-        color: yellow;
-        background-color: rgba(255, 0, 0, 0.7);
-        padding: 10px;
-        margin: 20px auto;
-        width: 50%;
-        border: 5px solid #ffcc00;
-        box-shadow: 0px 0px 10px #000;
-      }
+        .game-zone {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 16px auto 40px;
+            padding: 0 10px;
+        }
 
-      #unity-canvas {
-        width: 960px;
-        height: 600px;
-        background: #231F20;
-        border: 10px solid #ff0000;
-        box-shadow: 0px 0px 20px #00ff00, inset 0px 0px 10px #00ff00;
-        margin: 20px auto;
-      }
+        h1.tip-banner {
+            font-size: 20px;
+            color: yellow;
+            background-color: rgba(230, 0, 18, 0.85);
+            padding: 8px 16px;
+            margin: 14px auto;
+            width: 80%;
+            border: 3px solid #ffcc00;
+            box-shadow: 4px 4px 0px #000;
+            font-family: var(--font-sans);
+        }
+
+        #unity-canvas {
+            width: min(960px, 92vw);
+            height: min(600px, 57vw);
+            background: #231F20;
+            border: 8px solid #ff0000;
+            box-shadow: 0px 0px 20px #00ff00, inset 0px 0px 10px #00ff00;
+            margin: 10px auto;
+            display: block;
+        }
 
         .advert {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 200px;
-            height: 600px;
-            background: url('subwebsite/codes/RollingWHT/ad.jpg') no-repeat center center;
+            position: fixed;
+            top: 70px;
+            left: 10px;
+            width: 160px;
+            height: 520px;
+            background: url('ad.jpg') no-repeat center center;
             background-size: contain;
-            border: 5px solid #00ffcc;
+            border: 4px solid #00ffcc;
             color: #000;
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: bold;
             line-height: 1.5;
             padding: 10px;
             box-shadow: 0px 0px 10px #000;
+            z-index: 50;
         }
 
         .advert2 {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 200px;
-            height: 600px;
-            background: url('subwebsite/codes/RollingWHT/ad.jpg') no-repeat center center;
+            position: fixed;
+            top: 70px;
+            right: 10px;
+            width: 160px;
+            height: 520px;
+            background: url('ad.jpg') no-repeat center center;
             background-size: contain;
-            border: 5px solid #cc00ff;
+            border: 4px solid #cc00ff;
             color: #000;
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: bold;
             line-height: 1.5;
             padding: 10px;
             box-shadow: 0px 0px 10px #000;
+            z-index: 50;
+        }
+
+        @media (max-width: 1300px) {
+            .advert, .advert2 {
+                display: none;
+            }
         }
     </style>
   </head>
   <body>
-    <div class="advert">广告区1<br>杂乱元素</div>
-    <div class="advert2">广告区2<br>乱七八糟的广告</div>
-    <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-    <h1>操作提示：移动：WASD或箭号 开始：K</h1>
-    <h1>游戏简介：《RollingWHT：枣园巷大冒险》是一款充满奇幻色彩的网页小游戏，玩家将跟随主角WHT在神秘的枣园巷展开一场刺激的冒险。在这个五光十色的世界里，WHT需要穿越各种障碍，收集宝藏，解锁隐藏关卡，与形形色色的角色互动。通过挑战不同的任务和谜题，WHT逐渐成长，最终努力实现成为世界大明星的梦想。快来加入这场冒险，体验无尽的乐趣和挑战吧！</h1>
-        <script src="Build/WHT.loader.js"></script>
-        <script>
-            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-                // Mobile device style: fill the whole browser client area with the game canvas:
-                var meta = document.createElement('meta');
-                meta.name = 'viewport';
-                meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-                document.getElementsByTagName('head')[0].appendChild(meta);
+    <div class="advert">4399怀旧区<br>经典小游戏</div>
+    <div class="advert2">广告推广位<br>枣园巷大冒险</div>
 
-                var canvas = document.querySelector("#unity-canvas");
-                canvas.style.width = "100%";
-                canvas.style.height = "100%";
-                canvas.style.position = "fixed";
+    <div class="game-zone">
+        <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+        <h1 class="tip-banner">操作提示：移动：WASD 或 方向键 | 开始：K</h1>
+        <h1 class="tip-banner" style="font-size:14px; line-height:1.6; text-align:left; font-weight:normal; width:90%;">
+            <strong>游戏简介：</strong>《RollingWHT：枣园巷大冒险》是一款充满奇幻色彩的网页小游戏，跟随主角WHT在神秘的枣园巷展开一场刺激的冒险，收集宝藏，解锁关卡，努力成为世界大明星！
+        </h1>
+    </div>
 
-                document.body.style.textAlign = "left";
-            }
+    <script src="Build/WHT.loader.js"></script>
+    <script>
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            var meta = document.createElement('meta');
+            meta.name = 'viewport';
+            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+            document.getElementsByTagName('head')[0].appendChild(meta);
 
-            createUnityInstance(document.querySelector("#unity-canvas"), {
-                dataUrl: "Build/WHT.data",
-                frameworkUrl: "Build/WHT.framework.js",
-                codeUrl: "Build/WHT.wasm",
-                streamingAssetsUrl: "StreamingAssets",
-                companyName: "DefaultCompany",
-                productName: "RollingWHT_枣园巷大冒险",
-                productVersion: "0.1",
-            });
-        </script>
+            var canvas = document.querySelector("#unity-canvas");
+            canvas.style.width = "100%";
+            canvas.style.height = "auto";
+            canvas.style.aspectRatio = "960/600";
+        }
+
+        createUnityInstance(document.querySelector("#unity-canvas"), {
+            dataUrl: "Build/WHT.data",
+            frameworkUrl: "Build/WHT.framework.js",
+            codeUrl: "Build/WHT.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "DefaultCompany",
+            productName: "RollingWHT_枣园巷大冒险",
+            productVersion: "0.1",
+        });
+    </script>
 </body>
 </html>

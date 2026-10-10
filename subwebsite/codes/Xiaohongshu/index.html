@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BJBDJ1J052"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BJBDJ1J052');
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?5cb8cf2e475ade0241293a6b3ac8886f";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RED SIMULATOR | 小红书逼真移动端页面生成器</title>
+    <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../../velvet-theme.css">
+    <script src="../../velvet-nav.js" data-root="../../../index.html"></script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'xhs-red': '#ff2442',
+                        'xhs-red-hover': '#e61e3b',
+                        'xhs-dark': '#1a1a1a',
+                        'xhs-body': '#333333',
+                        'xhs-sub': '#666666',
+                        'xhs-muted': '#999999',
+                        'xhs-tag': '#13386c',
+                        'xhs-tag-bg': '#f5f7fa',
+                        'xhs-border': '#f2f2f2',
+                        'xhs-bg': '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- html2canvas for high quality screenshot generation -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <style>
+        /* Base and Typography */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f1015;
+            color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Phone Screen Typography (Strictly matching RED app) */
+        .xhs-font {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+
+        /* Custom Scrollbar for phone screen */
+        .phone-scroll::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        .phone-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom Scrollbar for Editor Drawer */
+        .editor-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .editor-scroll::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        .editor-scroll::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        /* Phone Mockup Case Styling (iPhone 16 Pro Titanium Style) */
+        .iphone-frame {
+            position: relative;
+            width: 400px;
+            height: 844px;
+            background: #000;
+            border-radius: 54px;
+            box-shadow: 
+                0 0 0 12px #26272b,
+                0 0 0 14px #1b1c20,
+                0 0 0 15px #3a3b40,
+                0 25px 50px -12px rgba(0, 0, 0, 0.7),
+                0 0 80px rgba(255, 36, 66, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Pure Screen (Frameless mode) */
+        .iphone-frame.frameless {
+            width: 393px;
+            height: 852px;
+            border-radius: 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 640px) {
+            .iphone-frame {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .iphone-frame.frameless {
+                width: 100vw;
+                height: 100vh;
+            }
+        }
+
+        /* Dynamic Island */
+        .dynamic-island {
+            position: absolute;
+            top: 11px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 118px;
+            height: 32px;
+            background: #000000;
+            border-radius: 20px;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            pointer-events: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .island-camera {
+            width: 11px;
+            height: 11px;
+            background: #111422;
+            border-radius: 50%;
+            border: 1px solid #1c2136;
+            box-shadow: inset 0 0 2px #00e1ff44;
+        }
+
+        .island-sensor {
+            width: 8px;
+            height: 8px;
+            background: #0a0c14;
+            border-radius: 50%;
+        }
+
+        /* Home Indicator Bar */
+        .home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 134px;
+            height: 5px;
+            background-color: #000000;
+            border-radius: 100px;
+            z-index: 45;
+            pointer-events: none;
+        }
+
+        /* Double-tap heart animation */
+        @keyframes heartPop {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.2) rotate(var(--rot, 0deg));
+            }
+            25% {
+                opacity: 0.95;
+                transform: translate(-50%, -50%) scale(1.25) rotate(var(--rot, 0deg));
+            }
+            60% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(var(--rot, 0deg));
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -100%) scale(1.4) rotate(var(--rot, 0deg));
+            }
+        }
+
+        .double-tap-heart {
+            position: absolute;
+            pointer-events: none;
+            z-index: 40;
+            animation: heartPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            filter: drop-shadow(0 6px 14px rgba(255, 36, 66, 0.5));
+        }
+
+        /* Bounce animation for like and star buttons */
+        @keyframes actionBounce {
+            0% { transform: scale(1); }
+            35% { transform: scale(1.38); }
+            65% { transform: scale(0.85); }
+            100% { transform: scale(1); }
+        }
+
+        .action-bounce {
+            animation: actionBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Image Tag Pulsing Dot */
+        @keyframes tagPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        .tag-pulse-dot {
+            animation: tagPulse 1.8s infinite;
+        }
+
+        /* Editable Outline Hint */
+        .editable-active [data-editable] {
+            outline: 1.5px dashed rgba(255, 36, 66, 0.45) !important;
+            outline-offset: 2px;
+            cursor: text;
+            transition: outline-color 0.15s ease;
+        }
+        .editable-active [data-editable]:hover {
+            outline: 2px dashed #ff2442 !important;
+            background-color: rgba(255, 36, 66, 0.05);
+        }
+        .editable-active [data-editable-img] {
+            cursor: pointer;
+            position: relative;
+        }
+        .editable-active [data-editable-img]::after {
+            content: "📷 点击更换";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            border-radius: inherit;
+        }
+        .editable-active [data-editable-img]:hover::after {
+            opacity: 1;
+        }
+
+        /* Custom Tag Style */
+        .xhs-image-tag {
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 0.5px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 antialiased selection:bg-rose-500 selection:text-white">
+
+    <!-- Top Workspace Toolbar -->
+    <header class="w-full bg-[#14151b] border-b border-gray-800/80 px-4 py-3 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand & Return -->
+            <div class="flex items-center gap-3">
+                <a href="../../../index.html" class="flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-lg bg-gray-800/90 text-gray-300 hover:text-white hover:bg-red-600/90 transition-all">
+                    <span>← 返回导航页</span>
+                </a>
+                <div class="h-4 w-px bg-gray-700 hidden sm:block"></div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#ff2442] animate-pulse"></span>
+                    <h1 class="text-sm sm:text-base font-black tracking-wide bg-gradient-to-r from-red-500 via-rose-400 to-amber-300 bg-clip-text text-transparent">
+                        RED NOTE SIMULATOR
+                    </h1>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-red-950/70 border border-red-500/30 text-red-300 font-mono hidden md:inline">
+                        小红书超拟真生成器
+                    </span>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center flex-wrap gap-2">
+                <!-- WYSIWYG Toggle -->
+                <button id="toggleEditModeBtn" class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-rose-600/20 text-rose-300 border border-rose-500/40 hover:bg-rose-600/30 transition shadow-sm">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span id="editModeStatusText">所见即所得：开</span>
+                </button>
+
+                <!-- Phone Frame Toggle -->
+                <button id="toggleFrameBtn" class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700 transition">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>
+                    <span id="frameModeText">钛金属外框</span>
+                </button>
+
+                <!-- Export Image Button -->
+                <button id="exportScreenshotBtn" class="flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#ff2442] to-rose-600 text-white hover:from-rose-600 hover:to-red-700 transition shadow-lg shadow-red-950/50 active:scale-95">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    <span>生成高清长图</span>
+                </button>
+
+                <!-- Toggle Sidebar on mobile/desktop -->
+                <button id="toggleDrawerBtn" class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700 transition">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>配置面板</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center p-3 sm:p-6 lg:p-8 gap-8 max-w-7xl mx-auto w-full">
+        
+        <!-- ================= LEFT: ULTRA-REALISTIC RED PHONE APP ================= -->
+        <div class="relative flex flex-col items-center justify-center">
+            
+            <!-- Phone Case Wrapper -->
+            <div id="phoneDeviceFrame" class="iphone-frame editable-active">
+                
+                <!-- Dynamic Island -->
+                <div class="dynamic-island" id="dynamicIsland">
+                    <div class="island-camera"></div>
+                    <div class="island-sensor"></div>
+                </div>
+
+                <!-- PHONE ROOT CONTENT VIEWPORT (White Background, Redbook Authentic UI) -->
+                <div id="phoneRoot" class="relative w-full h-full bg-white text-[#333333] flex flex-col overflow-hidden select-none xhs-font">
+                    
+                    <!-- 1. iOS Status Bar -->
+                    <div class="w-full pt-3 pb-1 px-7 flex items-center justify-between text-xs font-semibold text-black z-40 bg-white/80 backdrop-blur-sm select-none" id="statusBar">
+                        <!-- Left: Time -->
+                        <div class="text-[14px] font-medium tracking-tight" id="statusTime" data-editable="text">12:30</div>
+                        
+                        <!-- Right: Icons (Signal, 5G, Battery) -->
+                        <div class="flex items-center gap-1.5">
+                            <!-- Signal Icon -->
+                            <svg class="w-4 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="2" y="16" width="3" height="6" rx="1"/>
+                                <rect x="8" y="12" width="3" height="10" rx="1"/>
+                                <rect x="14" y="8" width="3" height="14" rx="1"/>
+                                <rect x="20" y="4" width="3" height="18" rx="1"/>
+                            </svg>
+                            <!-- 5G / WiFi Icon -->
+                            <span class="text-[11px] font-bold tracking-tighter">5G</span>
+                            <!-- Battery Icon -->
+                            <div class="flex items-center gap-0.5">
+                                <div class="w-5 h-2.5 border border-black rounded-[4px] p-0.5 flex items-center">
+                                    <div id="batteryLevelBar" class="h-full bg-black rounded-[2px]" style="width: 85%;"></div>
+                                </div>
+                                <div class="w-0.5 h-1 bg-black rounded-r-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Sticky RED App Navigation Bar -->
+                    <div id="appNavbar" class="w-full h-11 px-3.5 flex items-center justify-between z-30 transition-all duration-200 bg-white/95 border-b border-gray-100/80">
+                        <!-- Left: Back Arrow -->
+                        <button id="navBackBtn" class="w-8 h-8 flex items-center justify-center text-gray-800 hover:text-black active:scale-95 transition" title="返回">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m15 18-6-6 6-6"/>
+                            </svg>
+                        </button>
+
+                        <!-- Middle: Author Info & Follow Button -->
+                        <div class="flex items-center gap-2 flex-1 ml-1 overflow-hidden">
+                            <!-- Author Avatar -->
+                            <div class="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0 cursor-pointer border border-gray-200" id="authorAvatarWrapper" data-editable-img="avatar">
+                                <img id="authorAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="avatar" class="w-full h-full object-cover">
+                            </div>
+                            
+                            <!-- Author Name & Badge -->
+                            <div class="flex flex-col min-w-0">
+                                <div class="flex items-center gap-1">
+                                    <span id="authorName" class="text-[13px] font-semibold text-gray-900 truncate" data-editable="text">安妮的慢调日记</span>
+                                    <span id="authorVerifiedBadge" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-400 text-white text-[9px] font-bold flex-shrink-0">✓</span>
+                                </div>
+                                <span id="authorSubtitle" class="text-[10px] text-gray-400 truncate" data-editable="text">关注生活中的微光✨</span>
+                            </div>
+                        </div>
+
+                        <!-- Right Actions: Follow Button & Share/More -->
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <!-- Follow Capsule Button -->
+                            <button id="followBtn" class="px-3 py-1 rounded-full text-xs font-semibold tracking-tight transition-all duration-200 bg-[#ff2442] text-white active:scale-95 shadow-sm">
+                                关注
+                            </button>
+
+                            <!-- Share Icon -->
+                            <button id="navShareBtn" class="w-7 h-7 flex items-center justify-center text-gray-700 active:scale-90 transition">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                                    <polyline points="16 6 12 2 8 6"/>
+                                    <line x1="12" y1="2" x2="12" y2="15"/>
+                                </svg>
+                            </button>
+
+                            <!-- More Options (Three dots) -->
+                            <button id="navMoreBtn" class="w-7 h-7 flex items-center justify-center text-gray-700 active:scale-90 transition">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="5" cy="12" r="1.8"/>
+                                    <circle cx="12" cy="12" r="1.8"/>
+                                    <circle cx="19" cy="12" r="1.8"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Scrollable Main Content Container -->
+                    <div id="phoneScroll" class="flex-1 overflow-y-auto phone-scroll relative pb-16">
+                        
+                        <!-- Media Image Carousel Container -->
+                        <div id="carouselWrapper" class="relative w-full bg-gray-100 overflow-hidden select-none" style="aspect-ratio: 3 / 4;">
+                            
+                            <!-- Image Slider Track -->
+                            <div id="carouselTrack" class="w-full h-full flex transition-transform duration-300 ease-out">
+                                <!-- Slides inserted by JS -->
+                            </div>
+
+                            <!-- Carousel Indicators -->
+                            <!-- Top Right Page Tag (e.g. 1/3) -->
+                            <div class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-white text-[11px] font-medium tracking-wider z-20 pointer-events-none">
+                                <span id="carouselPageCurrent">1</span>/<span id="carouselPageTotal">3</span>
+                            </div>
+
+                            <!-- Bottom Dots Indicator -->
+                            <div id="carouselDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 pointer-events-none">
+                                <!-- Dots inserted by JS -->
+                            </div>
+
+                            <!-- Previous / Next Hover Arrows -->
+                            <button id="prevSlideBtn" class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 hover:bg-black/60 text-white flex items-center justify-center z-20 backdrop-blur-sm transition opacity-0 hover:opacity-100">
+                                ‹
+                            </button>
+                            <button id="nextSlideBtn" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 hover:bg-black/60 text-white flex items-center justify-center z-20 backdrop-blur-sm transition opacity-0 hover:opacity-100">
+                                ›
+                            </button>
+
+                            <!-- Image Tags (Xiaohongshu signature tag bubbles) -->
+                            <div id="imageTagElement" class="absolute left-1/4 top-1/2 -translate-y-1/2 z-20 cursor-pointer transition select-none">
+                                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-white text-[11px] font-medium xhs-image-tag">
+                                    <span class="w-2 h-2 rounded-full bg-white tag-pulse-dot"></span>
+                                    <span id="imageTagText" data-editable="text">☕️ 巨鹿路治愈法式小馆</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post Text Content Section -->
+                        <div class="px-4 pt-3.5 pb-2">
+                            <!-- Note Title -->
+                            <h2 id="noteTitle" class="text-[17px] font-bold text-[#1a1a1a] leading-snug mb-2.5" data-editable="text">
+                                救命！被问了800遍的复古法式咖啡馆☕️沉浸式过周末
+                            </h2>
+
+                            <!-- Note Description / Body Text -->
+                            <div id="noteBody" class="text-[14.5px] text-[#333333] leading-relaxed whitespace-pre-line space-y-2 mb-3.5 font-normal" data-editable="text">
+周末终于打卡了收藏已久的法式复古小馆！
+推开门的一瞬间仿佛瞬间闪现巴黎街头🍂
+
+斑驳的木质长桌、温暖的奶油色吊灯，
+还有空气中弥漫的现磨手冲咖啡香与刚出炉肉桂卷的微甜香气，
+找个靠窗的位置坐一下午，听着黑胶唱片，真的太惬意治愈了～
+
+☕️ 推荐尝试：
+• 招牌海盐焦糖拿铁：香浓丝滑，甜度刚刚好
+• 树莓开心果挞：酸甜可口，颜值极高好出片！
+
+穿搭建议选米白或大地色系风衣，法式松弛感直接拉满📸
+
+#法式咖啡馆 #周末去哪儿 #上海探店 #我的咖啡日记 #治愈系风景 #松弛感穿搭
+                            </div>
+
+                            <!-- Post Tags List Display -->
+                            <div id="renderedTagsContainer" class="flex flex-wrap gap-1.5 mb-3">
+                                <!-- Tags pill rendered dynamically -->
+                            </div>
+
+                            <!-- Publish Time, Location and Edit Status -->
+                            <div class="flex items-center justify-between text-[12px] text-gray-400 pt-1 pb-3 border-b border-gray-100">
+                                <div class="flex items-center gap-2">
+                                    <span id="notePublishTime" data-editable="text">昨天 16:48</span>
+                                    <span>·</span>
+                                    <span id="noteLocation" class="flex items-center gap-0.5 text-gray-500 font-medium cursor-pointer" data-editable="text">
+                                        <svg class="w-3 h-3 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                        上海 · 巨鹿路
+                                    </span>
+                                </div>
+                                <span class="text-gray-400">已编辑</span>
+                            </div>
+                        </div>
+
+                        <!-- Comments Section Header -->
+                        <div class="px-4 pt-3 pb-1">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[13px] font-semibold text-gray-800">
+                                    共 <span id="commentsCountHeader">128</span> 条评论
+                                </span>
+                                <div class="text-[11px] text-gray-400 flex items-center gap-2">
+                                    <span class="text-gray-800 font-medium">最热</span>
+                                    <span>|</span>
+                                    <span>最新</span>
+                                </div>
+                            </div>
+
+                            <!-- Inline Comment Quick Trigger -->
+                            <div id="quickCommentBar" class="flex items-center gap-2.5 py-1.5 mb-3 cursor-pointer">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="me" class="w-7 h-7 rounded-full object-cover">
+                                <div class="flex-1 h-8 rounded-full bg-gray-100 px-3 flex items-center text-xs text-gray-400">
+                                    爱评论的人运气都不差~
+                                </div>
+                            </div>
+
+                            <!-- Comments List -->
+                            <div id="commentsListContainer" class="space-y-4">
+                                <!-- Comments inserted by JS -->
+                            </div>
+
+                            <!-- End of comments hint -->
+                            <div class="text-center py-6 text-[11px] text-gray-300">
+                                - 已经到底啦，留下你的精彩想法吧 -
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 4. Sticky Bottom Action Bar (Ultra-Authentic Xiaohongshu) -->
+                    <div id="bottomActionBar" class="w-full h-[52px] px-3 flex items-center justify-between border-t border-gray-100 bg-white/95 backdrop-blur-md z-30 select-none">
+                        <!-- Left: Input Capsule -->
+                        <div id="bottomInputTrigger" class="flex-1 h-[34px] rounded-full bg-gray-100/90 hover:bg-gray-200/70 px-3 flex items-center gap-1.5 text-gray-400 cursor-pointer transition mr-3">
+                            <svg class="w-3.5 h-3.5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                            </svg>
+                            <span class="text-[12.5px]">说点什么...</span>
+                        </div>
+
+                        <!-- Right: Action Icons (Like, Star, Comment, Share) -->
+                        <div class="flex items-center gap-4 text-gray-700">
+                            <!-- Like Button -->
+                            <button id="likeBtn" class="flex items-center gap-1 cursor-pointer active:scale-90 transition group" title="点赞">
+                                <div id="likeIconContainer" class="w-5 h-5 flex items-center justify-center">
+                                    <!-- Heart SVG (Empty by default) -->
+                                    <svg id="likeIconSvg" class="w-5 h-5 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                    </svg>
+                                </div>
+                                <span id="likeCountText" class="text-[12px] font-semibold text-gray-700" data-editable="text">2.4万</span>
+                            </button>
+
+                            <!-- Star/Collect Button -->
+                            <button id="collectBtn" class="flex items-center gap-1 cursor-pointer active:scale-90 transition group" title="收藏">
+                                <div id="collectIconContainer" class="w-5 h-5 flex items-center justify-center">
+                                    <svg id="collectIconSvg" class="w-5 h-5 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                    </svg>
+                                </div>
+                                <span id="collectCountText" class="text-[12px] font-semibold text-gray-700" data-editable="text">8620</span>
+                            </button>
+
+                            <!-- Comment Count Button -->
+                            <button id="commentScrollBtn" class="flex items-center gap-1 cursor-pointer active:scale-90 transition" title="评论">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                <span id="bottomCommentCount" class="text-[12px] font-semibold text-gray-700" data-editable="text">128</span>
+                            </button>
+
+                            <!-- Share Button -->
+                            <button id="bottomShareBtn" class="flex items-center gap-1 cursor-pointer active:scale-90 transition" title="分享">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                                </svg>
+                                <span id="shareCountText" class="text-[12px] font-semibold text-gray-700" data-editable="text">650</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5. iOS Home Bar Indicator -->
+                    <div class="home-indicator"></div>
+
+                    <!-- ================= MODAL DRAWERS INSIDE PHONE ================= -->
+                    
+                    <!-- Interactive Comment Input Drawer -->
+                    <div id="commentModalDrawer" class="absolute inset-0 bg-black/50 z-50 flex flex-col justify-end opacity-0 pointer-events-none transition-opacity duration-200">
+                        <div class="w-full bg-white rounded-t-2xl p-4 shadow-2xl transform translate-y-full transition-transform duration-200" id="commentModalContent">
+                            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                                <span class="text-xs font-semibold text-gray-800">发表评论</span>
+                                <button id="closeCommentModalBtn" class="text-gray-400 hover:text-gray-600 text-sm">✕</button>
+                            </div>
+                            <div class="mt-3">
+                                <textarea id="modalCommentInput" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none" placeholder="善语结善缘，恶言伤人心..."></textarea>
+                                <div class="flex items-center justify-between mt-2.5">
+                                    <div class="flex items-center gap-2 text-gray-500 text-xs">
+                                        <span class="cursor-pointer hover:text-black">😊 表情</span>
+                                        <span class="cursor-pointer hover:text-black">@ 艾特</span>
+                                    </div>
+                                    <button id="submitNewCommentBtn" class="px-4 py-1.5 rounded-full bg-[#ff2442] text-white text-xs font-bold hover:bg-rose-600 active:scale-95 transition">
+                                        发送
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Share Drawer -->
+                    <div id="shareModalDrawer" class="absolute inset-0 bg-black/50 z-50 flex flex-col justify-end opacity-0 pointer-events-none transition-opacity duration-200">
+                        <div class="w-full bg-white rounded-t-2xl p-4 shadow-2xl transform translate-y-full transition-transform duration-200" id="shareModalContent">
+                            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
+                            <div class="text-center text-xs font-bold text-gray-700 mb-4">分享至</div>
+                            <div class="grid grid-cols-4 gap-3 text-center text-[11px] text-gray-600 mb-4">
+                                <div class="flex flex-col items-center gap-1 cursor-pointer">
+                                    <div class="w-11 h-11 rounded-full bg-emerald-500 text-white flex items-center justify-center text-lg font-bold">微</div>
+                                    <span>微信好友</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-1 cursor-pointer">
+                                    <div class="w-11 h-11 rounded-full bg-emerald-600 text-white flex items-center justify-center text-lg font-bold">圈</div>
+                                    <span>朋友圈</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-1 cursor-pointer">
+                                    <div class="w-11 h-11 rounded-full bg-blue-500 text-white flex items-center justify-center text-lg font-bold">Q</div>
+                                    <span>QQ好友</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-1 cursor-pointer" id="shareCopyLinkBtn">
+                                    <div class="w-11 h-11 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center text-sm font-bold">🔗</div>
+                                    <span>复制链接</span>
+                                </div>
+                            </div>
+                            <button id="closeShareModalBtn" class="w-full py-2.5 rounded-xl bg-gray-100 text-xs font-semibold text-gray-700 hover:bg-gray-200 transition">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Replace Image Picker Modal -->
+                    <div id="imagePickerModal" class="absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+                        <div class="w-full max-w-xs bg-white rounded-2xl p-5 shadow-2xl">
+                            <h3 class="text-sm font-bold text-gray-800 mb-3" id="imagePickerTitle">更换图片</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[11px] font-medium text-gray-500 mb-1">本地图片上传</label>
+                                    <input type="file" id="localImageInput" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-medium text-gray-500 mb-1">图片网址 URL</label>
+                                    <input type="text" id="urlImageInput" placeholder="https://..." class="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-red-500">
+                                </div>
+                                <div class="pt-2 flex justify-end gap-2">
+                                    <button id="cancelImagePickerBtn" class="px-3 py-1 rounded-lg text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">取消</button>
+                                    <button id="confirmImagePickerBtn" class="px-3 py-1 rounded-lg text-xs font-bold text-white bg-red-600 hover:bg-red-700">确认更换</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Hint below phone -->
+            <div class="mt-4 text-center text-xs text-gray-400 flex items-center gap-2">
+                <span>💡 提示：双击图片可触发小红书爱心爆炸特效，所有文字与图片均支持直接点击编辑</span>
+            </div>
+        </div>
+
+        <!-- ================= RIGHT: VISUAL EDITOR DRAWER & CONTROLS ================= -->
+        <div id="editorDrawer" class="w-full lg:w-[460px] bg-[#14151b] border border-gray-800/80 rounded-2xl p-5 flex flex-col gap-5 shadow-2xl">
+            
+            <!-- Drawer Header -->
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-md bg-[#ff2442]"></span>
+                    <h2 class="text-sm font-bold text-gray-100 tracking-wide">可视化控制台 & 模版库</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="resetDefaultsBtn" class="text-xs text-gray-400 hover:text-rose-400 transition" title="重置回初始数据">
+                        恢复默认
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="flex items-center gap-1 bg-[#1e2029] p-1 rounded-xl text-xs font-medium">
+                <button class="tab-btn flex-1 py-1.5 rounded-lg bg-[#282b37] text-white font-semibold transition" data-tab="templates">模版中心</button>
+                <button class="tab-btn flex-1 py-1.5 rounded-lg text-gray-400 hover:text-white transition" data-tab="content">图文内容</button>
+                <button class="tab-btn flex-1 py-1.5 rounded-lg text-gray-400 hover:text-white transition" data-tab="author">博主与数据</button>
+                <button class="tab-btn flex-1 py-1.5 rounded-lg text-gray-400 hover:text-white transition" data-tab="comments">评论管理</button>
+            </div>
+
+            <!-- TAB 1: PRESET TEMPLATES -->
+            <div id="tabTemplates" class="space-y-3.5 editor-scroll max-h-[580px] overflow-y-auto pr-1">
+                <p class="text-xs text-gray-400">点击一键套用逼真风格模版：</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <!-- Template 1: Cafe / Food -->
+                    <div class="template-card p-3 rounded-xl bg-[#1c1e27] hover:bg-[#252834] border border-gray-800 hover:border-red-500/50 cursor-pointer transition flex flex-col justify-between" data-template="cafe">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="text-lg">☕️</span>
+                            <span class="text-xs font-bold text-white">复古法式咖啡馆</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 line-clamp-2">被问了800遍的复古法式咖啡馆，周末沉浸式吸氧...</p>
+                        <span class="text-[10px] text-red-400 mt-2 font-mono">美食探店 · 2.4万赞</span>
+                    </div>
+
+                    <!-- Template 2: OOTD / Fashion -->
+                    <div class="template-card p-3 rounded-xl bg-[#1c1e27] hover:bg-[#252834] border border-gray-800 hover:border-red-500/50 cursor-pointer transition flex flex-col justify-between" data-template="ootd">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="text-lg">🧥</span>
+                            <span class="text-xs font-bold text-white">初秋静奢风穿搭</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 line-clamp-2">今日份初秋静奢风穿搭，松弛感拉满的高级质感...</p>
+                        <span class="text-[10px] text-red-400 mt-2 font-mono">时尚穿搭 · 3.8万赞</span>
+                    </div>
+
+                    <!-- Template 3: Digital / Tech -->
+                    <div class="template-card p-3 rounded-xl bg-[#1c1e27] hover:bg-[#252834] border border-gray-800 hover:border-red-500/50 cursor-pointer transition flex flex-col justify-between" data-template="tech">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="text-lg">📱</span>
+                            <span class="text-xs font-bold text-white">数码旗舰真实体验</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 line-clamp-2">终于换上新机！手感绝了，用过就回不去的深度测评...</p>
+                        <span class="text-[10px] text-red-400 mt-2 font-mono">数码测评 · 1.6万赞</span>
+                    </div>
+
+                    <!-- Template 4: Travel / Nature -->
+                    <div class="template-card p-3 rounded-xl bg-[#1c1e27] hover:bg-[#252834] border border-gray-800 hover:border-red-500/50 cursor-pointer transition flex flex-col justify-between" data-template="travel">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="text-lg">✈️</span>
+                            <span class="text-xs font-bold text-white">去有风的地方旅行</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 line-clamp-2">阿勒泰的这片蓝治愈了我所有的焦虑，风吹麦浪...</p>
+                        <span class="text-[10px] text-red-400 mt-2 font-mono">治愈旅拍 · 5.2万赞</span>
+                    </div>
+
+                    <!-- Template 5: Pets / Cats -->
+                    <div class="template-card p-3 rounded-xl bg-[#1c1e27] hover:bg-[#252834] border border-gray-800 hover:border-red-500/50 cursor-pointer transition flex flex-col justify-between" data-template="pets">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="text-lg">🐱</span>
+                            <span class="text-xs font-bold text-white">猫咪吸猫日记</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 line-clamp-2">怎么会有小猫咪长成软糯小年糕啊！这也太好吸了吧...</p>
+                        <span class="text-[10px] text-red-400 mt-2 font-mono">萌宠日常 · 6.9万赞</span>
+                    </div>
+                </div>
+
+                <!-- Custom Wallpaper / Ratio Settings -->
+                <div class="pt-3 border-t border-gray-800">
+                    <label class="block text-xs font-semibold text-gray-300 mb-2">图片长宽比切换</label>
+                    <div class="flex gap-2">
+                        <button class="ratio-btn flex-1 py-1.5 text-xs rounded-lg bg-[#282b37] text-white font-medium" data-ratio="3/4">3:4 (经典竖版)</button>
+                        <button class="ratio-btn flex-1 py-1.5 text-xs rounded-lg bg-[#1c1e27] text-gray-400 hover:text-white" data-ratio="1/1">1:1 (方图)</button>
+                        <button class="ratio-btn flex-1 py-1.5 text-xs rounded-lg bg-[#1c1e27] text-gray-400 hover:text-white" data-ratio="16/9">16:9 (横版)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: CONTENT & IMAGES -->
+            <div id="tabContent" class="space-y-4 editor-scroll max-h-[580px] overflow-y-auto pr-1 hidden">
+                <!-- Images Carousel List -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-semibold text-gray-300">轮播图片管理 (<span id="imgCountBadge">3</span>张)</label>
+                        <button id="addNewImageBtn" class="text-xs font-medium text-rose-400 hover:text-rose-300">+ 添加图片</button>
+                    </div>
+                    <div id="imageThumbnailsList" class="flex gap-2 overflow-x-auto py-1">
+                        <!-- Thumbs rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Image Tag Text -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">图片浮动标签文案</label>
+                    <input type="text" id="inputTagText" class="w-full bg-[#1c1e27] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500" value="☕️ 巨鹿路治愈法式小馆">
+                </div>
+
+                <!-- Note Title -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">笔记标题</label>
+                    <input type="text" id="inputNoteTitle" class="w-full bg-[#1c1e27] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500" value="救命！被问了800遍的复古法式咖啡馆☕️沉浸式过周末">
+                </div>
+
+                <!-- Note Body Text -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-xs font-semibold text-gray-300">笔记正文与话题</label>
+                        <div class="flex gap-1.5 text-[11px] text-gray-400">
+                            <button id="insertEmojiBtn" class="hover:text-white">插入表情</button>
+                            <span>·</span>
+                            <button id="insertTagBtn" class="hover:text-rose-400">#话题</button>
+                        </div>
+                    </div>
+                    <textarea id="inputNoteBody" rows="6" class="w-full bg-[#1c1e27] border border-gray-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-red-500 resize-none font-mono"></textarea>
+                </div>
+
+                <!-- Location & Time -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">地理位置</label>
+                        <input type="text" id="inputLocation" class="w-full bg-[#1c1e27] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500" value="上海 · 巨鹿路">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">发布时间</label>
+                        <input type="text" id="inputPublishTime" class="w-full bg-[#1c1e27] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500" value="昨天 16:48">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: AUTHOR & METRICS -->
+            <div id="tabAuthor" class="space-y-4 editor-scroll max-h-[580px] overflow-y-auto pr-1 hidden">
+                <!-- Author Profile -->
+                <div class="p-3 bg-[#1c1e27] rounded-xl border border-gray-800 space-y-3">
+                    <span class="text-xs font-bold text-gray-200">博主身份设置</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">博主昵称</label>
+                            <input type="text" id="inputAuthorName" class="w-full bg-[#282b37] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white" value="安妮的慢调日记">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">个性签名/副标题</label>
+                            <input type="text" id="inputAuthorSubtitle" class="w-full bg-[#282b37] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white" value="关注生活中的微光✨">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1">
+                        <label class="text-xs text-gray-300 flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="checkboxVerifiedBadge" class="accent-red-500 rounded" checked>
+                            <span>显示黄V官方认证标</span>
+                        </label>
+                        <label class="text-xs text-gray-300 flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="checkboxFollowed" class="accent-red-500 rounded">
+                            <span>初始设为“已关注”</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Interaction Metrics -->
+                <div class="p-3 bg-[#1c1e27] rounded-xl border border-gray-800 space-y-3">
+                    <span class="text-xs font-bold text-gray-200">互动数据设置</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">点赞数</label>
+                            <input type="text" id="inputLikeCount" class="w-full bg-[#282b37] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white" value="2.4万">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">收藏数</label>
+                            <input type="text" id="inputCollectCount" class="w-full bg-[#282b37] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white" value="8620">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">评论数</label>
+                            <input type="text" id="inputCommentCount" class="w-full bg-[#282b37] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white" value="128">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">分享数</label>
+                            <input type="text" id="inputShareCount" class="w-full bg-[#282b37] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white" value="650">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Bar Configuration -->
+                <div class="p-3 bg-[#1c1e27] rounded-xl border border-gray-800 space-y-2">
+                    <span class="text-xs font-bold text-gray-200">手机状态栏微调</span>
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1">
+                            <label class="block text-[11px] text-gray-400 mb-1">时间显示</label>
+                            <input type="text" id="inputStatusTime" class="w-full bg-[#282b37] border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-white" value="12:30">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[11px] text-gray-400 mb-1">电池电量 (%)</label>
+                            <input type="range" id="inputBatterySlider" min="5" max="100" value="85" class="w-full accent-emerald-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: COMMENTS MANAGER -->
+            <div id="tabComments" class="space-y-3.5 editor-scroll max-h-[580px] overflow-y-auto pr-1 hidden">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-300">评论列表管理</span>
+                    <button id="addManualCommentBtn" class="text-xs font-bold text-rose-400 hover:text-rose-300">+ 新增评论</button>
+                </div>
+
+                <div id="editorCommentsList" class="space-y-2.5">
+                    <!-- Comment items configured here -->
+                </div>
+            </div>
+
+            <!-- Footer Action: Export Hint -->
+            <div class="pt-3 border-t border-gray-800/80 flex items-center justify-between text-xs text-gray-400">
+                <span>修改实时自动生效</span>
+                <span class="text-emerald-400 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>已保存到本地
+                </span>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastNotification" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full border border-gray-700 shadow-xl backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
+        <span id="toastIcon">✨</span>
+        <span id="toastMsg">通知提示</span>
+    </div>
+
+    <!-- MAIN JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        /**
+         * RED NOTE SIMULATOR - CORE LOGIC
+         * Ultra-realistic Xiaohongshu front-end engine
+         */
+
+        // Initial Sample Datasets
+        const PRESETS = {
+            cafe: {
+                title: "救命！被问了800遍的复古法式咖啡馆☕️沉浸式过周末",
+                body: `周末终于打卡了收藏已久的法式复古小馆！
+推开门的一瞬间仿佛瞬间闪现巴黎街头🍂
+
+斑驳的木质长桌、温暖的奶油色吊灯，
+还有空气中弥漫的现磨手冲咖啡香与刚出炉肉桂卷的微甜香气，
+找个靠窗的位置坐一下午，听着黑胶唱片，真的太惬意治愈了～
+
+☕️ 推荐尝试：
+• 招牌海盐焦糖拿铁：香浓丝滑，甜度刚刚好
+• 树莓开心果挞：酸甜可口，颜值极高好出片！
+
+穿搭建议选米白或大地色系风衣，法式松弛感直接拉满📸
+
+#法式咖啡馆 #周末去哪儿 #上海探店 #我的咖啡日记 #治愈系风景 #松弛感穿搭`,
+                tagText: "☕️ 巨鹿路治愈法式小馆",
+                location: "上海 · 巨鹿路",
+                publishTime: "昨天 16:48",
+                authorName: "安妮的慢调日记",
+                authorSubtitle: "关注生活中的微光✨",
+                authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+                likes: "2.4万",
+                collects: "8620",
+                commentsCount: "128",
+                shares: "650",
+                images: [
+                    "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80"
+                ],
+                comments: [
+                    {
+                        name: "奶油泡芙甜甜圈",
+                        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80",
+                        content: "哇塞这也太好看了吧！求问具体地址在哪栋楼呀，周末想带闺蜜去拍照！",
+                        time: "2小时前",
+                        ip: "上海",
+                        likes: 42,
+                        isAuthor: false,
+                        liked: false
+                    },
+                    {
+                        name: "安妮的慢调日记",
+                        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+                        content: "回复 @奶油泡芙甜甜圈：就在巨鹿路758号院子拐角处哦，门口有一颗大银杏树很显眼～",
+                        time: "1小时前",
+                        ip: "上海",
+                        likes: 18,
+                        isAuthor: true,
+                        liked: false
+                    },
+                    {
+                        name: "林间风穿堂而过",
+                        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
+                        content: "这家肉桂卷是真的顶！已经去过三次了，工作日去人少更好拍～",
+                        time: "3小时前",
+                        ip: "江苏",
+                        likes: 15,
+                        isAuthor: false,
+                        liked: false
+                    }
+                ]
+            },
+            ootd: {
+                title: "今日份初秋静奢风穿搭🧥松弛感拉满！高级感拉满",
+                body: `秋意渐浓，最喜欢的叠穿季节终于来啦！🍂
+今天这套是经典的深燕麦色廓形大衣 + 羊绒内搭，
+低调又有质感，走在街上随风飘扬的气场真的太爱了～
+
+🧣 单品清单：
+• 廓形羊毛大衣：静奢风精髓，剪裁利落垂坠感满分
+• 阔腿西装裤：显腿长一绝，走路带风
+• 棕色复古皮托特包：大容量随性又百搭
+
+不费力的高级感就是这样穿出来的～姐妹们喜欢这种风格吗？
+
+#今日穿搭 #初秋穿搭 #静奢风 #高级感穿搭 #OOTD #大衣穿搭 #秋冬时髦指南`,
+                tagText: "🏷️ 羊毛廓形大衣",
+                location: "杭州 · 天目里",
+                publishTime: "前天 19:15",
+                authorName: "周周的时髦灵感",
+                authorSubtitle: "穿搭是写给生活的诗👗",
+                authorAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80",
+                likes: "3.8万",
+                collects: "1.9万",
+                commentsCount: "342",
+                shares: "1280",
+                images: [
+                    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=800&q=80"
+                ],
+                comments: [
+                    {
+                        name: "糯米糍很软",
+                        avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=120&q=80",
+                        content: "求大衣货号和鞋子链接！博主身高体重多少呀，太气质了！",
+                        time: "5小时前",
+                        ip: "浙江",
+                        likes: 89,
+                        isAuthor: false,
+                        liked: false
+                    },
+                    {
+                        name: "周周的时髦灵感",
+                        avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80",
+                        content: "回复 @糯米糍很软：我净身高168/50kg穿M码哦，详情我整理在收藏夹里啦！",
+                        time: "4小时前",
+                        ip: "浙江",
+                        likes: 34,
+                        isAuthor: true,
+                        liked: false
+                    }
+                ]
+            },
+            tech: {
+                title: "终于换上新机！手感绝了，用过就回不去的深度测评📱",
+                body: `心心念念的钛金属新机终于到手把玩了一整周！
+给纠结要不要换机的朋友们带来一份最客观的大实话体验～
+
+核心亮点总结：
+1. 重量减轻极其明显，单手握持小拇指终于不痛了！
+2. 边框极窄，息屏美学与视觉沉浸感无敌
+3. 影像色彩表现更真实，人像虚化边缘极其自然
+
+如果手持两年前老机型，闭眼冲绝对质的飞跃！有疑问欢迎评论区提问～
+
+#数码科技 #新机测评 #钛金属 #手机摄影 #数码好物 #开箱分享`,
+                tagText: "📱 沉浸式开箱",
+                location: "深圳 · 南山科技园",
+                publishTime: "10-08 14:22",
+                authorName: "极客阿泽Tech",
+                authorSubtitle: "硬核数码玩咖 · 真实测评",
+                authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
+                likes: "1.6万",
+                collects: "4520",
+                commentsCount: "518",
+                shares: "920",
+                images: [
+                    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=800&q=80"
+                ],
+                comments: [
+                    {
+                        name: "码农老王",
+                        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
+                        content: "发热情况怎么样？长时间打游戏掉帧吗？",
+                        time: "1天前",
+                        ip: "广东",
+                        likes: 67,
+                        isAuthor: false,
+                        liked: false
+                    }
+                ]
+            },
+            travel: {
+                title: "去有风的地方旅行🍃阿勒泰的这片蓝治愈了我所有的焦虑",
+                body: `如果生活太累，就去一趟阿勒泰吧。
+辽阔的白桦林、澄澈见底的蜿蜒河流，
+远处连绵雪山在金色夕阳下镀上神圣的粉红光晕。
+
+骑着骏马穿行在漫山遍野的草场上，
+迎面吹来的风都是带着青草与松木的清香。
+在这里，时间好像真的变慢了...
+
+“人生是旷野，不是轨道。”愿我们都能找到内心的宁静与辽阔🌿
+
+#阿勒泰 #新疆旅行 #治愈系风景 #去有风的地方 #大自然的美景 #川西旅拍`,
+                tagText: "📍 喀纳斯月亮湾",
+                location: "阿勒泰 · 喀纳斯",
+                publishTime: "10-05 20:10",
+                authorName: "流浪的摄影师鹿鸣",
+                authorSubtitle: "用镜头收集人间的浪漫⛰️",
+                authorAvatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=200&q=80",
+                likes: "5.2万",
+                collects: "2.8万",
+                commentsCount: "860",
+                shares: "3400",
+                images: [
+                    "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80"
+                ],
+                comments: [
+                    {
+                        name: "想要隐居的云",
+                        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+                        content: "美到失语！每一张都可以直接当壁纸的程度，年底一定要去一次！",
+                        time: "2天前",
+                        ip: "北京",
+                        likes: 128,
+                        isAuthor: false,
+                        liked: false
+                    }
+                ]
+            },
+            pets: {
+                title: "怎么会有小猫咪长成软糯小年糕啊！这也太好吸了吧😭",
+                body: `每天下班回家最幸福的时刻，
+就是推开门看到这只毛茸茸的小猪咪迈着小短腿飞奔扑向我！
+
+圆滚滚的小脑袋、粉嫩嫩的肉垫，
+一摸呼噜声就响得像拖拉机发动一样震天响～
+怎么会有人能抗拒猫猫的拥抱啊！
+
+今天也是沉浸式吸猫满血复活的一天！快来云吸猫吸走所有坏心情吧🐾
+
+#猫咪日常 #我的小猫咪 #云吸猫 #萌宠出道计划 #小猫咪的治愈瞬间 #布偶猫`,
+                tagText: "🐾 软糯小年糕",
+                location: "成都 · 宽窄巷子",
+                publishTime: "3小时前",
+                authorName: "小猫咪统治世界",
+                authorSubtitle: "家有两只干饭小猫🐱",
+                authorAvatar: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=200&q=80",
+                likes: "6.9万",
+                collects: "1.4万",
+                commentsCount: "920",
+                shares: "2150",
+                images: [
+                    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=800&q=80"
+                ],
+                comments: [
+                    {
+                        name: "罐头收割机",
+                        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
+                        content: "好想伸手揉揉它圆溜溜的小下巴！太乖太可爱了呜呜呜！",
+                        time: "1小时前",
+                        ip: "四川",
+                        likes: 154,
+                        isAuthor: false,
+                        liked: false
+                    }
+                ]
+            }
+        };
+
+        // Active State
+        let state = {
+            currentSlideIndex: 0,
+            isLiked: false,
+            isCollected: false,
+            isFollowed: false,
+            isEditingEnabled: true,
+            isFrameless: false,
+            currentRatio: "3/4",
+            pickingTargetType: null, // 'avatar' | 'slide'
+            pickingSlideIndex: 0,
+            data: JSON.parse(JSON.stringify(PRESETS.cafe))
+        };
+
+        // Load saved state from LocalStorage if available
+        try {
+            const saved = localStorage.getItem('red_simulator_state');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state.data = parsed;
+            }
+        } catch (e) {
+            console.warn("Storage not available");
+        }
+
+        // --- DOM Elements Cache ---
+        const phoneRoot = document.getElementById('phoneRoot');
+        const phoneScroll = document.getElementById('phoneScroll');
+        const phoneDeviceFrame = document.getElementById('phoneDeviceFrame');
+        const carouselTrack = document.getElementById('carouselTrack');
+        const carouselDots = document.getElementById('carouselDots');
+        const carouselPageCurrent = document.getElementById('carouselPageCurrent');
+        const carouselPageTotal = document.getElementById('carouselPageTotal');
+        const noteTitle = document.getElementById('noteTitle');
+        const noteBody = document.getElementById('noteBody');
+        const notePublishTime = document.getElementById('notePublishTime');
+        const noteLocation = document.getElementById('noteLocation');
+        const authorName = document.getElementById('authorName');
+        const authorSubtitle = document.getElementById('authorSubtitle');
+        const authorAvatarImg = document.getElementById('authorAvatarImg');
+        const authorVerifiedBadge = document.getElementById('authorVerifiedBadge');
+        const followBtn = document.getElementById('followBtn');
+        const imageTagText = document.getElementById('imageTagText');
+        const renderedTagsContainer = document.getElementById('renderedTagsContainer');
+        const commentsListContainer = document.getElementById('commentsListContainer');
+        const commentsCountHeader = document.getElementById('commentsCountHeader');
+        const bottomCommentCount = document.getElementById('bottomCommentCount');
+        const likeCountText = document.getElementById('likeCountText');
+        const collectCountText = document.getElementById('collectCountText');
+        const shareCountText = document.getElementById('shareCountText');
+        const likeBtn = document.getElementById('likeBtn');
+        const likeIconSvg = document.getElementById('likeIconSvg');
+        const collectBtn = document.getElementById('collectBtn');
+        const collectIconSvg = document.getElementById('collectIconSvg');
+        const toastNotification = document.getElementById('toastNotification');
+        const toastMsg = document.getElementById('toastMsg');
+        const toastIcon = document.getElementById('toastIcon');
+
+        // Form Inputs
+        const inputNoteTitle = document.getElementById('inputNoteTitle');
+        const inputNoteBody = document.getElementById('inputNoteBody');
+        const inputTagText = document.getElementById('inputTagText');
+        const inputLocation = document.getElementById('inputLocation');
+        const inputPublishTime = document.getElementById('inputPublishTime');
+        const inputAuthorName = document.getElementById('inputAuthorName');
+        const inputAuthorSubtitle = document.getElementById('inputAuthorSubtitle');
+        const inputLikeCount = document.getElementById('inputLikeCount');
+        const inputCollectCount = document.getElementById('inputCollectCount');
+        const inputCommentCount = document.getElementById('inputCommentCount');
+        const inputShareCount = document.getElementById('inputShareCount');
+        const checkboxVerifiedBadge = document.getElementById('checkboxVerifiedBadge');
+        const checkboxFollowed = document.getElementById('checkboxFollowed');
+        const imageThumbnailsList = document.getElementById('imageThumbnailsList');
+        const imgCountBadge = document.getElementById('imgCountBadge');
+
+        // Modals
+        const commentModalDrawer = document.getElementById('commentModalDrawer');
+        const commentModalContent = document.getElementById('commentModalContent');
+        const modalCommentInput = document.getElementById('modalCommentInput');
+        const shareModalDrawer = document.getElementById('shareModalDrawer');
+        const shareModalContent = document.getElementById('shareModalContent');
+        const imagePickerModal = document.getElementById('imagePickerModal');
+        const localImageInput = document.getElementById('localImageInput');
+        const urlImageInput = document.getElementById('urlImageInput');
+
+        // Show Toast Utility
+        function showToast(text, icon = '✨') {
+            toastMsg.innerText = text;
+            toastIcon.innerText = icon;
+            toastNotification.classList.remove('opacity-0', 'pointer-events-none');
+            toastNotification.classList.add('opacity-100');
+            setTimeout(() => {
+                toastNotification.classList.remove('opacity-100');
+                toastNotification.classList.add('opacity-0', 'pointer-events-none');
+            }, 2200);
+        }
+
+        // Save State
+        function saveToStorage() {
+            try {
+                localStorage.setItem('red_simulator_state', JSON.stringify(state.data));
+            } catch (e) {}
+        }
+
+        // --- RENDER FUNCTIONS ---
+
+        // Render Carousel
+        function renderCarousel() {
+            const images = state.data.images;
+            if (!images || images.length === 0) return;
+
+            carouselTrack.innerHTML = '';
+            carouselDots.innerHTML = '';
+
+            images.forEach((url, idx) => {
+                const slide = document.createElement('div');
+                slide.className = 'w-full h-full flex-shrink-0 relative overflow-hidden bg-gray-100 cursor-pointer';
+                slide.innerHTML = `<img src="${url}" alt="slide ${idx}" class="w-full h-full object-cover select-none pointer-events-none">`;
+                slide.setAttribute('data-slide-index', idx);
+                carouselTrack.appendChild(slide);
+
+                const dot = document.createElement('span');
+                dot.className = `h-1.5 rounded-full transition-all duration-300 ${idx === state.currentSlideIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/60'}`;
+                carouselDots.appendChild(dot);
+            });
+
+            carouselPageCurrent.innerText = state.currentSlideIndex + 1;
+            carouselPageTotal.innerText = images.length;
+            carouselTrack.style.transform = `translateX(-${state.currentSlideIndex * 100}%)`;
+            imgCountBadge.innerText = images.length;
+
+            renderThumbnailsInDrawer();
+        }
+
+        // Render Thumbnails in Drawer
+        function renderThumbnailsInDrawer() {
+            imageThumbnailsList.innerHTML = '';
+            state.data.images.forEach((url, idx) => {
+                const thumb = document.createElement('div');
+                thumb.className = `relative w-14 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 cursor-pointer transition ${idx === state.currentSlideIndex ? 'border-red-500 scale-105' : 'border-gray-700 hover:border-gray-500'}`;
+                thumb.innerHTML = `
+                    <img src="${url}" class="w-full h-full object-cover">
+                    <button class="delete-img-btn absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/70 hover:bg-red-600 text-white text-[10px] flex items-center justify-center" data-idx="${idx}">×</button>
+                `;
+                thumb.onclick = (e) => {
+                    if (e.target.classList.contains('delete-img-btn')) {
+                        e.stopPropagation();
+                        if (state.data.images.length <= 1) {
+                            showToast("至少保留一张图片哦", "⚠️");
+                            return;
+                        }
+                        state.data.images.splice(idx, 1);
+                        if (state.currentSlideIndex >= state.data.images.length) {
+                            state.currentSlideIndex = state.data.images.length - 1;
+                        }
+                        renderCarousel();
+                        saveToStorage();
+                        return;
+                    }
+                    goToSlide(idx);
+                };
+                imageThumbnailsList.appendChild(thumb);
+            });
+        }
+
+        function goToSlide(index) {
+            if (index < 0 || index >= state.data.images.length) return;
+            state.currentSlideIndex = index;
+            carouselTrack.style.transform = `translateX(-${state.currentSlideIndex * 100}%)`;
+            carouselPageCurrent.innerText = state.currentSlideIndex + 1;
+
+            const dots = carouselDots.children;
+            for (let i = 0; i < dots.length; i++) {
+                if (i === state.currentSlideIndex) {
+                    dots[i].className = 'h-1.5 w-4 rounded-full bg-white transition-all duration-300';
+                } else {
+                    dots[i].className = 'h-1.5 w-1.5 rounded-full bg-white/60 transition-all duration-300';
+                }
+            }
+            renderThumbnailsInDrawer();
+        }
+
+        // Render Extracted Hashtags
+        function renderHashtags() {
+            renderedTagsContainer.innerHTML = '';
+            const text = state.data.body || '';
+            const matches = text.match(/#([^#\s]+)/g);
+            if (matches && matches.length > 0) {
+                matches.slice(0, 8).forEach(tag => {
+                    const pill = document.createElement('span');
+                    pill.className = 'text-[12px] font-medium text-[#13386c] hover:underline cursor-pointer flex items-center';
+                    pill.innerText = tag;
+                    renderedTagsContainer.appendChild(pill);
+                });
+            }
+        }
+
+        // Render Comments
+        function renderComments() {
+            commentsListContainer.innerHTML = '';
+            const comments = state.data.comments || [];
+            commentsCountHeader.innerText = state.data.commentsCount;
+            bottomCommentCount.innerText = state.data.commentsCount;
+
+            comments.forEach((c, index) => {
+                const commentEl = document.createElement('div');
+                commentEl.className = 'flex items-start gap-2.5 text-xs';
+                commentEl.innerHTML = `
+                    <img src="${c.avatar}" alt="${c.name}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-100">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-1.5 mb-0.5">
+                            <span class="font-semibold text-gray-700 text-[12.5px] truncate" data-editable="text" data-comment-idx="${index}" data-comment-field="name">${c.name}</span>
+                            ${c.isAuthor ? '<span class="px-1.5 py-0.2 rounded-full bg-[#ff2442] text-white text-[9px] font-bold">作者</span>' : ''}
+                        </div>
+                        <p class="text-gray-800 text-[13.5px] leading-relaxed mb-1" data-editable="text" data-comment-idx="${index}" data-comment-field="content">${c.content}</p>
+                        <div class="flex items-center gap-3 text-[11px] text-gray-400">
+                            <span data-editable="text" data-comment-idx="${index}" data-comment-field="time">${c.time}</span>
+                            <span>·</span>
+                            <span>${c.ip || '未知'}</span>
+                            <span class="cursor-pointer hover:text-gray-600 font-medium">回复</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center gap-0.5 flex-shrink-0 cursor-pointer pt-1" data-like-comment-idx="${index}">
+                        <svg class="w-3.5 h-3.5 ${c.liked ? 'text-[#ff2442] fill-[#ff2442]' : 'text-gray-400'}" viewBox="0 0 24 24" fill="${c.liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        <span class="text-[10px] ${c.liked ? 'text-[#ff2442] font-bold' : 'text-gray-400'}">${c.likes || 0}</span>
+                    </div>
+                `;
+                commentsListContainer.appendChild(commentEl);
+            });
+
+            // Bind Comment Like Events
+            document.querySelectorAll('[data-like-comment-idx]').forEach(el => {
+                el.onclick = () => {
+                    const idx = parseInt(el.getAttribute('data-like-comment-idx'));
+                    const target = state.data.comments[idx];
+                    target.liked = !target.liked;
+                    target.likes = (target.likes || 0) + (target.liked ? 1 : -1);
+                    renderComments();
+                    saveToStorage();
+                    if (window.VelvetAudio) window.VelvetAudio.playClick();
+                };
+            });
+
+            renderCommentsInDrawer();
+            bindEditableElements();
+        }
+
+        // Render Comments in Drawer for Easy Editing
+        function renderCommentsInDrawer() {
+            const list = document.getElementById('editorCommentsList');
+            list.innerHTML = '';
+            state.data.comments.forEach((c, idx) => {
+                const item = document.createElement('div');
+                item.className = 'p-2.5 rounded-lg bg-[#1c1e27] border border-gray-800 space-y-2';
+                item.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-gray-300">#${idx + 1} ${c.name} ${c.isAuthor ? '(作者)' : ''}</span>
+                        <button class="text-xs text-rose-400 hover:text-rose-300" data-del-comment="${idx}">删除</button>
+                    </div>
+                    <input type="text" class="w-full bg-[#282b37] border border-gray-700 rounded px-2 py-1 text-xs text-white" value="${c.content}" data-edit-comment-content="${idx}">
+                    <div class="flex items-center justify-between text-[11px] text-gray-400">
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" ${c.isAuthor ? 'checked' : ''} data-toggle-author="${idx}" class="accent-red-500">
+                            <span>作者标签</span>
+                        </label>
+                        <span>获赞: ${c.likes || 0}</span>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+
+            // Bind drawer comment actions
+            document.querySelectorAll('[data-del-comment]').forEach(b => {
+                b.onclick = () => {
+                    const idx = parseInt(b.getAttribute('data-del-comment'));
+                    state.data.comments.splice(idx, 1);
+                    renderComments();
+                    saveToStorage();
+                };
+            });
+            document.querySelectorAll('[data-edit-comment-content]').forEach(inp => {
+                inp.oninput = (e) => {
+                    const idx = parseInt(inp.getAttribute('data-edit-comment-content'));
+                    state.data.comments[idx].content = e.target.value;
+                    renderComments();
+                    saveToStorage();
+                };
+            });
+            document.querySelectorAll('[data-toggle-author]').forEach(chk => {
+                chk.onchange = (e) => {
+                    const idx = parseInt(chk.getAttribute('data-toggle-author'));
+                    state.data.comments[idx].isAuthor = e.target.checked;
+                    renderComments();
+                    saveToStorage();
+                };
+            });
+        }
+
+        // Full UI Sync
+        function syncAllUI() {
+            const d = state.data;
+            noteTitle.innerText = d.title;
+            noteBody.innerText = d.body;
+            notePublishTime.innerText = d.publishTime;
+            noteLocation.innerHTML = `
+                <svg class="w-3 h-3 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                ${d.location}
+            `;
+            authorName.innerText = d.authorName;
+            authorSubtitle.innerText = d.authorSubtitle;
+            authorAvatarImg.src = d.authorAvatar;
+            imageTagText.innerText = d.tagText;
+
+            likeCountText.innerText = d.likes;
+            collectCountText.innerText = d.collects;
+            bottomCommentCount.innerText = d.commentsCount;
+            shareCountText.innerText = d.shares;
+
+            // Form inputs
+            inputNoteTitle.value = d.title;
+            inputNoteBody.value = d.body;
+            inputTagText.value = d.tagText;
+            inputLocation.value = d.location;
+            inputPublishTime.value = d.publishTime;
+            inputAuthorName.value = d.authorName;
+            inputAuthorSubtitle.value = d.authorSubtitle;
+            inputLikeCount.value = d.likes;
+            inputCollectCount.value = d.collects;
+            inputCommentCount.value = d.commentsCount;
+            inputShareCount.value = d.shares;
+
+            renderCarousel();
+            renderHashtags();
+            renderComments();
+            bindEditableElements();
+        }
+
+        // --- DOUBLE TAP HEART ANIMATION ---
+        function triggerHeartExplosion(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'double-tap-heart text-[#ff2442] text-5xl';
+            heart.style.left = `${x}px`;
+            heart.style.top = `${y}px`;
+            const rot = (Math.random() * 30 - 15).toFixed(1);
+            heart.style.setProperty('--rot', `${rot}deg`);
+            heart.innerHTML = `
+                <svg class="w-16 h-16 drop-shadow-xl" viewBox="0 0 24 24" fill="#ff2442" stroke="#ffffff" stroke-width="0.8">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            `;
+            phoneRoot.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 850);
+
+            // Turn like active if not already
+            if (!state.isLiked) {
+                toggleLikeAction(true);
+            }
+        }
+
+        // Like Toggle
+        function toggleLikeAction(forceLike = false) {
+            state.isLiked = forceLike ? true : !state.isLiked;
+            if (state.isLiked) {
+                likeIconSvg.setAttribute('fill', '#ff2442');
+                likeIconSvg.setAttribute('stroke', '#ff2442');
+                likeBtn.classList.add('text-[#ff2442]');
+                likeIconContainer.classList.add('action-bounce');
+                if (window.VelvetAudio) window.VelvetAudio.playSuccess();
+            } else {
+                likeIconSvg.setAttribute('fill', 'none');
+                likeIconSvg.setAttribute('stroke', 'currentColor');
+                likeBtn.classList.remove('text-[#ff2442]');
+                likeIconContainer.classList.remove('action-bounce');
+                if (window.VelvetAudio) window.VelvetAudio.playClick();
+            }
+        }
+
+        // Collect Toggle
+        function toggleCollectAction() {
+            state.isCollected = !state.isCollected;
+            if (state.isCollected) {
+                collectIconSvg.setAttribute('fill', '#ffb800');
+                collectIconSvg.setAttribute('stroke', '#ffb800');
+                collectBtn.classList.add('text-[#ffb800]');
+                collectIconContainer.classList.add('action-bounce');
+                if (window.VelvetAudio) window.VelvetAudio.playSuccess();
+            } else {
+                collectIconSvg.setAttribute('fill', 'none');
+                collectIconSvg.setAttribute('stroke', 'currentColor');
+                collectBtn.classList.remove('text-[#ffb800]');
+                collectIconContainer.classList.remove('action-bounce');
+                if (window.VelvetAudio) window.VelvetAudio.playClick();
+            }
+        }
+
+        // Follow Toggle
+        function toggleFollowAction() {
+            state.isFollowed = !state.isFollowed;
+            if (state.isFollowed) {
+                followBtn.innerText = '已关注';
+                followBtn.className = 'px-3 py-1 rounded-full text-xs font-semibold tracking-tight transition-all duration-200 bg-gray-100 text-gray-500 border border-gray-200 active:scale-95';
+                if (window.VelvetAudio) window.VelvetAudio.playClick();
+            } else {
+                followBtn.innerText = '关注';
+                followBtn.className = 'px-3 py-1 rounded-full text-xs font-semibold tracking-tight transition-all duration-200 bg-[#ff2442] text-white active:scale-95 shadow-sm';
+                if (window.VelvetAudio) window.VelvetAudio.playClick();
+            }
+        }
+
+        // --- WYSIWYG & CLICK TO EDIT LOGIC ---
+        function bindEditableElements() {
+            const editables = phoneRoot.querySelectorAll('[data-editable]');
+            editables.forEach(el => {
+                if (state.isEditingEnabled) {
+                    el.contentEditable = "true";
+                    el.spellcheck = false;
+                    el.onblur = () => {
+                        handleInlineEditSave(el);
+                    };
+                } else {
+                    el.contentEditable = "false";
+                }
+            });
+
+            // Editable Images
+            authorAvatarWrapper.onclick = (e) => {
+                e.stopPropagation();
+                openImagePicker('avatar');
+            };
+
+            const carouselWrapper = document.getElementById('carouselWrapper');
+            carouselWrapper.ondblclick = (e) => {
+                const rect = phoneRoot.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                triggerHeartExplosion(x, y);
+            };
+        }
+
+        function handleInlineEditSave(el) {
+            const text = el.innerText.trim();
+            const field = el.id;
+
+            if (field === 'noteTitle') {
+                state.data.title = text;
+                inputNoteTitle.value = text;
+            } else if (field === 'noteBody') {
+                state.data.body = text;
+                inputNoteBody.value = text;
+                renderHashtags();
+            } else if (field === 'authorName') {
+                state.data.authorName = text;
+                inputAuthorName.value = text;
+            } else if (field === 'authorSubtitle') {
+                state.data.authorSubtitle = text;
+                inputAuthorSubtitle.value = text;
+            } else if (field === 'imageTagText') {
+                state.data.tagText = text;
+                inputTagText.value = text;
+            } else if (field === 'notePublishTime') {
+                state.data.publishTime = text;
+                inputPublishTime.value = text;
+            } else if (field === 'likeCountText') {
+                state.data.likes = text;
+                inputLikeCount.value = text;
+            } else if (field === 'collectCountText') {
+                state.data.collects = text;
+                inputCollectCount.value = text;
+            } else if (field === 'bottomCommentCount') {
+                state.data.commentsCount = text;
+                inputCommentCount.value = text;
+            } else if (field === 'shareCountText') {
+                state.data.shares = text;
+                inputShareCount.value = text;
+            }
+
+            saveToStorage();
+        }
+
+        // Image Picker Modal Logic
+        function openImagePicker(type, slideIdx = 0) {
+            state.pickingTargetType = type;
+            state.pickingSlideIndex = slideIdx;
+            document.getElementById('imagePickerTitle').innerText = type === 'avatar' ? '更换博主头像' : `更换第 ${slideIdx + 1} 张图片`;
+            imagePickerModal.classList.remove('opacity-0', 'pointer-events-none');
+            imagePickerModal.classList.add('opacity-100');
+            urlImageInput.value = '';
+            localImageInput.value = '';
+        }
+
+        function closeImagePicker() {
+            imagePickerModal.classList.remove('opacity-100');
+            imagePickerModal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // --- EVENT HANDLERS & BINDINGS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            syncAllUI();
+
+            // Toggle Edit Mode
+            const toggleEditModeBtn = document.getElementById('toggleEditModeBtn');
+            const editModeStatusText = document.getElementById('editModeStatusText');
+            toggleEditModeBtn.onclick = () => {
+                state.isEditingEnabled = !state.isEditingEnabled;
+                if (state.isEditingEnabled) {
+                    phoneDeviceFrame.classList.add('editable-active');
+                    editModeStatusText.innerText = '所见即所得：开';
+                    toggleEditModeBtn.className = 'flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-rose-600/20 text-rose-300 border border-rose-500/40 hover:bg-rose-600/30 transition shadow-sm';
+                    showToast("所见即所得模式已开启，直接点击修改文字与图片！");
+                } else {
+                    phoneDeviceFrame.classList.remove('editable-active');
+                    editModeStatusText.innerText = '所见即所得：关';
+                    toggleEditModeBtn.className = 'flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 border border-gray-700 hover:bg-gray-700 transition';
+                    showToast("纯净预览模式已开启");
+                }
+                bindEditableElements();
+            };
+
+            // Toggle Phone Frame
+            const toggleFrameBtn = document.getElementById('toggleFrameBtn');
+            const frameModeText = document.getElementById('frameModeText');
+            toggleFrameBtn.onclick = () => {
+                state.isFrameless = !state.isFrameless;
+                if (state.isFrameless) {
+                    phoneDeviceFrame.classList.add('frameless');
+                    frameModeText.innerText = '无边框模式';
+                    showToast("已切换为全屏纯净模式");
+                } else {
+                    phoneDeviceFrame.classList.remove('frameless');
+                    frameModeText.innerText = '钛金属外框';
+                    showToast("已切换为 iPhone 16 Pro 外框");
+                }
+            };
+
+            // Like & Collect & Follow
+            likeBtn.onclick = () => toggleLikeAction(false);
+            collectBtn.onclick = () => toggleCollectAction();
+            followBtn.onclick = () => toggleFollowAction();
+
+            // Prev / Next Slide
+            document.getElementById('prevSlideBtn').onclick = () => goToSlide(state.currentSlideIndex - 1);
+            document.getElementById('nextSlideBtn').onclick = () => goToSlide(state.currentSlideIndex + 1);
+
+            // Swipe Gesture Support for Carousel (Touch & Mouse Drag)
+            const carouselWrapper = document.getElementById('carouselWrapper');
+            let startX = 0;
+            let startY = 0;
+            let isDragging = false;
+            let currentX = 0;
+
+            const handleTouchStart = (x, y) => {
+                startX = x;
+                startY = y;
+                currentX = x;
+                isDragging = true;
+            };
+
+            const handleTouchMove = (x, y) => {
+                if (!isDragging) return;
+                currentX = x;
+            };
+
+            const handleTouchEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                const diffX = currentX - startX;
+                if (Math.abs(diffX) > 40) {
+                    if (diffX < 0) {
+                        goToSlide(state.currentSlideIndex + 1);
+                    } else {
+                        goToSlide(state.currentSlideIndex - 1);
+                    }
+                }
+            };
+
+            carouselWrapper.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    handleTouchStart(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+
+            carouselWrapper.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    handleTouchMove(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+
+            carouselWrapper.addEventListener('touchend', () => {
+                handleTouchEnd();
+            });
+
+            carouselWrapper.addEventListener('mousedown', (e) => {
+                if (e.button === 0 && e.target !== imageTagElement && !imageTagElement.contains(e.target)) {
+                    handleTouchStart(e.clientX, e.clientY);
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    handleTouchMove(e.clientX, e.clientY);
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    handleTouchEnd();
+                }
+            });
+
+            // Draggable Image Tag in Edit Mode
+            const imageTagElement = document.getElementById('imageTagElement');
+            let isDraggingTag = false;
+            let tagStartX, tagStartY, tagInitLeft, tagInitTop;
+
+            imageTagElement.addEventListener('mousedown', (e) => {
+                if (!state.isEditingEnabled) return;
+                if (e.target.hasAttribute('data-editable') && document.activeElement === e.target) return;
+                isDraggingTag = true;
+                tagStartX = e.clientX;
+                tagStartY = e.clientY;
+                const rect = imageTagElement.getBoundingClientRect();
+                const parentRect = carouselWrapper.getBoundingClientRect();
+                tagInitLeft = rect.left - parentRect.left;
+                tagInitTop = rect.top - parentRect.top;
+                e.stopPropagation();
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDraggingTag) return;
+                const parentRect = carouselWrapper.getBoundingClientRect();
+                const dx = e.clientX - tagStartX;
+                const dy = e.clientY - tagStartY;
+                let newLeft = Math.max(10, Math.min(parentRect.width - 100, tagInitLeft + dx));
+                let newTop = Math.max(10, Math.min(parentRect.height - 30, tagInitTop + dy));
+                imageTagElement.style.left = `${(newLeft / parentRect.width) * 100}%`;
+                imageTagElement.style.top = `${(newTop / parentRect.height) * 100}%`;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isDraggingTag) isDraggingTag = false;
+            });
+
+            // Scroll-driven Navbar Effect
+            const appNavbar = document.getElementById('appNavbar');
+            phoneScroll.addEventListener('scroll', () => {
+                const scrollTop = phoneScroll.scrollTop;
+                if (scrollTop > 60) {
+                    appNavbar.classList.add('shadow-sm');
+                    appNavbar.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
+                } else {
+                    appNavbar.classList.remove('shadow-sm');
+                    appNavbar.style.backgroundColor = 'rgba(255, 255, 255, 0.92)';
+                }
+            });
+
+            // Comments Navigation Scroll
+            document.getElementById('commentScrollBtn').onclick = () => {
+                phoneScroll.scrollTo({
+                    top: phoneScroll.scrollHeight,
+                    behavior: 'smooth'
+                });
+            };
+
+            // Comment Modal
+            const openCommentModal = () => {
+                commentModalDrawer.classList.remove('opacity-0', 'pointer-events-none');
+                commentModalDrawer.classList.add('opacity-100');
+                commentModalContent.classList.remove('translate-y-full');
+                modalCommentInput.focus();
+            };
+            const closeCommentModal = () => {
+                commentModalContent.classList.add('translate-y-full');
+                commentModalDrawer.classList.remove('opacity-100');
+                commentModalDrawer.classList.add('opacity-0', 'pointer-events-none');
+            };
+
+            document.getElementById('bottomInputTrigger').onclick = openCommentModal;
+            document.getElementById('quickCommentBar').onclick = openCommentModal;
+            document.getElementById('closeCommentModalBtn').onclick = closeCommentModal;
+            commentModalDrawer.onclick = (e) => {
+                if (e.target === commentModalDrawer) closeCommentModal();
+            };
+
+            // Submit New Comment
+            document.getElementById('submitNewCommentBtn').onclick = () => {
+                const val = modalCommentInput.value.trim();
+                if (!val) {
+                    showToast("请输入评论内容", "✍️");
+                    return;
+                }
+                const newComment = {
+                    name: "我爱冲浪",
+                    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
+                    content: val,
+                    time: "刚刚",
+                    ip: "上海",
+                    likes: 0,
+                    isAuthor: false,
+                    liked: false
+                };
+                state.data.comments.unshift(newComment);
+                modalCommentInput.value = '';
+                closeCommentModal();
+                renderComments();
+                saveToStorage();
+                showToast("评论已发送！", "💬");
+                if (window.VelvetAudio) window.VelvetAudio.playSuccess();
+            };
+
+            // Share Modal
+            const openShareModal = () => {
+                shareModalDrawer.classList.remove('opacity-0', 'pointer-events-none');
+                shareModalDrawer.classList.add('opacity-100');
+                shareModalContent.classList.remove('translate-y-full');
+            };
+            const closeShareModal = () => {
+                shareModalContent.classList.add('translate-y-full');
+                shareModalDrawer.classList.remove('opacity-100');
+                shareModalDrawer.classList.add('opacity-0', 'pointer-events-none');
+            };
+
+            document.getElementById('navShareBtn').onclick = openShareModal;
+            document.getElementById('bottomShareBtn').onclick = openShareModal;
+            document.getElementById('closeShareModalBtn').onclick = closeShareModal;
+            shareModalDrawer.onclick = (e) => {
+                if (e.target === shareModalDrawer) closeShareModal();
+            };
+            document.getElementById('shareCopyLinkBtn').onclick = () => {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    closeShareModal();
+                    showToast("链接已复制到剪贴板！", "📋");
+                }).catch(() => {
+                    closeShareModal();
+                    showToast("已成功生成分享链接！", "📋");
+                });
+            };
+
+            // Image Picker Cancel & Confirm
+            document.getElementById('cancelImagePickerBtn').onclick = closeImagePicker;
+            document.getElementById('confirmImagePickerBtn').onclick = () => {
+                let finalUrl = urlImageInput.value.trim();
+                const file = localImageInput.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        applyPickedImage(ev.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                } else if (finalUrl) {
+                    applyPickedImage(finalUrl);
+                } else {
+                    showToast("请先选择本地图片或输入网址", "⚠️");
+                }
+            };
+
+            function applyPickedImage(src) {
+                if (state.pickingTargetType === 'avatar') {
+                    state.data.authorAvatar = src;
+                    authorAvatarImg.src = src;
+                } else if (state.pickingTargetType === 'slide') {
+                    state.data.images[state.pickingSlideIndex] = src;
+                    renderCarousel();
+                }
+                closeImagePicker();
+                saveToStorage();
+                showToast("图片已成功更换！", "🖼️");
+            }
+
+            // Tab Switching in Drawer
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => {
+                btn.onclick = () => {
+                    tabButtons.forEach(b => {
+                        b.className = 'tab-btn flex-1 py-1.5 rounded-lg text-gray-400 hover:text-white transition';
+                    });
+                    btn.className = 'tab-btn flex-1 py-1.5 rounded-lg bg-[#282b37] text-white font-semibold transition';
+
+                    const target = btn.getAttribute('data-tab');
+                    document.getElementById('tabTemplates').classList.add('hidden');
+                    document.getElementById('tabContent').classList.add('hidden');
+                    document.getElementById('tabAuthor').classList.add('hidden');
+                    document.getElementById('tabComments').classList.add('hidden');
+
+                    if (target === 'templates') document.getElementById('tabTemplates').classList.remove('hidden');
+                    if (target === 'content') document.getElementById('tabContent').classList.remove('hidden');
+                    if (target === 'author') document.getElementById('tabAuthor').classList.remove('hidden');
+                    if (target === 'comments') document.getElementById('tabComments').classList.remove('hidden');
+                };
+            });
+
+            // Preset Template Switchers
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.onclick = () => {
+                    const key = card.getAttribute('data-template');
+                    if (PRESETS[key]) {
+                        state.data = JSON.parse(JSON.stringify(PRESETS[key]));
+                        state.currentSlideIndex = 0;
+                        syncAllUI();
+                        saveToStorage();
+                        showToast(`已成功套用【${card.querySelector('.font-bold').innerText}】模版！`, "🎨");
+                        if (window.VelvetAudio) window.VelvetAudio.playSuccess();
+                    }
+                };
+            });
+
+            // Aspect Ratio Buttons
+            document.querySelectorAll('.ratio-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.ratio-btn').forEach(b => b.className = 'ratio-btn flex-1 py-1.5 text-xs rounded-lg bg-[#1c1e27] text-gray-400 hover:text-white');
+                    btn.className = 'ratio-btn flex-1 py-1.5 text-xs rounded-lg bg-[#282b37] text-white font-medium';
+                    const ratio = btn.getAttribute('data-ratio');
+                    document.getElementById('carouselWrapper').style.aspectRatio = ratio;
+                    showToast(`比例已切换为 ${ratio}`);
+                };
+            });
+
+            // Add New Image to Carousel
+            document.getElementById('addNewImageBtn').onclick = () => {
+                openImagePicker('slide', state.data.images.length);
+            };
+
+            // Form Input Event Listeners
+            inputNoteTitle.oninput = (e) => {
+                state.data.title = e.target.value;
+                noteTitle.innerText = e.target.value;
+                saveToStorage();
+            };
+            inputNoteBody.oninput = (e) => {
+                state.data.body = e.target.value;
+                noteBody.innerText = e.target.value;
+                renderHashtags();
+                saveToStorage();
+            };
+            inputTagText.oninput = (e) => {
+                state.data.tagText = e.target.value;
+                imageTagText.innerText = e.target.value;
+                saveToStorage();
+            };
+            inputLocation.oninput = (e) => {
+                state.data.location = e.target.value;
+                noteLocation.innerHTML = `
+                    <svg class="w-3 h-3 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                    ${e.target.value}
+                `;
+                saveToStorage();
+            };
+            inputPublishTime.oninput = (e) => {
+                state.data.publishTime = e.target.value;
+                notePublishTime.innerText = e.target.value;
+                saveToStorage();
+            };
+            inputAuthorName.oninput = (e) => {
+                state.data.authorName = e.target.value;
+                authorName.innerText = e.target.value;
+                saveToStorage();
+            };
+            inputAuthorSubtitle.oninput = (e) => {
+                state.data.authorSubtitle = e.target.value;
+                authorSubtitle.innerText = e.target.value;
+                saveToStorage();
+            };
+            inputLikeCount.oninput = (e) => {
+                state.data.likes = e.target.value;
+                likeCountText.innerText = e.target.value;
+                saveToStorage();
+            };
+            inputCollectCount.oninput = (e) => {
+                state.data.collects = e.target.value;
+                collectCountText.innerText = e.target.value;
+                saveToStorage();
+            };
+            inputCommentCount.oninput = (e) => {
+                state.data.commentsCount = e.target.value;
+                commentsCountHeader.innerText = e.target.value;
+                bottomCommentCount.innerText = e.target.value;
+                saveToStorage();
+            };
+            inputShareCount.oninput = (e) => {
+                state.data.shares = e.target.value;
+                shareCountText.innerText = e.target.value;
+                saveToStorage();
+            };
+
+            checkboxVerifiedBadge.onchange = (e) => {
+                authorVerifiedBadge.style.display = e.target.checked ? 'inline-flex' : 'none';
+            };
+            checkboxFollowed.onchange = (e) => {
+                if (e.target.checked !== state.isFollowed) {
+                    toggleFollowAction();
+                }
+            };
+
+            // Status Bar Controls
+            document.getElementById('inputStatusTime').oninput = (e) => {
+                document.getElementById('statusTime').innerText = e.target.value;
+            };
+            document.getElementById('inputBatterySlider').oninput = (e) => {
+                document.getElementById('batteryLevelBar').style.width = `${e.target.value}%`;
+            };
+
+            // Quick Insertion Helpers
+            document.getElementById('insertEmojiBtn').onclick = () => {
+                inputNoteBody.value += " ✨💖☕️🌿📸";
+                inputNoteBody.dispatchEvent(new Event('input'));
+            };
+            document.getElementById('insertTagBtn').onclick = () => {
+                inputNoteBody.value += " #生活记录";
+                inputNoteBody.dispatchEvent(new Event('input'));
+            };
+
+            // Reset Defaults
+            document.getElementById('resetDefaultsBtn').onclick = () => {
+                if (confirm("确定要恢复到默认咖啡馆模版吗？")) {
+                    localStorage.removeItem('red_simulator_state');
+                    state.data = JSON.parse(JSON.stringify(PRESETS.cafe));
+                    syncAllUI();
+                    showToast("已重置为初始状态");
+                }
+            };
+
+            // Drawer Toggle (Mobile / Desktop)
+            document.getElementById('toggleDrawerBtn').onclick = () => {
+                const drawer = document.getElementById('editorDrawer');
+                drawer.classList.toggle('hidden');
+            };
+
+            // Add Manual Comment in Drawer
+            document.getElementById('addManualCommentBtn').onclick = () => {
+                const newComment = {
+                    name: "新访客",
+                    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80",
+                    content: "写的太好啦，直接收藏了！",
+                    time: "1分钟前",
+                    ip: "广东",
+                    likes: 1,
+                    isAuthor: false,
+                    liked: false
+                };
+                state.data.comments.unshift(newComment);
+                renderComments();
+                saveToStorage();
+                showToast("已添加新评论");
+            };
+
+            // EXPORT HIGH-DEF SCREENSHOT (PNG)
+            document.getElementById('exportScreenshotBtn').onclick = async () => {
+                showToast("正在渲染高清长图，请稍候...", "📸");
+                
+                // Temporarily disable editable outline indicators for pure screenshot
+                const wasEditing = phoneDeviceFrame.classList.contains('editable-active');
+                phoneDeviceFrame.classList.remove('editable-active');
+
+                try {
+                    const canvas = await html2canvas(phoneRoot, {
+                        scale: 2.5, // 2.5x high definition retina screenshot
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    });
+
+                    const imgData = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = `xiaohongshu_${state.data.title.slice(0, 10)}.png`;
+                    link.href = imgData;
+                    link.click();
+
+                    showToast("高清长图生成成功！已自动开始下载", "🎉");
+                    if (window.VelvetAudio) window.VelvetAudio.playSuccess();
+                } catch (err) {
+                    console.error("Screenshot error:", err);
+                    showToast("截图生成遇到跨域图片，已尽可能为您导出", "⚠️");
+                } finally {
+                    if (wasEditing) {
+                        phoneDeviceFrame.classList.add('editable-active');
+                    }
+                }
+            };
+
+        });
+    </script>
+</body>
+</html>

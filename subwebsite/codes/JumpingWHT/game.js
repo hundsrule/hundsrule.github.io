@@ -1,47 +1,69 @@
 // 获取canvas和上下文
 const canvas = document.getElementById('dinoGame');
 const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    if (dino) {
+        dino.y = canvas.height - 100;
+    }
+}
+window.addEventListener('resize', resizeCanvas);
 
 const message = document.getElementById('message');
 const scoreDisplay = document.getElementById('score');
+const startBtn = document.getElementById('startBtn');
+const mobileJumpBtn = document.getElementById('mobileJumpBtn');
+const mobileDuckBtn = document.getElementById('mobileDuckBtn');
 
 // 加载贴图
 const dinoImg = new Image();
-dinoImg.src = 'dino.png';  // 本地恐龙贴图
+dinoImg.src = 'dino.png';
 
 const cactusImg = new Image();
-cactusImg.src = 'cactus.png';  // 本地仙人掌贴图
+cactusImg.src = 'cactus.png';
 
-const pteroImg = new Image(); // 本地翼龙贴图
-pteroImg.src = 'ptero.png'; 
+const pteroImg = new Image();
+pteroImg.src = '2s.png'; // 优先使用现存的备用动作图
+pteroImg.onerror = () => {
+    pteroImg.src = 'cactus.png';
+};
 
 const groundImg = new Image();
-groundImg.src = 'ground.png';  // 本地地面贴图
+groundImg.src = 'ground.png';
 
 let gameStarted = false;
 let gameOver = false;
 let score = 0;
-let speed = 5;
+let speed = 6;
 let isNight = false;
 
 // 恐龙
 let dino = {
-    x: 50,
-    y: canvas.height - 100,
+    x: 60,
+    y: window.innerHeight - 100,
     width: 50,
     height: 50,
     dy: 0,
-    jumpPower: -12,
-    gravity: 0.6,
+    jumpPower: -13,
+    gravity: 0.65,
     isJumping: false,
     isDucking: false
 };
+resizeCanvas();
 
 // 障碍物
 let obstacles = [];
-let obstacleFrequency = 150;
+let obstacleFrequency = 140;
+
+function playSound(type) {
+    if (window.VelvetNav && typeof window.VelvetNav.playTone === 'function') {
+        if (type === 'jump') window.VelvetNav.playTone(480, 'sine', 0.1);
+        if (type === 'hit') window.VelvetNav.playTone(180, 'sawtooth', 0.3);
+        if (type === 'milestone') window.VelvetNav.playTone(880, 'square', 0.15);
+    }
+}
 
 // 游戏循环
 function gameLoop() {
@@ -63,15 +85,10 @@ function gameLoop() {
         score++;
         scoreDisplay.textContent = score;
 
-        if (score % 1000 === 0) {
-            speed += 0.5; // 提高速度
-            obstacleFrequency -= 10; // 增加障碍物频率
-        }
-
-        // 昼夜交替
         if (score % 500 === 0) {
-            isNight = !isNight;
-            document.body.style.backgroundColor = isNight ? '#333' : '#f7f7f7';
+            speed += 0.5;
+            obstacleFrequency = Math.max(70, obstacleFrequency - 10);
+            playSound('milestone');
         }
 
         drawGround();
@@ -82,18 +99,40 @@ function gameLoop() {
 
 // 启动游戏
 function startGame() {
+    if (gameStarted && !gameOver) return;
+    gameOver = false;
+    score = 0;
+    speed = 6;
+    obstacles = [];
     message.style.display = 'none';
     gameStarted = true;
     gameLoop();
 }
 
-// 恐龙跳跃和下蹲
-window.addEventListener('keydown', function (event) {
-    if (event.code === 'Space' && !dino.isJumping) {
+function doJump() {
+    if (!gameStarted) {
+        startGame();
+        return;
+    }
+    if (gameOver) {
+        startGame();
+        return;
+    }
+    if (!dino.isJumping) {
         dino.isJumping = true;
         dino.dy = dino.jumpPower;
+        playSound('jump');
+    }
+}
+
+// 键盘控制
+window.addEventListener('keydown', function (event) {
+    if (event.code === 'Space' || event.code === 'ArrowUp') {
+        event.preventDefault();
+        doJump();
     }
     if (event.code === 'ArrowDown') {
+        event.preventDefault();
         dino.isDucking = true;
     }
 });
@@ -104,8 +143,40 @@ window.addEventListener('keyup', function (event) {
     }
 });
 
-// 点击恐龙启动游戏
-canvas.addEventListener('click', startGame);
+// 点击与触摸启动
+if (startBtn) {
+    startBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startGame();
+    });
+}
+
+canvas.addEventListener('click', () => {
+    if (!gameStarted || gameOver) {
+        startGame();
+    } else {
+        doJump();
+    }
+});
+
+// 移动端按键绑定
+if (mobileJumpBtn) {
+    mobileJumpBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        doJump();
+    });
+}
+
+if (mobileDuckBtn) {
+    mobileDuckBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        dino.isDucking = true;
+    });
+    mobileDuckBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        dino.isDucking = false;
+    });
+}
 
 // 更新恐龙状态
 function updateDino() {
@@ -120,7 +191,7 @@ function updateDino() {
         }
     }
     if (dino.isDucking) {
-        dino.height = 30;
+        dino.height = 32;
     } else {
         dino.height = 50;
     }
@@ -128,12 +199,12 @@ function updateDino() {
 
 // 障碍物
 function generateObstacle() {
-    let type = Math.random() > 0.5 ? 'cactus' : 'ptero';
+    let type = Math.random() > 0.4 ? 'cactus' : 'ptero';
     let obstacle = {
         x: canvas.width,
-        y: type === 'cactus' ? canvas.height - 100 : canvas.height - 200,
-        width: 50,
-        height: 50,
+        y: type === 'cactus' ? canvas.height - 100 : canvas.height - 180,
+        width: 48,
+        height: 48,
         speed: speed,
         type: type
     };
@@ -141,52 +212,66 @@ function generateObstacle() {
 }
 
 function updateObstacles() {
-    obstacles.forEach((obstacle, index) => {
+    for (let index = obstacles.length - 1; index >= 0; index--) {
+        let obstacle = obstacles[index];
         obstacle.x -= obstacle.speed;
 
-        // 移除屏幕外的障碍物
         if (obstacle.x + obstacle.width < 0) {
             obstacles.splice(index, 1);
+            continue;
         }
 
-        // 绘制障碍物
         drawObstacle(obstacle);
 
         // 碰撞检测
+        const hitboxPadding = 8;
         if (
-            dino.x < obstacle.x + obstacle.width &&
-            dino.x + dino.width > obstacle.x &&
-            dino.y < obstacle.y + obstacle.height &&
-            dino.y + dino.height > obstacle.y
+            dino.x + hitboxPadding < obstacle.x + obstacle.width - hitboxPadding &&
+            dino.x + dino.width - hitboxPadding > obstacle.x + hitboxPadding &&
+            dino.y + hitboxPadding < obstacle.y + obstacle.height - hitboxPadding &&
+            dino.y + dino.height > obstacle.y + hitboxPadding
         ) {
             gameOver = true;
-            message.textContent = `游戏结束！总分: ${score}`;
+            playSound('hit');
+            message.innerHTML = `
+                <div class="msg-badge">MISSION FAILED // 逃脱中断</div>
+                <div class="msg-title">GAME OVER</div>
+                <div class="msg-desc">最高奔跑距离: <strong style="color:var(--phantom-red);font-size:1.4rem;">${score}</strong> 米</div>
+                <button class="start-btn" onclick="startGame()">[↺ RETRY ESCAPE]</button>
+            `;
             message.style.display = 'block';
+            break;
         }
-    });
+    }
 }
 
-// 绘制障碍物
 function drawObstacle(obstacle) {
     let img = obstacle.type === 'cactus' ? cactusImg : pteroImg;
-    ctx.drawImage(img, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    if (!img.complete || img.naturalWidth === 0) {
+        img = cactusImg;
+    }
+    if (img.complete && img.naturalWidth !== 0) {
+        ctx.drawImage(img, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    } else {
+        ctx.fillStyle = '#e60012';
+        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    }
 }
 
 function drawGround() {
-    ctx.drawImage(groundImg, 0, canvas.height - 50, canvas.width, 50);
+    if (groundImg.complete && groundImg.naturalWidth !== 0) {
+        ctx.drawImage(groundImg, 0, canvas.height - 50, canvas.width, 50);
+    } else {
+        ctx.fillStyle = '#333';
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+    }
 }
 
 function drawDino() {
-    ctx.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
-}
-
-// 重新开始游戏
-window.addEventListener('keydown', function (event) {
-    if (gameOver && event.code === 'Space') {
-        gameOver = false;
-        score = 0;
-        speed = 5;
-        obstacles = [];
-        startGame();
+    if (dinoImg.complete && dinoImg.naturalWidth !== 0) {
+        ctx.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+    } else {
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
     }
-});
+}

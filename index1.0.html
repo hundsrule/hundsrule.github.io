@@ -3,107 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>洪特的跳转页</title>
+    <title>HUND'S ROOM v1.0 | 洪特的跳转页 (历史归档)</title>
+    <link rel="icon" href="hund.ico" type="image/x-icon">
+    <link rel="stylesheet" href="subwebsite/velvet-theme.css">
+    <script src="subwebsite/velvet-nav.js" data-root="./index.html"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0%;
-            margin-top: 1%;
-            padding: 1%;
+            font-family: var(--font-sans, 'Noto Sans SC'), Arial, sans-serif;
+            background-color: var(--phantom-black, #101010);
+            color: var(--phantom-white, #f2f2f2);
+            margin: 0;
+            padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: flex-start;
             align-items: center;
+            min-height: 100vh;
         }
+
+        .archive-banner {
+            width: 90%;
+            max-width: 680px;
+            margin: 25px auto 10px;
+            background: var(--phantom-red, #e60012);
+            color: #fff;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0px #fff;
+            transform: skewX(-6deg);
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .archive-banner a {
+            color: #fff;
+            background: #000;
+            padding: 4px 12px;
+            text-decoration: none;
+            border: 1px solid #fff;
+            font-size: 0.9rem;
+            transform: skewX(6deg);
+        }
+
         .container {
-            background-color: #fff;
-            padding: 1%;
-            margin-top: 1%;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            color: #101010;
+            padding: 2rem;
+            margin: 15px auto 60px;
+            border: 4px solid #000000;
+            box-shadow: 10px 10px 0px 0px var(--phantom-red, #e60012);
             text-align: center;
-            max-width: 600px;
+            max-width: 680px;
+            width: 90%;
+            box-sizing: border-box;
         }
+
+        h2 {
+            font-family: var(--font-display, 'Anton'), var(--font-sans), sans-serif;
+            font-size: 1.8rem;
+            color: #101010;
+            margin-top: 0;
+        }
+
+        h4 {
+            color: var(--phantom-red, #e60012);
+            margin-bottom: 8px;
+        }
+
+        audio {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
         .site-section {
+            display: flex;
+            align-items: center;
             margin-bottom: 20px;
+            padding: 15px;
+            border: 2px solid #000;
+            background: #fafafa;
+            box-shadow: 4px 4px 0px #000;
+            gap: 15px;
+            text-align: left;
         }
+
         .site-section img {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            border: 2px solid #000;
+            flex-shrink: 0;
         }
+
+        .site-section-info {
+            flex: 1;
+        }
+
         .site-section p {
-            font-size: 20px;
-            margin: 10px 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: #101010;
         }
-        button {
-            padding: 10px 20px;
-            margin-top: 10px;
-            border: none;
-            background-color: #007BFF;
+
+        button.action-btn {
+            padding: 8px 16px;
+            border: 2px solid #000;
+            background-color: var(--phantom-red, #e60012);
             color: white;
-            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-family: var(--font-display, 'Anton'), sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            box-shadow: 3px 3px 0px #000;
+            transform: skewX(-6deg);
+            transition: all 0.15s ease;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        button.action-btn:hover {
+            background-color: #000;
+            color: #fff;
+            transform: skewX(-6deg) scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            .site-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .archive-banner {
+                flex-direction: column;
+                gap: 8px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="archive-banner">
+        <span>ARCHIVE // 历史版本 v1.0 展览厅</span>
+        <a href="index.html">返回现代主站 3.0 ▶</a>
+    </div>
+
     <div class="container">
         <h2>欢迎来到洪特的天鹅绒房间。<br>今天想要干什么呢？</h2>
         <h4>天鹅绒房间背景音乐</h4>
-        <audio src="subwebsite/BGM.mp3" autoplay controls></audio>
+        <audio src="subwebsite/BGM.mp3" controls></audio>
+
         <div class="site-section">
-            <img src="subwebsite\images\image-demostration1\pink.jpg" alt="高考倒计时">
-            <p>功能如其名的一个倒计时工具</p>
-            <button onclick="window.location.href='https://hundsrule.github.io/subwebsite/codes/%E9%AB%98%E8%80%83%E5%80%92%E8%AE%A1%E6%97%B6/index.html'">开始考试</button>
+            <img src="subwebsite/images/image-demostration1/pink.jpg" alt="高考倒计时">
+            <div class="site-section-info">
+                <p>功能如其名的一个倒计时工具</p>
+                <button class="action-btn" onclick="window.location.href='subwebsite/codes/%E9%AB%98%E8%80%83%E5%80%92%E8%AE%A1%E6%97%B6/index.html'">开始考试</button>
+            </div>
         </div>
 
         <div class="site-section">
-            <img src="subwebsite\images\imgae-demostration2\kcoffee.png" alt="网站2图片">
-            <p>将输入的任何文本的一部分随机替换为K</p>
-            <button onclick="window.location.href='https://hundsrule.github.io/subwebsite/codes/kkkgenerator/'">开始KK之旅</button>
+            <img src="subwebsite/images/imgae-demostration2/kcoffee.png" alt="网站2图片">
+            <div class="site-section-info">
+                <p>将输入的任何文本的一部分随机替换为K</p>
+                <button class="action-btn" onclick="window.location.href='subwebsite/codes/kkkgenerator/index.html'">开始KK之旅</button>
+            </div>
         </div>
 
         <div class="site-section">
-            <img src="subwebsite\images\WHT.gif" alt="网站4图片">
-            <p>RollingWHT 滚动的王宏涛</p>
-            <button onclick="window.location.href='https://hundsrule.github.io/subwebsite/codes/RollingWHT/index.html'">开始翻滚之旅</button>
+            <img src="subwebsite/images/WHT.gif" alt="网站4图片">
+            <div class="site-section-info">
+                <p>RollingWHT 滚动的王宏涛</p>
+                <button class="action-btn" onclick="window.location.href='subwebsite/codes/RollingWHT/index.html'">开始翻滚之旅</button>
+            </div>
         </div>
 
         <div class="site-section">
-            <img src="subwebsite\images\WHTm.jpg" alt="wht图片">
-            <p>RollingWHT 滚动的王宏涛 风格化网页版</p>
-            <button onclick="window.location.href='https://hundsrule.github.io/subwebsite/codes/RollingWHT/4399version.html'">开始翻滚之旅</button>
+            <img src="subwebsite/images/WHTm.jpg" alt="wht图片">
+            <div class="site-section-info">
+                <p>RollingWHT 滚动的王宏涛 风格化网页版</p>
+                <button class="action-btn" onclick="window.location.href='subwebsite/codes/RollingWHT/4399version.html'">开始翻滚之旅</button>
+            </div>
         </div>
 
         <div class="site-section">
-            <img src="subwebsite\images\Fluttershy.jpg" alt="网站5图片">
-            <p>一张福瑞图片</p>
-            <button onclick="window.location.href='https://hundsrule.github.io/subwebsite/images/Furry1 (1).jpg'">开始福瑞之旅</button>
+            <img src="subwebsite/images/Fluttershy.jpg" alt="网站5图片">
+            <div class="site-section-info">
+                <p>一张福瑞图片</p>
+                <button class="action-btn" onclick="window.location.href='subwebsite/images/Furry1 (1).jpg'">开始福瑞之旅</button>
+            </div>
         </div>
 
         <div class="site-section">
-            <img src="subwebsite\images\Furry1 (2).jpg" alt="网站5图片">
-            <p>一张福瑞图片</p>
-            <button onclick="window.location.href='https://hundsrule.github.io/subwebsite/images/Furry1 (3).jpg'">开始福瑞之旅</button>
+            <img src="subwebsite/images/Furry1 (2).jpg" alt="网站5图片">
+            <div class="site-section-info">
+                <p>一张福瑞图片</p>
+                <button class="action-btn" onclick="window.location.href='subwebsite/images/Furry1 (3).jpg'">开始福瑞之旅</button>
+            </div>
         </div>
 
         <div class="site-section">
-            <img src="subwebsite\images\FS2.png" alt="网站6图片">
-            <p>一张清晰度测试图片</p>
-            <button onclick="window.location.href='https://hundsrule.github.io/subwebsite/images/testHDimage.jpg'">开始看图之旅</button>
+            <img src="subwebsite/images/FS2.png" alt="网站6图片">
+            <div class="site-section-info">
+                <p>一张清晰度测试图片</p>
+                <button class="action-btn" onclick="window.location.href='subwebsite/images/testHDimage.jpg'">开始看图之旅</button>
+            </div>
         </div>
-
-
     </div>
-    <script>
-        // 这里可以添加更多 JavaScript 代码
-    </script>
 </body>
 </html>

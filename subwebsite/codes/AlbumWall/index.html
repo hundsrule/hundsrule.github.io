@@ -1,35 +1,144 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>动态封面墙</title>
+    <title>ALBUM WALL | 动态唱片墙</title>
+    <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+
+    <!-- Unified Velvet Room Theme -->
+    <link rel="stylesheet" href="../../velvet-theme.css">
+
+    <!-- Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BJBDJ1J052"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BJBDJ1J052');
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?5cb8cf2e475ade0241293a6b3ac8886f";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background: #000;
+            background: #000000;
             min-height: 100vh;
-            color: #fff;
+            color: #ffffff;
+            font-family: var(--font-sans);
             overflow: hidden;
+            user-select: none;
         }
 
+        /* Velvet Control Dock */
         .controls {
             position: fixed;
-            top: 20px;
+            top: 70px;
             left: 20px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-            display: block;
+            z-index: 1000;
+            background: rgba(16, 16, 16, 0.95);
+            border: 3px solid #ffffff;
+            box-shadow: 6px 6px 0px 0px var(--phantom-red);
+            padding: 20px 24px;
+            max-width: 440px;
+            width: 90vw;
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
         }
 
         .controls.hidden {
-            display: none;
+            transform: translateX(-120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .controls h2 {
+            margin: 0 0 14px 0;
+            font-family: var(--font-display);
+            font-size: 20px;
+            color: #ffffff;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--phantom-red);
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .control-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .controls input[type="number"],
+        .controls select {
+            background: #202020;
+            color: #ffffff;
+            border: 2px solid #555555;
+            padding: 6px 8px;
+            font-family: var(--font-display);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .controls input[type="number"]:focus,
+        .controls select:focus {
+            border-color: var(--phantom-red);
+        }
+
+        .dock-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--phantom-black);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            box-shadow: 4px 4px 0px 0px var(--phantom-red);
+            padding: 8px 16px;
+            font-family: var(--font-display);
+            font-size: 14px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transform: skewX(-8deg);
+        }
+
+        .dock-toggle-btn:hover {
+            background: var(--phantom-red);
+            transform: skewX(-8deg) translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px #ffffff;
+        }
+
+        /* Wall Grid */
+        .wall-viewport {
+            width: 100vw;
+            height: calc(100vh - 54px);
+            overflow: hidden;
+            position: relative;
         }
 
         .container {
@@ -37,17 +146,18 @@
             gap: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: none;
             will-change: transform;
-            position: relative;
-            margin-top: -1px;
-            margin-left: -1px;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .cover-wrapper {
             position: relative;
             aspect-ratio: 1;
             overflow: hidden;
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .album-cover {
@@ -68,86 +178,99 @@
 
         .album-cover.transitioning {
             opacity: 0;
-            transform: scale(1.3);
-            filter: blur(12px);
-        }
-
-        input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            margin: 5px;
-            background: #333;
-            color: #fff;
-            border: 1px solid #555;
-        }
-
-        button,
-        .toggle-switch {
-            padding: 8px 15px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 5px;
-        }
-
-        button:hover,
-        .toggle-switch:hover {
-            background: #45a049;
-        }
-
-        .toggle-switch.active {
-            background: #2196F3;
-        }
-
-        .fullscreen-btn {
-            background: #9c27b0;
-        }
-
-        .fullscreen-btn:hover {
-            background: #7b1fa2;
+            transform: scale(1.25);
+            filter: blur(10px);
         }
     </style>
 </head>
-
 <body>
+    <!-- Unified Velvet Room Nav Script -->
+    <script src="../../velvet-nav.js" data-root="../../../index.html"></script>
+
+    <!-- Floating Dock Toggle -->
+    <button class="dock-toggle-btn" id="dockToggleBtn" onclick="toggleControls()">
+        <span>SETTINGS // 控制面板</span>
+    </button>
+
+    <!-- Controls Dock -->
     <div class="controls" id="controls">
-        <h2>动态封面墙设置</h2>
-        <div>
-            <label>行数：<input type="number" id="rows" value="3" min="1" max="10"></label>
-            <label>列数：<input type="number" id="cols" value="4" min="1" max="10"></label>
-            <label>切换间隔(秒)：<input type="number" id="rotateInterval" value="3" min="1" max="60"></label>
-            <button onclick="updateGrid()">更新布局</button>
-            <button class="fullscreen-btn" onclick="toggleFullscreen()">全屏显示</button>
+        <h2>
+            <span>ALBUM WALL // 唱片墙</span>
+            <span style="font-size:12px; color:var(--phantom-red); cursor:pointer;" onclick="toggleControls()">[收起]</span>
+        </h2>
+        <div class="control-row">
+            <label>行数：<input type="number" id="rows" value="3" min="1" max="10" style="width:55px;"></label>
+            <label>列数：<input type="number" id="cols" value="4" min="1" max="10" style="width:55px;"></label>
+            <label>换图间隔(秒)：<input type="number" id="rotateInterval" value="3" min="1" max="60" style="width:55px;"></label>
         </div>
-        <div>
-            <button class="toggle-switch" id="moveToggle">开启移动效果</button>
+        <div class="control-row">
+            <button class="velvet-btn velvet-btn-primary" style="padding:6px 14px; font-size:13px;" onclick="updateGrid()">
+                <span>更新布局</span>
+            </button>
+            <button class="velvet-btn" style="padding:6px 14px; font-size:13px;" onclick="toggleFullscreen()">
+                <span>全屏模式</span>
+            </button>
+        </div>
+        <div class="control-row">
+            <button class="velvet-btn" id="moveToggle" style="padding:6px 14px; font-size:13px;" onclick="toggleMove()">
+                <span>开启动态滚动</span>
+            </button>
             <select id="moveDirection">
-                <option value="horizontal">左右移动</option>
-                <option value="vertical">上下移动</option>
+                <option value="horizontal">水平滚动</option>
+                <option value="vertical">垂直滚动</option>
             </select>
-            <label>移动速度：<input type="number" id="moveSpeed" value="2" min="0.1" max="10" step="0.05"></label>
+            <label>速度：<input type="number" id="moveSpeed" value="1.5" min="0.2" max="10" step="0.1" style="width:55px;"></label>
         </div>
-        <input type="file" id="fileInput" multiple accept="image/*" style="margin-top: 10px;">
-        <h6>说明：点击非控制面板的区域隐藏控制面板，再次点击显示控制面板。左右移动暂时有BUG，下个版本修复。</h6>
+        <div style="margin-top:10px;">
+            <label style="font-size:12px; color:#aaa; display:block; margin-bottom:6px;">上传自定义封面图片：</label>
+            <input type="file" id="fileInput" multiple accept="image/*" style="font-size:12px; color:#ccc;">
+        </div>
+        <div style="font-size:11px; color:#888; margin-top:12px; line-height:1.4;">
+            TIP: 默认已载入天鹅绒精选封面库。点击左下角按钮可随时显示或隐藏设置面板。
+        </div>
     </div>
-    <div class="container" id="coverContainer"></div>
+
+    <!-- Wall Viewport -->
+    <div class="wall-viewport" id="wallViewport">
+        <div class="container" id="coverContainer"></div>
+    </div>
 
     <script>
+        // Preset default album covers from repo images
+        const defaultCovers = [
+            '../../images/cover.jpg',
+            '../../images/Fluttershy.jpg',
+            '../../images/FlyingWHT.png',
+            '../../images/FS2.png',
+            '../../images/k048.jpg',
+            '../../images/recite.jpeg',
+            '../../images/WordCrusher.jpeg',
+            '../../images/WHTm.jpg',
+            '../../images/previouy.jpg',
+            '../../images/Furry1 (1).jpg',
+            '../../images/Furry1 (2).jpg',
+            '../../images/Furry1 (3).jpg',
+            '../../images/image-demostration1/pink.jpg',
+            '../../images/imgae-demostration2/kcoffee.png'
+        ];
+
         let imageFiles = [];
         let rotationInterval;
         let isMoving = false;
-        let moveInterval;
+        let animationFrameId;
         let imageCache = new Map();
         let preloadedImages = new Set();
-        let animationFrameId;
+        let scrollX = 0;
+        let scrollY = 0;
+
+        function toggleControls() {
+            const controls = document.getElementById('controls');
+            controls.classList.toggle('hidden');
+        }
 
         function preloadImage(file) {
             if (!preloadedImages.has(file.name)) {
-                const img = new Image();
                 const url = URL.createObjectURL(file);
-                img.src = url;
                 imageCache.set(file.name, url);
                 preloadedImages.add(file.name);
                 return url;
@@ -155,42 +278,40 @@
             return imageCache.get(file.name);
         }
 
-        function updateGrid() {
-            const rows = parseInt(document.getElementById('rows').value);
-            const cols = parseInt(document.getElementById('cols').value);
-            const container = document.getElementById('coverContainer');
+        function getActiveImagePool() {
+            if (imageFiles.length > 0) {
+                return imageFiles.map(file => preloadImage(file));
+            }
+            return defaultCovers;
+        }
 
-            const cellSize = Math.max(window.innerWidth / cols, window.innerHeight / rows);
-            container.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
-            container.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+        function updateGrid() {
+            const rows = parseInt(document.getElementById('rows').value) || 3;
+            const cols = parseInt(document.getElementById('cols').value) || 4;
+            const container = document.getElementById('coverContainer');
+            const viewport = document.getElementById('wallViewport');
+
+            const cellWidth = Math.ceil(viewport.clientWidth / cols);
+            const cellHeight = Math.ceil(viewport.clientHeight / rows);
+            const cellSize = Math.max(cellWidth, cellHeight);
+
+            // Create extra buffer cells for infinite scrolling
+            const renderCols = cols + 4;
+            const renderRows = rows + 4;
+
+            container.style.gridTemplateColumns = `repeat(${renderCols}, ${cellSize}px)`;
+            container.style.gridTemplateRows = `repeat(${renderRows}, ${cellSize}px)`;
 
             const fragment = document.createDocumentFragment();
-            const totalCells = rows * cols;
+            const totalCells = renderCols * renderRows;
 
-            if (imageFiles.length > 0) {
-                const preloadPromises = imageFiles.map(file => {
-                    return new Promise((resolve) => {
-                        const img = new Image();
-                        img.onload = () => resolve();
-                        img.src = preloadImage(file);
-                    });
-                });
-                Promise.all(preloadPromises).then(() => {
-                    for (let i = 0; i < totalCells; i++) {
-                        fragment.appendChild(createCoverElement());
-                    }
-                    container.innerHTML = '';
-                    container.appendChild(fragment);
-                    startRotation();
-                });
-            } else {
-                for (let i = 0; i < totalCells; i++) {
-                    fragment.appendChild(createCoverElement());
-                }
-                container.innerHTML = '';
-                container.appendChild(fragment);
-                startRotation();
+            for (let i = 0; i < totalCells; i++) {
+                fragment.appendChild(createCoverElement());
             }
+
+            container.innerHTML = '';
+            container.appendChild(fragment);
+            startRotation();
         }
 
         function createCoverElement() {
@@ -199,6 +320,7 @@
 
             const img = document.createElement('img');
             img.className = 'album-cover active';
+            img.loading = 'lazy';
             updateImageSource(img);
             wrapper.appendChild(img);
 
@@ -206,21 +328,18 @@
         }
 
         function updateImageSource(img) {
-            if (imageFiles.length > 0) {
-                const randomIndex = Math.floor(Math.random() * imageFiles.length);
-                const file = imageFiles[randomIndex];
-                img.src = preloadImage(file);
-            } else {
-                img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23333"/></svg>';
-            }
+            const pool = getActiveImagePool();
+            const randomIndex = Math.floor(Math.random() * pool.length);
+            img.src = pool[randomIndex];
         }
 
         function startRotation() {
             if (rotationInterval) clearInterval(rotationInterval);
 
-            const interval = document.getElementById('rotateInterval').value * 1000;
+            const interval = (parseFloat(document.getElementById('rotateInterval').value) || 3) * 1000;
             rotationInterval = setInterval(() => {
                 const covers = document.querySelectorAll('.cover-wrapper');
+                if (covers.length === 0) return;
                 const randomCover = covers[Math.floor(Math.random() * covers.length)];
                 if (randomCover) transitionImage(randomCover);
             }, interval);
@@ -228,8 +347,11 @@
 
         function transitionImage(wrapper) {
             const oldImg = wrapper.querySelector('.album-cover.active');
+            if (!oldImg) return;
+
             const newImg = document.createElement('img');
             newImg.className = 'album-cover';
+            newImg.loading = 'lazy';
             updateImageSource(newImg);
             wrapper.appendChild(newImg);
 
@@ -238,82 +360,46 @@
                 newImg.classList.add('active');
 
                 setTimeout(() => {
-                    wrapper.removeChild(oldImg);
+                    if (wrapper.contains(oldImg)) {
+                        wrapper.removeChild(oldImg);
+                    }
                 }, 1200);
             });
         }
 
         function toggleMove() {
             isMoving = !isMoving;
-            const container = document.getElementById('coverContainer');
             const moveToggle = document.getElementById('moveToggle');
-            const direction = document.getElementById('moveDirection').value;
+            const container = document.getElementById('coverContainer');
 
             if (isMoving) {
-                moveToggle.classList.add('active');
-                moveToggle.textContent = '关闭移动效果';
+                moveToggle.querySelector('span').textContent = '关闭动态滚动';
+                moveToggle.classList.add('velvet-btn-primary');
 
-                let position = 0;
                 let lastTimestamp = 0;
-
-                // 初始化时添加更多的图片以确保无缝滚动
-                if (direction === 'horizontal') {
-                    const extraCols = Math.ceil(window.innerWidth / container.firstChild.offsetWidth) * 3;
-                    const currentCols = parseInt(document.getElementById('cols').value);
-                    const rows = parseInt(document.getElementById('rows').value);
-                    container.style.gridTemplateColumns = `repeat(${currentCols + extraCols}, ${container.firstChild.offsetWidth}px)`;
-                    
-                    const totalNewCells = rows * extraCols;
-                    for (let i = 0; i < totalNewCells; i++) {
-                        container.appendChild(createCoverElement());
-                    }
-                } else {
-                    const extraRows = Math.ceil(window.innerHeight / container.firstChild.offsetHeight) * 2;
-                    const cols = parseInt(document.getElementById('cols').value);
-                    for (let i = 0; i < extraRows * cols; i++) {
-                        container.appendChild(createCoverElement());
-                    }
-                }
 
                 function animate(timestamp) {
                     if (!lastTimestamp) lastTimestamp = timestamp;
                     const deltaTime = timestamp - lastTimestamp;
                     lastTimestamp = timestamp;
 
-                    const moveStep = parseFloat(document.getElementById('moveSpeed').value) * (deltaTime / 16);
-                    position += moveStep;
-
-                    const container = document.getElementById('coverContainer');
+                    const speed = (parseFloat(document.getElementById('moveSpeed').value) || 1.5) * (deltaTime / 16);
                     const direction = document.getElementById('moveDirection').value;
+                    const firstCell = container.firstElementChild;
+                    const cellSize = firstCell ? firstCell.offsetWidth : 200;
 
                     if (direction === 'horizontal') {
-                        container.style.transform = `translateX(${-position}px)`;
-
-                        // 当移动到一个元素宽度时重置
-                        if (position >= container.firstChild.offsetWidth) {
-                            position = 0;
-                            container.style.transform = `translateX(0)`;
-                            // 移动第一列到最后
-                            const cols = parseInt(document.getElementById('cols').value);
-                            const rows = parseInt(document.getElementById('rows').value);
-                            for (let i = 0; i < rows; i++) {
-                                const firstChild = container.children[i];
-                                container.appendChild(firstChild);
-                            }
+                        scrollX += speed;
+                        if (scrollX >= cellSize) {
+                            scrollX %= cellSize;
                         }
+                        container.style.transform = `translate3d(${-scrollX}px, 0, 0)`;
                     } else {
-                        container.style.transform = `translateY(${-position}px)`;
-
-                        const cols = parseInt(document.getElementById('cols').value);
-                        if (position >= container.firstChild.offsetHeight) {
-                            for (let i = 0; i < cols; i++) {
-                                const firstChild = container.firstChild;
-                                container.removeChild(firstChild);
-                                container.appendChild(createCoverElement());
-                            }
-                            position -= container.firstChild.offsetHeight;
-                            container.style.transform = `translateY(${-position}px)`;
+                        scrollY += speed;
+                        if (scrollY >= cellSize) {
+                            scrollY %= cellSize;
                         }
+                        container.style.transform = `translate3d(0, ${-scrollY}px, 0)`;
                     }
 
                     if (isMoving) {
@@ -323,19 +409,20 @@
 
                 animationFrameId = requestAnimationFrame(animate);
             } else {
-                moveToggle.classList.remove('active');
-                moveToggle.textContent = '开启移动效果';
+                moveToggle.querySelector('span').textContent = '开启动态滚动';
+                moveToggle.classList.remove('velvet-btn-primary');
                 cancelAnimationFrame(animationFrameId);
+                scrollX = 0;
+                scrollY = 0;
                 container.style.transform = 'none';
-                updateGrid();
             }
         }
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
+                document.documentElement.requestFullscreen().catch(() => {});
             } else {
-                document.exitFullscreen();
+                document.exitFullscreen().catch(() => {});
             }
         }
 
@@ -348,29 +435,15 @@
             updateGrid();
         });
 
-        document.getElementById('moveToggle').addEventListener('click', toggleMove);
-        document.getElementById('moveDirection').addEventListener('change', function () {
-            if (isMoving) {
-                toggleMove();
-                toggleMove();
-            }
-        });
-
-        document.addEventListener('click', function (e) {
-            const controls = document.getElementById('controls');
-            if (!controls.contains(e.target)) {
-                controls.classList.toggle('hidden');
-            }
-        });
-
         window.addEventListener('resize', () => {
             if (!isMoving) {
                 updateGrid();
             }
         });
 
-        updateGrid();
+        window.onload = () => {
+            updateGrid();
+        };
     </script>
 </body>
-
 </html>

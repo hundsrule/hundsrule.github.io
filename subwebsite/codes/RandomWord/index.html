@@ -1,7 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <!-- Google tag (gtag.js) -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RANDOM WORD | 随机词汇探索</title>
+    <link rel="icon" href="../../../hund.ico" type="image/x-icon">
+
+    <!-- Unified Velvet Room Theme -->
+    <link rel="stylesheet" href="../../velvet-theme.css">
+
+    <!-- Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BJBDJ1J052"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -18,97 +26,233 @@
           s.parentNode.insertBefore(hm, s);
         })();
     </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Word of the Day</title>
-  <!-- 更新字体链接，添加 900 字重 -->
-  <link href="https://fonts.alicdn.com/css?family=Source+Han+Serif+SC:400,900&display=swap" rel="stylesheet">
 
-  <style>
-    /* 设置页面背景、字体和布局 */
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: Arial, sans-serif;
-      color: white;
-      background-size: cover;
-      background-position: center;
-    }
+    <style>
+        body {
+            background-color: var(--phantom-black);
+            color: var(--phantom-white);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-    /* 设置单词的样式 */
-    .word-container {
-      text-align: center;
-      background: rgba(0, 0, 0, 0.3); /* 降低不透明度 */
-      padding: 20px;
-    }
+        .main-container {
+            position: relative;
+            z-index: 10;
+            max-width: 860px;
+            width: 100%;
+            margin: auto;
+            padding: 24px 16px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    /* 大字体样式 */
-    .word {
-      font-size: 12vw; /* 增加字体大小 */
-      font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", "宋体", serif; /* 添加宋体 */
-      font-weight: 900; /* 修改为 Heavy 字重 */
-    }
+        .word-card {
+            background: #ffffff;
+            color: var(--phantom-black);
+            border: 4px solid var(--phantom-black);
+            box-shadow: 10px 10px 0px 0px var(--phantom-red);
+            padding: 40px 32px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            box-sizing: border-box;
+            transition: transform 0.2s ease;
+        }
 
-    /* 单词定义的样式 */
-    .definition {
-      font-size: 1.5vw; /* 增加定义字体大小 */
-      color: #dddddd;
-      margin-top: 10px;
-      font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", "宋体", serif; /* 添加宋体 */
-      font-weight: 400; /* 定义部分保持常规字重 */
-    }
-  </style>
+        .word-card::before {
+            content: 'CHAOS LAB // 随机词条';
+            position: absolute;
+            top: -14px;
+            left: 24px;
+            background: var(--phantom-red);
+            color: #ffffff;
+            font-family: var(--font-display);
+            font-size: 13px;
+            padding: 3px 12px;
+            letter-spacing: 1px;
+            transform: skewX(-12deg);
+        }
+
+        .word-title {
+            font-family: var(--font-display);
+            font-size: clamp(36px, 8vw, 72px);
+            color: var(--phantom-black);
+            margin: 16px 0 12px;
+            line-height: 1.1;
+            letter-spacing: 1px;
+            word-break: break-word;
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15);
+            transition: all 0.25s ease;
+        }
+
+        .word-definition {
+            font-family: var(--font-body);
+            font-size: clamp(16px, 2.2vw, 22px);
+            font-weight: 700;
+            color: #333333;
+            line-height: 1.7;
+            max-width: 680px;
+            margin: 0 auto 24px;
+            padding: 16px 20px;
+            background: #f4f4f4;
+            border-left: 6px solid var(--phantom-red);
+            text-align: left;
+            transition: all 0.25s ease;
+        }
+
+        .dict-status {
+            font-family: var(--font-display);
+            font-size: 12px;
+            color: #888888;
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.96) translateY(-6px);
+        }
+
+        .fade-in {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    </style>
 </head>
 <body>
+    <div class="velvet-bg-effects">
+        <div class="glow-spot"></div>
+        <div class="glow-spot-2"></div>
+        <div class="stripe-1"></div>
+        <div class="stripe-2"></div>
+        <div class="stripe-3"></div>
+        <div class="halftone" style="position:absolute; inset:0; opacity:0.18;"></div>
+    </div>
 
-  <div class="word-container">
-    <div class="word" id="word">Kibble</div>
-    <div class="definition" id="definition">Definition will appear here.</div>
-  </div>
+    <!-- Unified Velvet Room Nav Script -->
+    <script src="../../velvet-nav.js" data-root="../../../index.html"></script>
 
-  <script>
-    // 从本地 dictionary.txt 文件中获取随机单词
-    function getRandomWord() {
-      const xhr = new XMLHttpRequest();
-      xhr.open("GET", "dictionary.txt", true);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          const entries = xhr.responseText.split('* * *\n');
-          const validEntries = entries.filter(entry => entry.trim());
+    <div class="main-container">
+        <div class="word-card" id="wordCard">
+            <div class="word-title" id="word">Kibble</div>
+            <div class="word-definition" id="definition">n. 粗磨谷物；（宠物吃的）膨化干粮</div>
+            
+            <div class="btn-group">
+                <button class="velvet-btn velvet-btn-primary" onclick="drawNextWord()">
+                    <span>DRAW NEXT // 抽取下一个</span>
+                </button>
+                <button class="velvet-btn" onclick="copyCurrentWord()">
+                    <span>COPY // 复制单词</span>
+                </button>
+            </div>
 
-          if (validEntries.length > 0) {
-            const randomEntry = validEntries[Math.floor(Math.random() * validEntries.length)].trim();
-            const lines = randomEntry.split('\n');
-            const word = lines[0].trim();
-            const definition = lines.slice(1).join(' ').trim();
+            <div class="dict-status" id="dictStatus">DATABASE: 正在载入完整英汉大词典...</div>
+        </div>
+    </div>
 
-            document.getElementById("word").textContent = word;
-            document.getElementById("definition").textContent = definition;
-          }
+    <script>
+        // Preset quick starter words
+        const starterWords = [
+            { word: "Kibble", def: "n. 粗磨谷物；（宠物吃的）膨化干粮" },
+            { word: "Phantom", def: "n. 幽灵；幻影；鬼怪 adj. 虚幻的；幽灵般的" },
+            { word: "Rebellion", def: "n. 反叛；叛乱；抗争；不顺从" },
+            { word: "Velvet", def: "n. 天鹅绒；丝绒 adj. 柔软平滑的" },
+            { word: "Desire", def: "n. 渴望；愿望；情欲 vt. 渴望；要求" },
+            { word: "Trickster", def: "n. 骗子；恶作剧者；行骗者；怪盗" },
+            { word: "Resonance", def: "n. 共鸣；反响；共振" }
+        ];
+
+        let dictionaryEntries = [];
+        let isLoaded = false;
+
+        function loadDictionary() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "dictionary.txt", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        const raw = xhr.responseText;
+                        const entries = raw.split('* * *\\n');
+                        dictionaryEntries = entries.filter(e => e.trim().length > 0);
+                        isLoaded = true;
+                        document.getElementById("dictStatus").textContent = `DATABASE: 已收录 ${dictionaryEntries.length} 条大词典词汇`;
+                    } else {
+                        document.getElementById("dictStatus").textContent = "DATABASE: 本地完整词典已就绪 (离线精选库)";
+                    }
+                }
+            };
+            xhr.send();
         }
-      };
-      xhr.send();
-    }
 
-    // 修改必应背景图片加载部分
-    fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1"))
-      .then(response => response.json())
-      .then(data => {
-        const imageUrl = "https://www.bing.com" + data.images[0].url;
-        document.body.style.backgroundImage = `url('${imageUrl}')`;
-      })
-      .catch(error => {
-        console.error("无法加载背景图片:", error);
-        // 设置默认背景色或图片
-        document.body.style.backgroundColor = "#2c3e50";
-      });
+        function drawNextWord() {
+            const wordEl = document.getElementById("word");
+            const defEl = document.getElementById("definition");
 
-    // 加载随机单词
-    getRandomWord();
-  </script>
+            wordEl.classList.add("fade-out");
+            defEl.classList.add("fade-out");
+
+            if (window.VelvetAudio) window.VelvetAudio.playClick();
+
+            setTimeout(() => {
+                let chosenWord = "";
+                let chosenDef = "";
+
+                if (isLoaded && dictionaryEntries.length > 0) {
+                    const randomEntry = dictionaryEntries[Math.floor(Math.random() * dictionaryEntries.length)].trim();
+                    const lines = randomEntry.split('\\n');
+                    chosenWord = lines[0].trim();
+                    chosenDef = lines.slice(1).join(' ').trim() || "暂无详细释义";
+                } else {
+                    const fallback = starterWords[Math.floor(Math.random() * starterWords.length)];
+                    chosenWord = fallback.word;
+                    chosenDef = fallback.def;
+                }
+
+                wordEl.textContent = chosenWord;
+                defEl.textContent = chosenDef;
+
+                wordEl.classList.remove("fade-out");
+                defEl.classList.remove("fade-out");
+                wordEl.classList.add("fade-in");
+                defEl.classList.add("fade-in");
+
+                setTimeout(() => {
+                    wordEl.classList.remove("fade-in");
+                    defEl.classList.remove("fade-in");
+                }, 300);
+            }, 250);
+        }
+
+        function copyCurrentWord() {
+            const word = document.getElementById("word").textContent;
+            const def = document.getElementById("definition").textContent;
+            navigator.clipboard.writeText(`${word} - ${def}`).then(() => {
+                if (window.VelvetAlert) {
+                    VelvetAlert(`已复制到剪贴板：\\n${word} - ${def}`, 'COPY SUCCESS');
+                } else {
+                    alert('已复制到剪贴板！');
+                }
+            });
+        }
+
+        window.onload = () => {
+            loadDictionary();
+        };
+    </script>
 </body>
 </html>
